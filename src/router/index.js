@@ -2,9 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import login from '@/pages/login/login'
 import home from '@/pages/home/home'
-import a from '@/pages/a/a'
-import b from '@/pages/b/b'
-import c from '@/pages/c/c'
+
 
 Vue.use(Router);
 
@@ -17,23 +15,24 @@ export default new Router({
     },
     {
       path: '/home',
-      name: 'home',
-      component: home,
-      children:[
+      component: resolve => require([ '@/pages/home/home' ], resolve),
+      children: [
         {
-          path: '/a',
-          name: 'a',
-          component: a
+          path: 'a',
+          component: resolve => require([ '@/pages/home/a/a' ], resolve)
         },
         {
-          path: '/b',
-          name: 'b',
-          component: b
+          path: 'b',
+          component: resolve => require([ '@/pages/home/b/b' ], resolve)
+
         },
         {
-          path: '/c',
-          name: 'c',
-          component: c
+          path: 'c',
+          component: resolve => require([ '@/pages/home/c/c' ], resolve)
+        },
+        {
+          path: 'd',
+          component: resolve => require([ '@/pages/home/d/d' ], resolve)
         }
       ]
     }

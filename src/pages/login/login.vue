@@ -10,7 +10,7 @@
       </p>
       <register></register>
         <input type="button" value="登陆" id="login" @click="login">
-      <router-link to="/home" >点我啊,傻</router-link>
+      <router-link to="/home/a" >点我啊,傻</router-link>
       <router-view></router-view>
     </div>
   </div>
@@ -25,7 +25,6 @@
     methods:{
       login:function () {
         alert(0)
-        window.location.href="/home"
       }
     }
   }
