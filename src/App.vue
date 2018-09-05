@@ -10,6 +10,7 @@ export default {
 }
 </script>
 
-<style>
-
+<style scoped lang="stylus">
+body,html
+  height: 100%
 </style>

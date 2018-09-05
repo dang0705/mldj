@@ -3,9 +3,12 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import './assets/styles/H5Reset.css'
+import './assets/styles/reset.css'
 import fastClick from 'fastclick'
+import Element from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 
+Vue.use(Element);
 Vue.config.productionTip = false;
 fastClick.attach(document.body);
 /* eslint-disable no-new */
@@ -13,6 +16,6 @@ fastClick.attach(document.body);
 new Vue({
   el: '#app',
   router,
-  components: { App },
+  components: {App},
   template: '<App/>'
 })
