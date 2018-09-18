@@ -1,10 +1,10 @@
 <template>
-<p>a</p>
+  <div>channelManagement</div>
 </template>
 
 <script>
 	export default {
-		name: "a"
+		name: "channelManagement"
 	}
 </script>
 

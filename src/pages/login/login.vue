@@ -10,21 +10,23 @@
       </p>
       <register></register>
         <input type="button" value="登陆" id="login" @click="login">
-      <router-link to="/home/a" >点我啊,傻</router-link>
-      <router-view></router-view>
+      <router-link to="/home/businessManagement/activityManagement" >点我啊,傻</router-link>
+      <!--<router-link to="../home/baseInfoManagement/brandManagement" >点我啊,傻</router-link>-->
+      <!--<router-view></router-view>-->
     </div>
   </div>
 </template>
 
 <script>
   import register from './components/register'
+  import axios from 'axios'
   
   export default {
     name: "login",
     components: {register},
     methods:{
       login:function () {
-        alert(0)
+        window.localStorage.clear()
       }
     }
   }

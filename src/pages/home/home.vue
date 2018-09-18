@@ -13,37 +13,29 @@
 </style>-->
 <template>
   <div class="index">
-    <menu-select :active.sync="active"></menu-select>
+    <!--<homeHeader></homeHeader>-->
+    <menu-select></menu-select>
     <router-view></router-view>
   </div>
 </template>
 
 <script>
-  import menuSelect from '@/components/commen/menu/menu'
+  import menuSelect from '@/components/common/menu/menu'
+  import homeHeader from '@/components/common/header/header'
+  import axios from 'axios'
   
   export default {
     name: 'home',
-    components: {
+    components:{
       menuSelect
+      // homeHeader
     },
-    data() {
-      return {
-        active: 'a'
-      };
+    // data() {
+    //
+    // },
+    methods: {},
+    mounted() {
+      // this.$router.push('/home/businessManagement/activityManagement')
     },
-    methods: {
-    
-    },
-    mounted:function () {
-      // this.active='a';
-    },
-    watch:{
-      active(newVal){
-        console.log(newVal);
-        this.$router.push({
-          path:`${this.active}`
-        })
-      }
-    }
   }
 </script>

@@ -1,10 +1,10 @@
 <template>
-<p>c</p>
+  <div>deviceVersionManagement</div>
 </template>
 
 <script>
 	export default {
-		name: "c"
+		name: "deviceVersionManagement"
 	}
 </script>
 
