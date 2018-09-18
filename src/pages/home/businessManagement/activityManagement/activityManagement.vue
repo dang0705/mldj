@@ -1,12 +1,14 @@
 <template>
   <div id="wrapper">
     <search-component></search-component>
+    <search-list></search-list>
   </div>
 </template>
 
 <script>
   import axios from 'axios'
   import searchComponent from './component/searchComponent'
+  import searchList from './component/searchList'
   export default {
     name: "activityManagement",
     data() {
@@ -15,7 +17,8 @@
       };
     },
     components:{
-      searchComponent
+      searchComponent,
+      searchList
     },
     methods:{
       handelList(){

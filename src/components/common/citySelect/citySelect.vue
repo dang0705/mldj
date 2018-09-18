@@ -4,6 +4,8 @@
       :options="options2"
       @active-item-change="handleItemChange"
       :props="props"
+      placeholder="省份>市"
+      expand-trigger="hover"
     ></el-cascader>
   </div>
 </template>
@@ -44,11 +46,14 @@
     }
 	}
 </script>
-@import  '@/assets/styles/inputNoBorder.styl'
 <style scoped lang="stylus">
+  @import  '~@/assets/styles/inputNoBorder.styl'
   #citySelectWrapper
     display inline-block
   #citySelectWrapper >>> .el-input__inner
     inputNoBorder()
+  #citySelectWrapper >>> .el-input__inner:focus
+    inputNoFocusLine()
+
 
 </style>
