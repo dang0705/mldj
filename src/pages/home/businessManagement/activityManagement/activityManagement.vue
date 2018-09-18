@@ -1,17 +1,21 @@
 <template>
-  <div>
-    activityManagement
+  <div id="wrapper">
+    <search-component></search-component>
   </div>
 </template>
 
 <script>
   import axios from 'axios'
+  import searchComponent from './component/searchComponent'
   export default {
     name: "activityManagement",
     data() {
       return {
         list: []
       };
+    },
+    components:{
+      searchComponent
     },
     methods:{
       handelList(){

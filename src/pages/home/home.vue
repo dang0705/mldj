@@ -21,7 +21,7 @@
 
 <script>
   import menuSelect from '@/components/common/menu/menu'
-  import homeHeader from '@/components/common/header/header'
+  // import homeHeader from '@/components/common/header/header'
   import axios from 'axios'
   
   export default {
