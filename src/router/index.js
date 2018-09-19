@@ -19,7 +19,7 @@ export default new Router({
     //   component: login
     // },
     {
-      path: '/home',
+      path: '*/',
       component: home,
       children: [
         {

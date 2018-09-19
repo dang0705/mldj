@@ -141,10 +141,11 @@
 </script>
 
 <style lang="stylus" scoped>
+  @import '~@/assets/styles/varibles.styl'
   .menu >>> .el-menu--horizontal
     text-align center
     margin-bottom: 10px
-    box-shadow 0 5px 8px rgba(0,0,0,.2)
+    box-shadow $boxShadow
     .el-menu-item
       float none
       display inline-block

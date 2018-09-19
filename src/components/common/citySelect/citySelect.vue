@@ -11,7 +11,7 @@
 </template>
 
 <script>
-	export default {
+  export default {
 		name: "citySelect",
     data() {
       return {
@@ -31,6 +31,7 @@
     methods: {
       handleItemChange(val) {
         console.log('active item:', val);
+        this.$store.commit('changeCity',val);
         setTimeout(_ => {
           if (val.indexOf('江苏') > -1 && !this.options2[0].cities.length) {
             this.options2[0].cities = [{
@@ -47,10 +48,11 @@
 	}
 </script>
 <style scoped lang="stylus">
-  @import  '~@/assets/styles/inputNoBorder.styl'
+  @import  '~@/assets/styles/mixin.styl'
   #citySelectWrapper
     display inline-block
   #citySelectWrapper >>> .el-input__inner
+    width: 300px
     inputNoBorder()
   #citySelectWrapper >>> .el-input__inner:focus
     inputNoFocusLine()

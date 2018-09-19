@@ -2,7 +2,6 @@
   <div id="searchWrapper">
     <input type="text" class="textSearch" placeholder="名称">
     <i class="el-icon-search"></i>
-    
     <city-select></city-select>
     
     <el-select
@@ -32,20 +31,20 @@
     data() {
       return {
         options: [ {
-          value: '选项1',
+          value: '1',
           label: '01店'
         }, {
-          value: '选项2',
-          label: '01店'
+          value: '2',
+          label: '02店'
         }, {
-          value: '选项3',
-          label: '01店'
+          value: '3',
+          label: '03店'
         }, {
-          value: '选项4',
-          label: '01店'
+          value: '4',
+          label: '04店'
         }, {
-          value: '选项5',
-          label: '01店'
+          value: '5',
+          label: '05店'
         } ],
         value: ''
       }
@@ -54,7 +53,7 @@
 </script>
 
 <style scoped lang="stylus">
-  @import  '~@/assets/styles/inputNoBorder.styl'
+  @import  '~@/assets/styles/mixin.styl'
   #searchWrapper >>> .el-input__inner
     inputNoBorder()
   #searchWrapper
@@ -67,8 +66,7 @@
       font-size: 30px
       cursor pointer
       vertical-align middle
-    #storeSelect
-      inputNoBorder()
-      inputNoFocusLine()
+    .el-select
+      width: 300px
 
 </style>

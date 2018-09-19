@@ -8,7 +8,7 @@
 <script>
   import axios from 'axios'
   import searchComponent from './component/searchComponent'
-  import searchList from './component/searchList'
+  import searchList from './component/searchList/searchList'
   export default {
     name: "activityManagement",
     data() {
