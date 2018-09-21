@@ -5,7 +5,8 @@
       <li
         v-for="(item,i) of firstLevelNavigationArr"
         :key="i"
-        @mouseenter="showSecondNavigation(i)"
+        :class="{ active: isActive ===i}"
+        @click="showSecondNavigation(i)"
       >
         {{item.navName}}
       </li>
@@ -18,7 +19,7 @@
       mode="horizontal"
       background-color="#fff"
       text-color="#000"
-      active-text-color="#ff0000"
+      active-text-color="#f00"
     >
       <el-menu-item
         v-for="(eachSub,index) of firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
@@ -27,7 +28,6 @@
       >
         {{eachSub.subNavNam}}
       </el-menu-item>
-    
     </el-menu>
     <!--<el-menu
       :default-active="$route.path"
@@ -71,9 +71,10 @@
 
 <script>
   export default {
-    name: 'home',
+    name: 'head-Menu',
     data() {
       return {
+        isActive:0,
         firstLevelNavigationArr: [
           {
             navName: '业务管理',
@@ -105,7 +106,6 @@
               {subNavNam: '角色管理', subIndex: '/roleManagement'} ]
           },
         ],
-        // activeIndex: 'activityManagement',
         firstLevelNavigationIndex:0,
       }
     },
@@ -122,19 +122,11 @@
     methods: {
       showSecondNavigation(i) {
         this.firstLevelNavigationIndex=i;
-        console.log(this.firstLevelNavigationIndex);
-      },
-      redFontColor (i) {
-        alert(i)
-      },
-      hideSecondNavigation() {
-        this.isHover = false
+        this.isActive=i
+        // console.log(this.firstLevelNavigationIndex);
       },
       handleSelect(key, keyPath) {
-        //console.log(key, keyPath);
-        //console.log(key);
-        // this.$emit('update:active',key)
-        this.$store.commit('changeMenu', key)
+        // this.$store.commit('changeMenu', key);
       }
     }
   }
@@ -142,6 +134,9 @@
 
 <style lang="stylus" scoped>
   @import '~@/assets/styles/varibles.styl'
+  .active
+    color white
+    
   .menu >>> .el-menu--horizontal
     text-align center
     margin-bottom: 10px
@@ -166,36 +161,10 @@
     height: 80px
     line-height: 80px
     background #000
-    color #ccc
+    color #a5a5a5
     text-align center
     li
-      display inline-block
-      margin 0 40px
-      cursor: pointer
-     li:hover
-       color #fff
- 
-  /* .menu >>> .el-submenu__title
-	 font-size 27px
-	 font-weight: bold
-	 height: 80px
-	 line-height: 80px
-   
-   .menu >>> .el-submenu__title:hover
-	 color #fff !important
-   
-   .menu >>> .el-submenu
-	 float none
-	 display inline-block
-	 margin 0 40px
-   
-   .menu
-	 position: relative
-	 width 100%
-	 left 0
-	 top 0
-	 text-align center
-	 .el-menu-item:hover
-	   color red !important*/
-  /*height 80px*/
+        display inline-block
+        margin 0 40px
+        cursor: pointer
 </style>

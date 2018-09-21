@@ -1,16 +1,3 @@
-<!--<template>
-	<div>home</div>
-</template>
-
-<script>
-	export default {
-		name: "home"
-	}
-</script>
-
-<style scoped>
-
-</style>-->
 <template>
   <div class="index">
     <!--<homeHeader></homeHeader>-->
@@ -35,7 +22,7 @@
     // },
     methods: {},
     mounted() {
-      // this.$router.push('/home/businessManagement/activityManagement')
+      this.$router.push('/activityManagement')
     },
   }
 </script>

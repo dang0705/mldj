@@ -2,12 +2,13 @@
  <div id="dateWrapper">
    <el-date-picker
      v-model="value"
+     size="large"
      value-format="yyyy-MM-dd"
      @change="getDate"
      type="daterange"
-     align="right"
+     align="center"
      unlink-panels
-     range-separator="至"
+     range-separator="到"
      start-placeholder="开始日期"
      end-placeholder="结束日期"
      :picker-options="pickerOptions2">
@@ -18,6 +19,7 @@
 <script>
 	export default {
 		name: "dateSelect",
+    // components:{Bus},
     data() {
       return {
         pickerOptions2: {
@@ -52,10 +54,15 @@
       };
     },
     methods:{
-      getDate () {
+      getDate (val) {
         // const val=this.value;
         // this.$store.commit(this.pickerTitle,val);
-        
+        // console.log(this.$store.state.pickerTitle);
+        let commitName='';
+        commitName=this.$store.state.dataPickerTitle==='startAndEndDateSelect'?'startAndEndDateSelect':'advanceAndWithDrawlDateSelect';
+        // console.log(commitName);
+        console.log(val);
+        this.$store.commit(commitName,val)
         // console.log('startDate'+startDate,'endDate'+endDate);
       }
     }
@@ -63,6 +70,8 @@
 </script>
 
 <style scoped lang="stylus">
-#dateWrapper
-  display inline-block
+  #dateWrapper
+    display inline-block
+    >div
+      width 100%
 </style>

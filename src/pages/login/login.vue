@@ -10,7 +10,7 @@
       </p>
       <register></register>
         <input type="button" value="登陆" id="login" @click="login">
-      <router-link to="/home/businessManagement/activityManagement" >点我啊,傻</router-link>
+      <router-link to="/activityManagement" >点我啊,傻</router-link>
       <!--<router-link to="../home/baseInfoManagement/brandManagement" >点我啊,傻</router-link>-->
       <!--<router-view></router-view>-->
     </div>

@@ -1,5 +1,5 @@
 <template>
-	<div id="citySelectWrapper">
+  <div id="citySelectWrapper">
     <el-cascader
       :options="options2"
       @active-item-change="handleItemChange"
@@ -12,16 +12,16 @@
 
 <script>
   export default {
-		name: "citySelect",
+    name: "citySelect",
     data() {
       return {
-        options2: [{
+        options2: [ {
           label: '江苏',
           cities: []
         }, {
           label: '浙江',
           cities: []
-        }],
+        } ],
         props: {
           value: 'label',
           children: 'cities'
@@ -31,31 +31,30 @@
     methods: {
       handleItemChange(val) {
         console.log('active item:', val);
-        this.$store.commit('changeCity',val);
+        let commitName = '';
+        commitName = this.$store.state.citySelectTitle === 'changeActiveCity' ? 'changeActiveCity' : 'changeWithDrawlCity';
+        this.$store.commit(commitName, val);
+        // this.$store.commit('changeActiveCity', val);
         setTimeout(_ => {
-          if (val.indexOf('江苏') > -1 && !this.options2[0].cities.length) {
-            this.options2[0].cities = [{
+          if ( val.indexOf('江苏') > -1 && !this.options2[ 0 ].cities.length ) {
+            this.options2[ 0 ].cities = [ {
               label: '南京'
-            }];
-          } else if (val.indexOf('浙江') > -1 && !this.options2[1].cities.length) {
-            this.options2[1].cities = [{
+            } ];
+          } else if ( val.indexOf('浙江') > -1 && !this.options2[ 1 ].cities.length ) {
+            this.options2[ 1 ].cities = [ {
               label: '杭州'
-            }];
+            } ];
           }
         }, 300);
       }
     }
-	}
+  }
 </script>
 <style scoped lang="stylus">
-  @import  '~@/assets/styles/mixin.styl'
+  @import '~@/assets/styles/mixin.styl'
   #citySelectWrapper
-    display inline-block
-  #citySelectWrapper >>> .el-input__inner
-    width: 300px
-    inputNoBorder()
-  #citySelectWrapper >>> .el-input__inner:focus
-    inputNoFocusLine()
-
+      .el-cascader
+        width 100%
+        line-height normal
 
 </style>
