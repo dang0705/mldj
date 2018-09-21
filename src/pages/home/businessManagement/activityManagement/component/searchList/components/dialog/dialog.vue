@@ -2,12 +2,16 @@
   <div id="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :before-close="handleClose"
       width="600px"
       title="新增活动"
       :close-on-click-modal='false'
+      :before-close="handleClose"
+      @closed="closed"
     >
-      <el-form :model="form">
+      <el-form
+        :model="form"
+        ref="dialog"
+      >
         <div id="" v-show="next1Flag">
           <el-row
             :gutter="50"
@@ -16,22 +20,26 @@
             align="bottom"
           >
             <el-col :span="12">
-              <el-input v-model="form.name"
-                        autofocus
-                        clearable
-                        class="input activeName"
-                        autocomplete="on"
-                        placeholder="请输入活动名称">
-              </el-input>
+              <el-form-item prop="activeName">
+                <el-input v-model="form.activeName"
+                          autofocus
+                          clearable
+                          class="input activeName"
+                          autoComplete="on"
+                          placeholder="请输入活动名称">
+                </el-input>
+              </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-input v-model="form.number"
-                        clearable
-                        class="input activeNumber"
-                        size="medium"
-                        autocomplete="on"
-                        placeholder="请输入活动编号">
-              </el-input>
+              <el-form-item prop="activeNumber">
+                <el-input v-model="form.activeNumber"
+                          clearable
+                          class="input activeNumber"
+                          size="medium"
+                          autoComplete="on"
+                          placeholder="请输入活动编号">
+                </el-input>
+              </el-form-item>
             </el-col>
           </el-row>
           
@@ -48,8 +56,13 @@
               <city-select @click.native="sendCitySelectTitle('changeActiveCity')"></city-select>
             </el-col>
             <el-col :span="14">
-              <el-input v-model="form.activeAddress" clearable class="input" autocomplete="on"
-                        placeholder="详细地址"></el-input>
+              <el-form-item prop="activeAddress">
+                <el-input v-model="form.activeAddress"
+                          clearable
+                          class="input"
+                          autoComplete="on"
+                          placeholder="详细地址"></el-input>
+              </el-form-item>
             </el-col>
           </el-row>
           
@@ -63,7 +76,12 @@
               <span>Crm门店：</span>
             </el-col>
             <el-col :span="20">
-              <el-input v-model="form.store" clearable class="input crmStore" autocomplete="on"></el-input>
+              <el-form-item prop="CrmStore">
+                <el-input v-model="form.CrmStore"
+                          clearable
+                          class="input crmStore"
+                          autoComplete="on"></el-input>
+              </el-form-item>
             </el-col>
           </el-row>
           
@@ -94,7 +112,6 @@
               <date-select @click.native="sendDataPickerTitle('advanceAndWithDrawlDateSelect')"></date-select>
             </el-col>
           </el-row>
-          
           <el-row type="flex"
                   :gutter="10"
                   justify="center"
@@ -107,10 +124,14 @@
               <city-select @click.native="sendCitySelectTitle('changeWithDrawlCity')"></city-select>
             </el-col>
             <el-col :span="14">
-              <el-input v-model="form.withDrawAddress" class="input" clearable autocomplete="off"
-                        placeholder="详细地址">
-              
-              </el-input>
+              <el-form-item prop="withDrawAddress">
+                <el-input v-model="form.withDrawAddress" class="input"
+                          clearable
+                          autoComplete="on"
+                          placeholder="详细地址">
+                </el-input>
+              </el-form-item>
+            
             </el-col>
           </el-row>
           
@@ -167,7 +188,7 @@
         prevFlag: false,
         next2Flag: false,
         confirmFLag: false,
-        gridData: [ {
+        gridData: [ /*{
           date: '2016-05-02',
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄'
@@ -183,27 +204,20 @@
           date: '2016-05-03',
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄'
-        } ],
-        // dialogTableVisible: false,
+        }*/ ],
         form: {
-          name: '',
-          number: '',
-          activeCity: [],
-          withDrawlCity: [],
-          activeAddress: '',
-          withDrawAddress: '',
-          store: '',
-          startDate: '',
-          endDate: '',
+          activeName: '', /*活动名称*/
+          activeNumber: '', /*活动编号*/
+          activeCity: [], /*活动省市*/
+          activeAddress: '', /*活动详细地址*/
+          CrmStore: '', /*Crm门店*/
+          startDate: '', /*开始时间*/
+          endDate: '', /*结束时间*/
           advanceDate: '', /*进场时间*/
           withDrawlDate: '', /*撤场时间*/
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: ''
+          withDrawlCity: [], /*撤场省市*/
+          withDrawAddress: '', /*撤场详细地址*/
+          deliveryDate: '', /*发货时间*/
         },
         formLabelWidth: '80px'
       };
@@ -224,6 +238,7 @@
         this.form.endDate = this.$store.state.endDate;
         this.form.advanceDate = this.$store.state.advanceDate;
         this.form.withDrawlDate = this.$store.state.withDrawlDate;
+        this.form.deliveryDate = this.$store.state.deliveryDate;
         // console.log('this.form.activeCity='+this.form.activeCity,'this.form.withDrawlCity='+this.form.withDrawlCity);
         this.prevFlag = true;
         this.next1Flag = false
@@ -237,11 +252,15 @@
         this.$emit('closeAlert')
       },
       handleClose() {
+        this.$emit('closeAlert');
+        this.$refs[ 'dialog' ].resetFields();
+        
+      },
+      closed() {
         this.next1Flag = true;
         this.prevFlag = false;
         this.next2Flag = false;
         this.confirmFLag = false;
-        this.$emit('closeAlert')
       }
     }
   }
@@ -254,13 +273,18 @@
     inputNoBorder()
     height: 50px
     color red
+  #dialogWrapper >>> .el-form-item
+   margin-bottom 0
   #dialogWrapper >>> .el-cascader__label
     line-height: 50px
     color red
+  
   #dialogWrapper >>> .el-range-separator
     line-height: 43px
+  
   #dialogWrapper >>> .el-range-input
     color red
+  
   #dialogWrapper
     text-align left
     .activeName

@@ -1,6 +1,6 @@
 <template>
   <div class="menu">
-    <img src="../../../assets/img/logo.png" alt="" width="3%" style="position: absolute;left: 3%;top: 2%; z-index: 10">
+    <img src="../../../assets/img/logo.png" alt="" width="80px" style="position: absolute;left: 5%;top: 0; z-index: 10">
     <ul id="firstLevelNavigation">
       <li
         v-for="(item,i) of firstLevelNavigationArr"
@@ -11,61 +11,18 @@
         {{item.navName}}
       </li>
     </ul>
-    <el-menu
-      :default-active="$route.path"
-      router
-      class="el-menu"
-      @select="handleSelect"
-      mode="horizontal"
-      background-color="#fff"
-      text-color="#000"
-      active-text-color="#f00"
-    >
-      <el-menu-item
+    
+    <ul id="secondLevelNavigation">
+      <router-link
+        tag="li"
         v-for="(eachSub,index) of firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
-        :index="eachSub.subIndex"
+        class="secondNavigation"
+        :to="eachSub.subIndex"
         :key="index"
       >
         {{eachSub.subNavNam}}
-      </el-menu-item>
-    </el-menu>
-    <!--<el-menu
-      :default-active="$route.path"
-      router
-      class="el-menu"
-      @select="handleSelect"
-      mode="horizontal"
-      background-color="#000"
-      text-color="#ccc"
-      active-text-color="#fff">
-      <el-submenu index="businessManagement">
-        <template slot="title">业务管理</template>
-        <el-menu-item index="activityManagement">活动管理</el-menu-item>
-        <el-menu-item index="InventoryManagement">库存管理</el-menu-item>
-        <el-menu-item index="orderManagement">订单管理</el-menu-item>
-        <el-menu-item index="operationsManagement">运维管理</el-menu-item>
-      </el-submenu>
-      <el-submenu index="baseInfoManagement">
-        <template slot="title">基础信息管理</template>
-        <el-menu-item index="brandManagement">品牌管理</el-menu-item>
-        <el-menu-item index="storeManagement">门店管理</el-menu-item>
-        <el-menu-item index="productManagement">产品管理</el-menu-item>
-        <el-menu-item index="channelManagement">渠道管理</el-menu-item>
-      </el-submenu>
-      
-      <el-submenu index="deviceManagement">
-        <template slot="title">设备管理</template>
-        <el-menu-item index="deviceManagementPage">设备管理</el-menu-item>
-        <el-menu-item index="deviceVersionManagement">设备版本管理</el-menu-item>
-        <el-menu-item index="mediaManagement">媒体管理</el-menu-item>
-      </el-submenu>
-      
-      <el-submenu index="personalManagement">
-        <template slot="title">人员管理</template>
-        <el-menu-item index="personnelManagementPage">人员管理</el-menu-item>
-        <el-menu-item index="roleManagement">角色管理</el-menu-item>
-      </el-submenu>
-    </el-menu>-->
+      </router-link>
+    </ul>
   </div>
 </template>
 
@@ -74,7 +31,8 @@
     name: 'head-Menu',
     data() {
       return {
-        isActive:0,
+        isActive: 0,
+        isSubActive: 0,
         firstLevelNavigationArr: [
           {
             navName: '业务管理',
@@ -106,7 +64,7 @@
               {subNavNam: '角色管理', subIndex: '/roleManagement'} ]
           },
         ],
-        firstLevelNavigationIndex:0,
+        firstLevelNavigationIndex: 0,
       }
     },
     // props:{
@@ -121,9 +79,13 @@
     
     methods: {
       showSecondNavigation(i) {
-        this.firstLevelNavigationIndex=i;
-        this.isActive=i
+        this.firstLevelNavigationIndex = i;
+        this.isActive = i
         // console.log(this.firstLevelNavigationIndex);
+      },
+      secondNavigation(i) {
+        this.isSubActive = i;
+        alert(0)
       },
       handleSelect(key, keyPath) {
         // this.$store.commit('changeMenu', key);
@@ -136,25 +98,6 @@
   @import '~@/assets/styles/varibles.styl'
   .active
     color white
-    
-  .menu >>> .el-menu--horizontal
-    text-align center
-    margin-bottom: 10px
-    box-shadow $boxShadow
-    .el-menu-item
-      float none
-      display inline-block
-      margin 0 40px
-      padding: 0
-      font-size: 20px
-      .el-menu--horizontal .el-menu-item:hover{
-        color :#fff !important;
-        font-weight: bold;
-      }
-      .el-menu--horizontal .el-menu-item.is-active{
-        color: red!important;
-        font-weight: bold;
-      }
   #firstLevelNavigation
     font-size 27px
     font-weight: bold
@@ -164,7 +107,27 @@
     color #a5a5a5
     text-align center
     li
-        display inline-block
-        margin 0 40px
-        cursor: pointer
+      display inline-block
+      margin 0 40px
+      cursor: pointer
+  .menu
+    #secondLevelNavigation
+      text-align center
+      background white
+      margin-bottom: 10px
+      box-shadow $boxShadow
+    .secondNavigation
+      cursor pointer
+      display inline-block
+      margin 0 40px
+      padding: 0
+      font-size: 20px
+      height: 60px
+      line-height: 60px
+    .router-link-exact-active.router-link-active
+      color red
+    
+
+  
+
 </style>

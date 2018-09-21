@@ -59,10 +59,12 @@
         // this.$store.commit(this.pickerTitle,val);
         // console.log(this.$store.state.pickerTitle);
         let commitName='';
-        commitName=this.$store.state.dataPickerTitle==='startAndEndDateSelect'?'startAndEndDateSelect':'advanceAndWithDrawlDateSelect';
+        if ( val ) {
+          commitName=this.$store.state.dataPickerTitle==='startAndEndDateSelect'?'startAndEndDateSelect':'advanceAndWithDrawlDateSelect';
+          this.$store.commit(commitName,val)
+          console.log(val);
+        }
         // console.log(commitName);
-        console.log(val);
-        this.$store.commit(commitName,val)
         // console.log('startDate'+startDate,'endDate'+endDate);
       }
     }

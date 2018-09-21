@@ -17,7 +17,7 @@
 
 <script>
   import listTitle from '@/components/common/listTitle/listTitle'
-  import alertDialog from './components/dialog'
+  import alertDialog from './components/dialog/dialog'
   
   export default {
     name: "searchList",
