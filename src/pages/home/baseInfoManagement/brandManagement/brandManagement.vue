@@ -1,10 +1,16 @@
 <template>
-	<div>brandManagement</div>
+  <search-list>
+  
+  </search-list>
 </template>
 
 <script>
+  import searchList from './component/searchList/searchList'
 	export default {
-		name: "brandManagement"
+		name: "brandManagement",
+    components:{
+      searchList
+    }
 	}
 </script>
 

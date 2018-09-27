@@ -11,6 +11,6 @@
 </script>
 
 <style scoped lang="stylus">
-  body, html
+  body, html,#app
     height: 100%
 </style>

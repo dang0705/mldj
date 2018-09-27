@@ -10,11 +10,12 @@ export default new Vuex.Store({
     activeCity: [],
     withDrawCity: [],
     dataPickerTitle: '',
-    citySelectTitle:'',
+    citySelectTitle: '',
     startDate: '',
     endDate: '',
     advanceDate: '',
-    withDrawlDate: ''
+    withDrawlDate: '',
+    clearUpload: false
   },
   // actions:{
   //   changeMenu (ctx,menuIndex){
@@ -45,6 +46,8 @@ export default new Vuex.Store({
       state.advanceDate = date[ 0 ];
       state.withDrawlDate = date[ 1 ];
     },
-
+    clearUpload(state) {
+      state.clearUpload = true;
+    }
   }
 })

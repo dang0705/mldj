@@ -48,6 +48,7 @@
               {subNavNam: '品牌管理', subIndex: '/brandManagement'},
               {subNavNam: '门店管理', subIndex: '/storeManagement'},
               {subNavNam: '产品管理', subIndex: '/productManagement'},
+              {subNavNam: '仓库管理', subIndex: '/warehouseManagement'},
               {subNavNam: '渠道管理', subIndex: '/channelManagement'} ]
           },
           {

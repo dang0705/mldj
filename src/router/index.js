@@ -58,6 +58,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/baseInfoManagement/productManagement/productManagement' ], resolve)
         },
         {
+          path: '/warehouseManagement',
+          name: 'warehouseManagement',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/warehouseManagement/warehouseManagement' ], resolve)
+        },
+        {
           path: '/storeManagement',
           name: 'storeManagement',
           component: resolve => require([ '@/pages/home/baseInfoManagement/storeManagement/storeManagement' ], resolve)
