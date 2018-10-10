@@ -43,9 +43,9 @@ export default new Router({
           component: resolve => require([ '@/pages/home/businessManagement/operationsManagement/operationsManagement' ], resolve)
         },
         {
-          path: '/brandManagement',
-          name: 'brandManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/brandManagement/brandManagement' ], resolve)
+          path: '/BrandManagement',
+          name: 'BrandManagement',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/BrandManagement/BrandManagement' ], resolve)
         },
         {
           path: '/channelManagement',

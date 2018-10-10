@@ -7,9 +7,29 @@
       :before-close="handleClose"
       @closed="closed"
     >
-      <upload ref="uploadList"></upload>
+      <el-form
+        :ref="uploadData"
+        :model="formData"
+        :rules="uploadRules"
+      >
+        <el-form-item>
+          <el-input v-model="formData.BrandCode" placeholder="品牌编号"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-input v-model="formData.BrandComments" placeholder="品牌名称"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-input v-model="formData.BrandName" placeholder="品牌简介"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-input v-model="formData.BrandShowText" placeholder="品牌描述"></el-input>
+        </el-form-item>
+      </el-form>
+      
+      <!--上传图片插件-->
+      <upload :isClose="isClose" @closeDialog="closeDialog" @getBase64Url="getBase64Url"></upload>
       <!--<div slot="footer" class="dialog-footer">-->
-      <!--<el-button type="primary" @click="confirm">确 定</el-button>-->
+      <!--<el-button type="primary" @click="confirmUpload">确 定</el-button>-->
       <!--</div>-->
     </el-dialog>
   </div>
@@ -17,6 +37,7 @@
 
 <script>
   import upload from '@/components/common/upload/uploadList'
+  import axios from 'axios'
   
   export default {
     name: "brandManagement_dialog",
@@ -30,6 +51,28 @@
     },
     data() {
       return {
+        formData: {
+          BrandCode: '',
+          BrandComments: '',
+          BrandName: '',
+          BrandShowText: '',
+          ImgBase: '',
+          DogType: 'a_dd'
+        },
+        uploadRules:{
+        
+        }
+      }
+    },
+    computed: {
+      isClose: {
+        get: function () {
+          let clearImg = this.isAlertShow;
+          return !clearImg
+        },
+        set: function () {
+        
+        }
       }
     },
     methods: {
@@ -38,10 +81,11 @@
       },
       handleClose() {
         this.$emit('closeAlert');
-        this.$refs.uploadList.resetFields();
+        // this.$refs.uploadList.resetFields();
       },
       closed() {
-        this.$store.commit('clearUpload')
+        this.$store.commit('clearUpload');
+        this.isClose = true;
       },
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
@@ -61,6 +105,16 @@
         
         return (isJPG || isPNG) && isLt2M;
         
+      },
+      closeDialog() {
+        // alert(0)
+        this.$emit('closeAlert')
+      },
+      confirmUpload() {
+        console.log(this.formData.ImgBase);
+      },
+      getBase64Url(url) {
+        this.formData.ImgBase = url;
       }
     }
   }

@@ -1,12 +1,12 @@
 <template>
   <div class="img-list">
-    <div class="img-content">
+    <div class="img-content" v-show="imagelist.url">
       <el-form
         :model="form"
         ref="uploadList"
       >
         <el-form-item prop="imgUrl">
-          <img :src="imagelist.url" v-model="form.imgUrl">
+          <img :src="clearSrc" v-model="form.imgUrl" width="200px">
         </el-form-item>
         
         <el-form-item prop="name">
@@ -17,9 +17,9 @@
         </el-form-item>
       </el-form>
       <!-- 删除icon -->
-      <div class="del">
-        <i @click="handleFileRemove()" class="el-icon-delete"></i>
-      </div>
+      <!-- <div class="del">
+		 <i @click="handleFileRemove()" class="el-icon-delete"></i>
+	   </div>-->
       <!-- 放大icon -->
       <div class="layer" @click="handleFileEnlarge(imagelist.url)">
         <i class="el-icon-view"></i>
@@ -49,7 +49,8 @@
     <el-dialog title=""
                :visible.sync="isEnlargeImage"
                size="large"
-               :modal-append-to-body="false"
+               :modal="false"
+               :modal-append-to-body="true"
                top="8%"
                width="60%">
       <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
@@ -64,6 +65,11 @@
   
   export default {
     name: 'upload-list',
+    props: {
+      isClose: {
+        type: Boolean
+      }
+    },
     data() {
       return {
         form: {
@@ -75,7 +81,7 @@
         isEnlargeImage: false,//放大图片
         enlargeImage: '',//放大图片地址
         imagelist: {},
-        fileList:{},
+        fileList: {},
         params: {
           action: '',
           data: {}
@@ -91,31 +97,32 @@
         } else {
           return ''
         }
+      },
+      clearSrc() {
+        let clearImg = this.isClose;
+        return this.imagelist.url = clearImg ? '' : this.imagelist.url
       }
     },
     methods: {
       uploadImg() {
-        console.log('upload');
+        // console.log('upload');
         let that = this;
-        console.log(that.fileList);
-        axios.post('http://v2.1shi.com.cn:8078/Company/UpLoadCertified', qs.stringify({
-          ID: '12',
-          UpBusinessLicense: that.fileList
-        }))
-        // axios.get('https://api.shi1.cn/yl/YLHandler.ashx?type=PrizeClawB&action=volume&number=999').then(function (data) {
-        //   console.log(data);
-        // })
-        // axios.post('http://yl.1shi.com.cn', qs.stringify({
-        //   type: 'PeaceBirdPhone',
-        //   image: that.imagelist[ 3 ].url,
-        //   action: 'UploadPic',
-        //   site: '20',
-        //   openid: 'openid'
-        // }))
+        console.log(that.imagelist.url);
+  
+        axios.post('/api/Home/BrandSave', {
+          DogType: 'a_dd',
+          BrandCode: '4',
+          BrandName: '品牌名称',
+          BrandShowText: '品牌简介',
+          BrandComments: '品牌描述',
+          ImgBase: that.imagelist.url
+        })
           .then(data => {
             console.log(data);
             that.$message.success("上传成功");
-            this.pass = true;
+            that.pass = true;
+            that.$emit('closeDialog')
+            // that.isClose=false
           })
           .catch(e => {
             console.log(e);
@@ -139,17 +146,18 @@
           //   url: file.url,
           //   name: '新增图片'
           // }
-  
+          
           const reader = new FileReader();
           reader.readAsDataURL(file.raw);
           var that = this;
           reader.onload = function (e) {
-            console.log(e.target.result);
-            that.imagelist={
+            // console.log(e.target.result);
+            that.imagelist = {
               url: e.target.result,
               name: '新增图片'
             };
-            console.log(that.imagelist);
+            // console.log(that.imagelist);
+            that.$emit('getBase64Url',that.imagelist.url)
           };
           
         } else if ( file.status === 'fail' ) {
@@ -175,14 +183,14 @@
       },
       
       handleFileEnlarge(_url) {//放大图片
-        console.log(_url)
+        console.log(_url);
         if ( _url ) {
           this.enlargeImage = _url;
           this.isEnlargeImage = !this.isEnlargeImage;
         }
       },
       handleFileName(file, i) {//修改名字
-        console.log(file, i)
+        console.log(file, i);
         let that = this;
         this.$prompt("请输入新文件名：", "提示：", {
           confirmButtonText: '确定',
@@ -222,41 +230,36 @@
           this.$message.success("删除成功")
         }).catch((meg) => console.log(meg))
       },
+    },
+    mounted() {
+      console.log(this.isClose);
     }
   }
 </script>
 
-<style>
+<style lang="stylus" scoped>
   * {
     box-sizing: border-box;
   }
-  
+  .img-list>>>.el-upload-dragger
+    width: 200px
+    height auto
+    border: none
   .img-list {
     overflow: hidden;
     width: 100%;
+    position: relative
   }
   
   .img-list .img-content {
-    float: left;
-    text-align: left;
-    position: relative;
-    display: inline-block;
-    width: 200px;
     height: 270px;
-    padding: 5px;
-    margin: 5px 20px 20px 0;
-    border: 1px solid #d1dbe5;
-    border-radius: 4px;
     transition: all .3s;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, .12), 0 0 6px 0 rgba(0, 0, 0, .04);
   }
   
   .img-list .img-upload {
-    float: left;
     width: 200px;
-    height: 270px;
-    display: table;
     text-align: center;
+    margin: 0 auto;
   }
   
   .img-list .uploader {
@@ -272,10 +275,8 @@
   
   .img-list .img-content img {
     display: block;
-    width: 100%;
     height: 190px;
     margin: 0 auto;
-    border-radius: 4px;
   }
   
   .img-list .img-content .name {

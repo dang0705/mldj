@@ -27,6 +27,8 @@
 </template>
 
 <script>
+  import axios from 'axios'
+  
   export default {
     name: 'head-Menu',
     data() {
@@ -34,36 +36,40 @@
         isActive: 0,
         isSubActive: 0,
         firstLevelNavigationArr: [
-          {
-            navName: '业务管理',
-            subNav: [
-              {subNavNam: '活动管理', subIndex: '/activityManagement'},
-              {subNavNam: '库存管理', subIndex: '/InventoryManagement'},
-              {subNavNam: '订单管理', subIndex: '/orderManagement'},
-              {subNavNam: '运维管理', subIndex: '/operationsManagement'} ]
-          },
-          {
-            navName: '基础信息管理',
-            subNav: [
-              {subNavNam: '品牌管理', subIndex: '/brandManagement'},
-              {subNavNam: '门店管理', subIndex: '/storeManagement'},
-              {subNavNam: '产品管理', subIndex: '/productManagement'},
-              {subNavNam: '仓库管理', subIndex: '/warehouseManagement'},
-              {subNavNam: '渠道管理', subIndex: '/channelManagement'} ]
-          },
-          {
-            navName: '设备管理',
-            subNav: [
-              {subNavNam: '设备管理', subIndex: '/deviceManagementPage'},
-              {subNavNam: '设备版本管理', subIndex: '/deviceVersionManagement'},
-              {subNavNam: '媒体管理', subIndex: '/mediaManagement'} ]
-          },
-          {
-            navName: '人员管理',
-            subNav: [
-              {subNavNam: '用户管理', subIndex: '/personnelManagementPage'},
-              {subNavNam: '角色管理', subIndex: '/roleManagement'} ]
-          },
+         /* {
+            navName: '',
+            subNav: []
+          }*/
+          /* {
+			 navName: '业务管理',
+			 subNav: [
+			   {subNavNam: '活动管理', subIndex: '/activityManagement'},
+			   {subNavNam: '库存管理', subIndex: '/InventoryManagement'},
+			   {subNavNam: '订单管理', subIndex: '/orderManagement'},
+			   {subNavNam: '运维管理', subIndex: '/operationsManagement'} ]
+		   },
+		   {
+			 navName: '基础信息管理',
+			 subNav: [
+			   {subNavNam: '品牌管理', subIndex: '/brandManagement'},
+			   {subNavNam: '门店管理', subIndex: '/storeManagement'},
+			   {subNavNam: '产品管理', subIndex: '/productManagement'},
+			   {subNavNam: '仓库管理', subIndex: '/warehouseManagement'},
+			   {subNavNam: '渠道管理', subIndex: '/channelManagement'} ]
+		   },
+		   {
+			 navName: '设备管理',
+			 subNav: [
+			   {subNavNam: '设备管理', subIndex: '/deviceManagementPage'},
+			   {subNavNam: '设备版本管理', subIndex: '/deviceVersionManagement'},
+			   {subNavNam: '媒体管理', subIndex: '/mediaManagement'} ]
+		   },
+		   {
+			 navName: '人员管理',
+			 subNav: [
+			   {subNavNam: '用户管理', subIndex: '/personnelManagementPage'},
+			   {subNavNam: '角色管理', subIndex: '/roleManagement'} ]
+		   },*/
         ],
         firstLevelNavigationIndex: 0,
       }
@@ -75,7 +81,23 @@
     //     default:'personnelManagement'
     //   }
     // },
-    beforeMount() {
+    created() {
+      var that = this;
+      axios.post('/api/Menu/GetRoleMenListByTree')
+        .then(data => {
+          console.log(data);
+          const myData = data.data.Content;
+          console.log(myData);
+          
+          for ( var i = 0; i < myData.length; i++ ) {
+            that.firstLevelNavigationArr.push({navName: myData[ i ].MenuName, subNav: []});
+            for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
+              var MenuList = myData[ i ].MenuList[ j ];
+              that.firstLevelNavigationArr[ i ].subNav.push({subNavNam: MenuList.MenuName, subIndex: MenuList.MenuCode})
+            }
+          }
+          console.log(that.firstLevelNavigationArr);
+        })
     },
     
     methods: {
@@ -99,6 +121,7 @@
   @import '~@/assets/styles/varibles.styl'
   .active
     color white
+  
   #firstLevelNavigation
     font-size 27px
     font-weight: bold
@@ -111,6 +134,7 @@
       display inline-block
       margin 0 40px
       cursor: pointer
+  
   .menu
     #secondLevelNavigation
       text-align center
@@ -127,8 +151,6 @@
       line-height: 60px
     .router-link-exact-active.router-link-active
       color red
-    
 
-  
 
 </style>
