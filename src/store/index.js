@@ -6,7 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    menuIndex: 'activityManagement',
+    menuIndex: '',
     activeCity: [],
     withDrawCity: [],
     dataPickerTitle: '',
@@ -15,7 +15,8 @@ export default new Vuex.Store({
     endDate: '',
     advanceDate: '',
     withDrawlDate: '',
-    clearUpload: false
+    clearUpload: false,
+    isBrandUpdateData: false
   },
   // actions:{
   //   changeMenu (ctx,menuIndex){
@@ -25,29 +26,39 @@ export default new Vuex.Store({
   mutations: {
     changeMenu(state, menuIndex) {
       // console.log(menuIndex);
-      storage.setItem('menuIndex', menuIndex);
+      // storage.setItem('menuIndex', menuIndex);
       state.menuIndex = menuIndex
-    },
+    }
+    ,
     /*更改活动地点*/
     changeActiveCity(state, activeCity) {
       state.activeCity = activeCity;
-    },
+    }
+    ,
     /*更改撤场地点*/
     changeWithDrawlCity(state, withDrawCity) {
       state.withDrawCity = withDrawCity;
-    },
+    }
+    ,
     /*活动管理弹框开始结束日期选择*/
     startAndEndDateSelect(state, date) {
       state.startDate = date[ 0 ];
       state.endDate = date[ 1 ];
-    },
+    }
+    ,
     /*活动管理弹框进场撤场日期选择*/
     advanceAndWithDrawlDateSelect(state, date) {
       state.advanceDate = date[ 0 ];
       state.withDrawlDate = date[ 1 ];
-    },
+    }
+    ,
     clearUpload(state) {
       state.clearUpload = true;
     }
+    /*增加后更新品牌列表*/
+    , BrandUpdateData(state) {
+      state.isBrandUpdateData = true
+    }
+
   }
 })

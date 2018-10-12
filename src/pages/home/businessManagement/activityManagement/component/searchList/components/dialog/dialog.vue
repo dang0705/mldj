@@ -188,23 +188,7 @@
         prevFlag: false,
         next2Flag: false,
         confirmFLag: false,
-        gridData: [ /*{
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }*/ ],
+        gridData: [],
         form: {
           activeName: '', /*活动名称*/
           activeNumber: '', /*活动编号*/
@@ -230,8 +214,6 @@
         this.$store.state.dataPickerTitle = val;
       },
       next1() {
-        //console.log('this.$store.state.startDate='+this.$store.state.startDate,' this.$store.state.endDate='+ this.$store.state.endDate);
-        //console.log('this.$store.state.advanceDate='+this.$store.state.advanceDate,' this.$store.state.withDrawlDate='+ this.$store.state.withDrawlDate);
         this.form.activeCity = this.$store.state.activeCity;
         this.form.withDrawlCity = this.$store.state.withDrawCity;
         this.form.startDate = this.$store.state.startDate;
@@ -239,7 +221,6 @@
         this.form.advanceDate = this.$store.state.advanceDate;
         this.form.withDrawlDate = this.$store.state.withDrawlDate;
         this.form.deliveryDate = this.$store.state.deliveryDate;
-        // console.log('this.form.activeCity='+this.form.activeCity,'this.form.withDrawlCity='+this.form.withDrawlCity);
         this.prevFlag = true;
         this.next1Flag = false
       },

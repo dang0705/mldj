@@ -9,12 +9,12 @@
           <img :src="clearSrc" v-model="form.imgUrl" width="200px">
         </el-form-item>
         
-        <el-form-item prop="name">
+       <!-- <el-form-item prop="name">
           <div class="name">
             <div v-model="form.name">{{ imagelist.name }}</div>
             <el-button type="text" @click="handleFileName()">修改名字</el-button>
           </div>
-        </el-form-item>
+        </el-form-item>-->
       </el-form>
       <!-- 删除icon -->
       <!-- <div class="del">
@@ -41,9 +41,8 @@
                  :data="params.data"
                  :on-change="uploadOnChange"
                  :on-progress="uploadOnProgress"
-                 :http-request="uploadImg"
       >
-        <el-button type="primary">点击上传</el-button>
+        <el-button type="primary">上传logo</el-button>
       </el-upload>
     </div>
     <el-dialog title=""
@@ -55,7 +54,7 @@
                width="60%">
       <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
     </el-dialog>
-    <el-button type="primary" @click="confirmUpload">确 定</el-button>
+    <!--<el-button type="primary" @click="confirmUpload">确 定</el-button>-->
   </div>
 </template>
 
@@ -104,7 +103,7 @@
       }
     },
     methods: {
-      uploadImg() {
+     /* uploadImg() {
         // console.log('upload');
         let that = this;
         console.log(that.imagelist.url);
@@ -127,10 +126,10 @@
           .catch(e => {
             console.log(e);
           })
-      },
-      confirmUpload() {
+      },*/
+     /* confirmUpload() {
         this.$refs.upload.submit();
-      },
+      },*/
       uploadOnProgress(e, file) {//开始上传
         console.log(e.percent, file);
         this.progress = Math.floor(e.percent)
@@ -183,13 +182,13 @@
       },
       
       handleFileEnlarge(_url) {//放大图片
-        console.log(_url);
+        // console.log(_url);
         if ( _url ) {
           this.enlargeImage = _url;
           this.isEnlargeImage = !this.isEnlargeImage;
         }
       },
-      handleFileName(file, i) {//修改名字
+     /* handleFileName(file, i) {//修改名字
         console.log(file, i);
         let that = this;
         this.$prompt("请输入新文件名：", "提示：", {
@@ -229,7 +228,7 @@
           });
           this.$message.success("删除成功")
         }).catch((meg) => console.log(meg))
-      },
+      },*/
     },
     mounted() {
       console.log(this.isClose);
@@ -252,7 +251,7 @@
   }
   
   .img-list .img-content {
-    height: 270px;
+    /*height: 270px;*/
     transition: all .3s;
   }
   

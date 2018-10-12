@@ -1,8 +1,7 @@
 <template>
-  <div id="brandManagementWrapper">
+  <div id="apkManagementWrapper">
     <search-list>
     </search-list>
-    
     <content-list>
     </content-list>
   </div>
@@ -11,16 +10,15 @@
 <script>
   import searchList from './component/searchList/searchList'
   import contentList from './component/contentList/contentList'
-  
-  export default {
-    name: "brandManagement",
+	export default {
+		name: "ApkManagement",
     components: {
       searchList,
       contentList
     }
-  }
+	}
 </script>
 
-<style scoped>
+<style scoped lang="stylus">
 
 </style>

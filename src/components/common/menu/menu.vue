@@ -12,16 +12,16 @@
       </li>
     </ul>
     
-    <ul id="secondLevelNavigation">
-      <router-link
-        tag="li"
-        v-for="(eachSub,index) of firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
-        class="secondNavigation"
-        :to="eachSub.subIndex"
-        :key="index"
-      >
-        {{eachSub.subNavNam}}
-      </router-link>
+    <ul id="secondLevelNavigation" >
+        <router-link
+          tag="li"
+          v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
+          class="secondNavigation"
+          :to="eachSub.subIndex"
+          :key="index"
+        >
+          {{eachSub.subNavNam}}
+        </router-link>
     </ul>
   </div>
 </template>
@@ -35,42 +35,8 @@
       return {
         isActive: 0,
         isSubActive: 0,
-        firstLevelNavigationArr: [
-         /* {
-            navName: '',
-            subNav: []
-          }*/
-          /* {
-			 navName: '业务管理',
-			 subNav: [
-			   {subNavNam: '活动管理', subIndex: '/activityManagement'},
-			   {subNavNam: '库存管理', subIndex: '/InventoryManagement'},
-			   {subNavNam: '订单管理', subIndex: '/orderManagement'},
-			   {subNavNam: '运维管理', subIndex: '/operationsManagement'} ]
-		   },
-		   {
-			 navName: '基础信息管理',
-			 subNav: [
-			   {subNavNam: '品牌管理', subIndex: '/brandManagement'},
-			   {subNavNam: '门店管理', subIndex: '/storeManagement'},
-			   {subNavNam: '产品管理', subIndex: '/productManagement'},
-			   {subNavNam: '仓库管理', subIndex: '/warehouseManagement'},
-			   {subNavNam: '渠道管理', subIndex: '/channelManagement'} ]
-		   },
-		   {
-			 navName: '设备管理',
-			 subNav: [
-			   {subNavNam: '设备管理', subIndex: '/deviceManagementPage'},
-			   {subNavNam: '设备版本管理', subIndex: '/deviceVersionManagement'},
-			   {subNavNam: '媒体管理', subIndex: '/mediaManagement'} ]
-		   },
-		   {
-			 navName: '人员管理',
-			 subNav: [
-			   {subNavNam: '用户管理', subIndex: '/personnelManagementPage'},
-			   {subNavNam: '角色管理', subIndex: '/roleManagement'} ]
-		   },*/
-        ],
+        firstLevelNavigationArr: [],
+        secondNavigationArr:[],
         firstLevelNavigationIndex: 0,
       }
     },
@@ -81,14 +47,16 @@
     //     default:'personnelManagement'
     //   }
     // },
-    created() {
+    mounted() {
       var that = this;
       axios.post('/api/Menu/GetRoleMenListByTree')
         .then(data => {
           console.log(data);
+          if ( data.data.state !== 1 ) {
+            that.$router.push('/login');
+            return
+          }
           const myData = data.data.Content;
-          console.log(myData);
-          
           for ( var i = 0; i < myData.length; i++ ) {
             that.firstLevelNavigationArr.push({navName: myData[ i ].MenuName, subNav: []});
             for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
@@ -103,7 +71,8 @@
     methods: {
       showSecondNavigation(i) {
         this.firstLevelNavigationIndex = i;
-        this.isActive = i
+        this.isActive = i;
+        this.$store.commit('changeMenu',i)
         // console.log(this.firstLevelNavigationIndex);
       },
       secondNavigation(i) {

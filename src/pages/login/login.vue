@@ -55,8 +55,8 @@
             },
             {
               min: 3,
-              max: 20,
-              message: '长度请在3~10个字符',
+              max: 30,
+              message: '长度请在3~30个字符',
               trigger: 'blur'
             }
           ],
