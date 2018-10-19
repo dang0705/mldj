@@ -29,14 +29,18 @@
       return {
         keyWord:'',
         titleList: [
-          '操作', '版本名称', '版本编号', '版本描述', '增加+'
+          '操作','门店名称','门店编号','渠道编号','省份编号', '城市编号','门店地址', '联系方式', '增加+'
         ]
         ,
         liStyleObj: [
           {width: '60px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
           {width: '140px',textAlign:'center'},
-          {width: '140px',textAlign:'center'},
-          {width: '620px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
           {
             width: '100px',
             margin: 0,
@@ -75,7 +79,6 @@
   #searchListWrapper
     margin: 80px 0 10px 0
     #title
-      width: $listWidth
       margin 0 auto
       background #fff
       text-align left

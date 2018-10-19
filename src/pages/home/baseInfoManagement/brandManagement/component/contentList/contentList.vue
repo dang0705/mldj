@@ -19,20 +19,53 @@
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
     >
-      <el-table-column label="" width="100">
+      <el-table-column label=""
+                       width="100"
+                       align="center"
+      >
         <template slot-scope="scope">
-          <el-button type="primary" size="small" @click="getData(scope.$index,scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="deleteItem(scope.$index,scope.row)">删除</el-button>
+          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
+          <el-button type="danger" icon="el-icon-delete" circle size="small"
+                     @click="deleteItem(scope.$index,scope.row)">
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="BrandName" width="180">
+      <el-table-column label="" prop="BrandName"
+                       width="180"
+                       align="center"
+      >
       </el-table-column>
-      <el-table-column label="" prop="BrandCode" width="180">
+      <el-table-column label="" prop="BrandCode"
+                       width="180"
+                       align="center"
+      >
       </el-table-column>
-      <el-table-column label="" prop="BrandLogoUrl" width="180">
+      <el-table-column label="" prop="BrandLogoUrl"
+                       width="140"
+                       align="center"
+      >
         <template slot-scope="scope">
-          <img :src="scope.row.BrandLogoUrl||noLogo" alt="" width="50" height="50">
+          <img :src="scope.row.BrandLogoUrl||noLogo" alt="" width="60" height="60" style="vertical-align: middle">
         </template>
+      </el-table-column>
+      
+      <el-table-column label=""
+                       prop="BrandShowText"
+                       width="260"
+                       align="center"
+                       :show-overflow-tooltip="true"
+      
+      >
+      </el-table-column>
+      <el-table-column label=""
+                       prop="BrandComments"
+                       width="260"
+                       align="center"
+                       :show-overflow-tooltip="true"
+      
+      >
+      </el-table-column>
+      <el-table-column label="">
       </el-table-column>
     </el-table>
     
@@ -67,9 +100,9 @@
       return {
         list: [],
         keyWord: '',
-        noLogo: '/static/img/noData.3e8ee30.png',
+        noLogo: 'static/img/noData.jpg',
         currentPage: 1, //初始页
-        pagesize: 7,    //    每页的数据
+        pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -119,7 +152,7 @@
       , deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该品牌, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -139,7 +172,7 @@
                   })
               })
           })
-          .catch(()=>{
+          .catch(() => {
           
           })
         
@@ -177,6 +210,13 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
+  #contentListWrapper >>> .el-input__inner
+    inputNoBorder()
+  
+  #contentListWrapper >>> .el-table
+    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
+    margin-bottom: 40px
+  
   #contentListWrapper >>> .el-table__header-wrapper
     display none
   
@@ -185,6 +225,8 @@
   
   #contentListWrapper
     listStyle()
+    .el-icon-search
+      filterIcon()
     li
       height $eachListHeight
       background white
@@ -192,6 +234,7 @@
   
   .el-table__body-wrapper
     width: 100%
+  
   .activeName
     filter()
     width: 600px

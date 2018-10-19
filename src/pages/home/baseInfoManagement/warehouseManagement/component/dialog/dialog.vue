@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增品牌'"
+      :title="alertTitle||'新增仓库'"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -12,31 +12,25 @@
         :model="formData"
         :rules="uploadRules"
       >
-        <el-form-item prop="BrandCode">
-          <el-input v-model="formData.BrandCode" clearable placeholder="品牌编号" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="WarehouseCode">
+          <el-input v-model="formData.WarehouseCode" clearable placeholder="仓库编号" minlength="1"
+                    maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="BrandName"
-        >
-          <el-input v-model="formData.BrandName" clearable placeholder="品牌名称" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="WarehouseName">
+          <el-input v-model="formData.WarehouseName" clearable placeholder="仓库名称" minlength="1"
+                    maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="formData.BrandShowText" clearable placeholder="品牌简介" minlength="1"
-                    maxlength="15"></el-input>
+        <el-form-item prop="WarehouseAdd">
+          <el-input v-model="formData.WarehouseAdd" clearable placeholder="仓库地址" minlength="1"
+                    maxlength="30"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input type="textarea" v-model="formData.BrandComments" placeholder="品牌描述" maxlength="250"></el-input>
+        <el-form-item prop="WarehouseDec">
+          <el-input type="textarea" v-model="formData.WarehouseDec" placeholder="仓库描述"></el-input>
         </el-form-item>
-        <div id="imgWrapper">
-          <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200">
-        </div>
       </el-form>
-      
       <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url" :getUpLoadTitle="upLoadTitle"
-              :getUploadType="uploadType"></upload>
-      <!--<div slot="footer" class="dialog-footer">-->
+      <upload :isClose="isClose" @closeDialog="handleClose" :isDisplay="isDisplay"></upload>
       <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
     </el-dialog>
   </div>
 </template>
@@ -47,7 +41,7 @@
   
   export default {
     // inject:['reload'],
-    name: "brandManagement_dialog",
+    name: "SupplierManagement_dialog",
     components: {
       upload
     },
@@ -65,24 +59,23 @@
     data() {
       return {
         alertTitle: '',
-        upLoadTitle: '上传LOGO',
-        uploadType: 'image/jpeg',
+        isDisplay: true,
+        uploadType: '.apk',
+        file: false,
         formData: {
-          BrandCode: '',
-          BrandName: '',
-          BrandComments: '',
-          BrandShowText: '',
-          ImgBase: '',
+          WarehouseCode: '',
+          WarehouseName: '',
+          WarehouseAdd: '',
+          WarehouseDec: '',
           DogType: "a_dd"
         }
         ,
         editFormData: {},
-        
         uploadRules: {
-          BrandCode: [
+          WarehouseCode: [
             {
               required: true,
-              message: '品牌编号为必填项',
+              message: '仓库编号为必填项',
               trigger: 'blur'
             },
             {
@@ -92,16 +85,29 @@
               trigger: 'blur'
             }
           ],
-          BrandName: [
+          WarehouseName: [
             {
               required: true,
-              message: '品牌名称为必填项',
+              message: '仓库名称为必填项',
               trigger: 'blur'
             },
             {
               min: 1,
               max: 20,
               message: '长度请在1~20个字符',
+              trigger: 'blur'
+            }
+          ],
+          WarehouseAdd: [
+            {
+              required: true,
+              message: '仓库地址为必填项',
+              trigger: 'blur'
+            },
+            {
+              min: 1,
+              max: 20,
+              message: '长度请在1~50个字符',
               trigger: 'blur'
             }
           ]
@@ -127,15 +133,15 @@
           if ( this.isAlertShow === true ) {
             console.log(this.editData);
             this.editString = this.editOrAdd;
-            this.formData.BrandCode = this.editData.BrandCode;
-            this.formData.BrandName = this.editData.BrandName;
-            this.formData.BrandComments = this.editData.BrandComments;
-            this.formData.BrandShowText = this.editData.BrandShowText;
+            this.formData.WarehouseCode = this.editData.WarehouseCode;
+            this.formData.WarehouseName = this.editData.WarehouseName;
+            this.formData.WarehouseAdd = this.editData.WarehouseAdd;
+            this.formData.WarehouseDec = this.editData.WarehouseDec;
             this.formData.ID = this.editData.ID;
-            this.editFormData.ImgBase = this.editData.ImgBase;
+            // this.editFormData.ImgBase = this.editData.ImgBase;
             this.formData.DogType = this.editString;
             console.log(this.formData.DogType);
-            this.alertTitle = '编辑品牌'
+            this.alertTitle = '编辑仓库'
           } else {
             this.editString = '';
           }
@@ -154,9 +160,8 @@
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
-        this.formData.ImgBase = '';
-        this.editFormData.ImgBase = ''
-        
+        // this.formData.ImgBase='';
+        // this.editFormData.ImgBase=''
         // this.$refs.uploadList.resetFields();
       },
       closed() {
@@ -164,55 +169,37 @@
         this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(this.imageUrl);
+      hasFile(hasFile) {
+        console.log(hasFile);
+        this.file = hasFile;
       },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
-        const isPNG = file.type === 'image/png';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if ( !isJPG && !isPNG ) {
-          this.$message.error('上传图片只能是 JPG 和 PNG 格式!');
-        }
-        
-        if ( !isLt2M ) {
-          this.$message.error('上传图片大小不能超过 2MB!');
-        }
-        
-        return (isJPG || isPNG) && isLt2M;
-        
-      },
-      /* closeDialog() {
-		 this.$emit('closeAlert')
-		 this.addOrEdit='';
-	   },*/
       confirmUpload() {
         let that = this;
-        if ( that.formData.BrandCode === '' ) {
-          that.$message.error('品牌编号不能为空');
+        if ( that.formData.WarehouseCode === '' ) {
+          that.$message.error('仓库编号不能为空');
           return
-        } else if ( that.formData.BrandName === '' ) {
-          that.$message.error('品牌名称不能为空');
+        }
+        else if ( that.formData.WarehouseName === '' ) {
+          that.$message.error('仓库名称不能为空');
+          return
+        }
+        else if ( that.formData.WarehouseAdd === '' ) {
+          that.$message.error('仓库地址不能为空');
           return
         }
         
-        /*  if ( this.editString === 'edit' ) {
-		  
-		  } else {
-		  
-		  }*/
-        axios.post('/api/Home/BrandSave', this.formData)
+        axios.post('/api/Home/WarehouseSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
+              
               that.$message.success("上传成功");
               that.pass = true;
               that.$emit('closeAlert');
-              that.$store.commit('BrandUpdateData');
+              that.$store.commit('WarehouseUpdateData');
               that.$refs[ 'upload' ].resetFields();
-              that.formData.ImgBase = '';
-            } else {
+            }
+            else {
               that.$message.error(res.msg);
             }
             // that.reload()
@@ -221,12 +208,6 @@
           .catch(e => {
             console.log(e);
           })
-        
-        // console.log(this.formData.ImgBase);
-      },
-      getBase64Url(url) {
-        this.formData.ImgBase = url;
-        // console.log(this.formData.ImgBase);
       }
     }
   }

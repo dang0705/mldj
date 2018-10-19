@@ -1,5 +1,4 @@
 <template>
-  
   <div id="contentListWrapper">
     <el-input
       autofocus
@@ -19,7 +18,7 @@
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
-
+    
     >
       <el-table-column label="" width="100">
         <template slot-scope="scope">
@@ -29,16 +28,40 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ApkName" width="180">
+      <el-table-column label="" prop="StoreName" width="140">
       </el-table-column>
-      <el-table-column label="" prop="ApkCode" width="180">
+      <el-table-column label="" prop="StoreCode" width="140">
+      </el-table-column>
+      <el-table-column label="" prop="ChannelCode" width="140">
+      </el-table-column>
+      <!-- <el-table-column label="" prop="ProvinceCode" width="140">
+	   </el-table-column>
+	   <el-table-column label="" prop="CityCode" width="140">
+	   </el-table-column>-->
+      <el-table-column label=""
+                       prop="ProvinceName"
+                       width="140"
+      >
       </el-table-column>
       <el-table-column label=""
-                       prop="ApkDec"
-                       width="660"
-                       :show-overflow-tooltip="true">
+                       prop="CityName"
+                       width="140"
+      >
       </el-table-column>
-      <el-table-column label="">
+      <el-table-column label=""
+                       prop="AddInfo"
+                       width="180"
+                       :show-overflow-tooltip="true"
+      
+      >
+      </el-table-column>
+      <el-table-column label=""
+                       prop="ContactPhone"
+                       width="140"
+      
+      >
+      </el-table-column>
+      <el-table-column label="" prop="">
       </el-table-column>
     </el-table>
     
@@ -71,8 +94,8 @@
     data() {
       return {
         list: [],
-        rowStyle:{
-          height:'40px'
+        rowStyle: {
+          height: '40px'
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -80,9 +103,15 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ApkName: '',
-          ApkCode: '',
-          ApkDec: '',
+          StoreCode: '',
+          StoreName: '',
+          ChannelCode: '',
+          ProvinceCode: '',
+          ProvinceName:'省',
+          CityCode: '',
+          CityName:'市',
+          AddInfo: '',
+          ContactPhone: '',
           ID: '',
         }
         
@@ -90,16 +119,16 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
-      getApkList() {
+      getList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadApkList')
+        axios.post('/api/Home/OnloadStorelList')
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isStoreUpdateData = false;
           })
       }
       
@@ -108,38 +137,43 @@
         this.add = '';
         this.isAlertShow = false
       }
-      ,
-      getData(index, row) {
-        // console.log(index, row);
+      , getData(index, row) {
         // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
-        this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
-        this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
+        this.sendDialogData.StoreCode = this.list[ realIndex ].StoreCode;
+        this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
+        this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
+        
+        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName?this.list[ realIndex ].ProvinceName:'省份';
+        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
+        this.sendDialogData.CityName = this.list[ realIndex ].CityName?this.list[ realIndex ].CityName:'市';
+        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
+        this.sendDialogData.AddInfo = this.list[ realIndex ].AddInfo;
+        this.sendDialogData.ContactPhone = this.list[ realIndex ].ContactPhone;
         this.sendDialogData.ID = row.ID;
       }
       , deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/ApkSave', {
+            axios.post('/api/Home/StoreSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
-                  ApkName: this.keyWord
+                axios.post('/api/Home/OnloadStorelList', {
+                  StoreName: this.keyWord
                 })
                   .then(res => {
                     that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
+                    that.$store.state.isStoreUpdateData = false;
                   })
               })
           })
@@ -160,20 +194,20 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadApkList', {
-          ApkName: this.keyWord
+        axios.post('/api/Home/OnloadStorelList', {
+          StoreName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isStoreUpdateData = false;
           })
       }
       
     },
     watch: {
-      '$store.state.isApkUpdateData': function () {
-        if ( this.$store.state.isApkUpdateData === true ) {
-          this.getApkList()
+      '$store.state.isStoreUpdateData': function () {
+        if ( this.$store.state.isStoreUpdateData === true ) {
+          this.getList()
         }
       },
       
@@ -183,7 +217,6 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   

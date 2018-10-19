@@ -1,6 +1,6 @@
 <template>
   <div id="searchListWrapper">
-
+    
     <list-title>
       <li
         v-for="(item,i) in titleList"
@@ -11,7 +11,7 @@
         {{item}}
       </li>
     </list-title>
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" ></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert"></alert-dialog>
   </div>
 </template>
 
@@ -27,16 +27,17 @@
     },
     data() {
       return {
-        keyWord:'',
+        keyWord: '',
         titleList: [
-          '操作', '版本名称', '版本编号', '版本描述', '增加+'
+          '操作', '仓库名称', '仓库编号', '仓库地址','仓库描述', '增加+'
         ]
         ,
         liStyleObj: [
-          {width: '60px',textAlign:'center'},
-          {width: '140px',textAlign:'center'},
-          {width: '140px',textAlign:'center'},
-          {width: '620px',textAlign:'center'},
+          {width: '60px', textAlign: 'center'},
+          {width: '140px', textAlign: 'center'},
+          {width: '140px', textAlign: 'center'},
+          {width: '300px', textAlign: 'center'},
+          {width: '280px', textAlign: 'center'},
           {
             width: '100px',
             margin: 0,
@@ -47,7 +48,7 @@
         ]
         ,
         isAlertShow: false,
-        isUpdateDate:false
+        isUpdateDate: false
       }
     },
     methods: {
@@ -61,10 +62,10 @@
       
       /*父组件监听子组件关闭弹窗事件,改变隐藏标志*/
       closeAlert() {
-        this.add='';
+        this.add = '';
         this.isAlertShow = false
       }
-   
+      
     }
   }
 </script>

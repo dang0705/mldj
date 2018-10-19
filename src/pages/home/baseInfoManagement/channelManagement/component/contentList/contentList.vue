@@ -1,5 +1,4 @@
 <template>
-  
   <div id="contentListWrapper">
     <el-input
       autofocus
@@ -29,17 +28,18 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ApkName" width="180">
+      <el-table-column label="" prop="ChannelName" width="180">
       </el-table-column>
-      <el-table-column label="" prop="ApkCode" width="180">
+      <el-table-column label="" prop="ChannelCode" width="180">
       </el-table-column>
       <el-table-column label=""
-                       prop="ApkDec"
+                       prop="ChannelDec"
                        width="660"
                        :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column label="">
-      </el-table-column>
+    </el-table-column>
+    
     </el-table>
     
     <el-pagination
@@ -71,18 +71,19 @@
     data() {
       return {
         list: [],
-        rowStyle:{
-          height:'40px'
+        rowStyle: {
+          height: '40px',
         },
+        
         keyWord: '',
         currentPage: 1, //初始页
         pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ApkName: '',
-          ApkCode: '',
-          ApkDec: '',
+          ChannelCode: '',
+          ChannelDec: '',
+          ChannelName: '',
           ID: '',
         }
         
@@ -96,10 +97,10 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadApkList')
+        axios.post('/api/Home/OnloadChannelList')
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isChannelUpdateData = false;
           })
       }
       
@@ -108,38 +109,37 @@
         this.add = '';
         this.isAlertShow = false
       }
-      ,
-      getData(index, row) {
+      , getData(index, row) {
         // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
-        this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
-        this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
+        this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
+        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        this.sendDialogData.ChannelDec = this.list[ realIndex ].ChannelDec;
         this.sendDialogData.ID = row.ID;
       }
       , deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/ApkSave', {
+            axios.post('/api/Home/ChannelSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
-                  ApkName: this.keyWord
+                axios.post('/api/Home/OnloadChannelList', {
+                  ChannelName: this.keyWord
                 })
                   .then(res => {
                     that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
+                    that.$store.state.isChannelUpdateData = false;
                   })
               })
           })
@@ -160,19 +160,19 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadApkList', {
-          ApkName: this.keyWord
+        axios.post('/api/Home/OnloadChannelList', {
+          ChannelName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isChannelUpdateData = false;
           })
       }
       
     },
     watch: {
-      '$store.state.isApkUpdateData': function () {
-        if ( this.$store.state.isApkUpdateData === true ) {
+      '$store.state.isChannelUpdateData': function () {
+        if ( this.$store.state.isChannelUpdateData === true ) {
           this.getApkList()
         }
       },
@@ -183,7 +183,6 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   

@@ -1,5 +1,5 @@
 <template>
-  <div class="img-list">
+  <div class="img-list" v-if="!isShow">
     <div class="img-content" v-show="imagelist.url">
       <el-form
         :model="form"
@@ -8,13 +8,12 @@
         <el-form-item prop="imgUrl">
           <img :src="clearSrc" v-model="form.imgUrl" width="200px">
         </el-form-item>
-        
-       <!-- <el-form-item prop="name">
-          <div class="name">
-            <div v-model="form.name">{{ imagelist.name }}</div>
-            <el-button type="text" @click="handleFileName()">修改名字</el-button>
-          </div>
-        </el-form-item>-->
+        <!-- <el-form-item prop="name">
+		   <div class="name">
+			 <div v-model="form.name">{{ imagelist.name }}</div>
+			 <el-button type="text" @click="handleFileName()">修改名字</el-button>
+		   </div>
+		 </el-form-item>-->
       </el-form>
       <!-- 删除icon -->
       <!-- <div class="del">
@@ -31,7 +30,7 @@
     </div>
     
     <div class="img-upload">
-      <el-upload class="uploader" accept="image/*"
+      <el-upload class="uploader" :accept="uploadType"
                  ref="upload"
                  list-type="picture"
                  drag
@@ -42,7 +41,7 @@
                  :on-change="uploadOnChange"
                  :on-progress="uploadOnProgress"
       >
-        <el-button type="primary">上传logo</el-button>
+        <el-button type="primary">{{uploadTitle}}</el-button>
       </el-upload>
     </div>
     <el-dialog title=""
@@ -54,23 +53,31 @@
                width="60%">
       <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
     </el-dialog>
-    <!--<el-button type="primary" @click="confirmUpload">确 定</el-button>-->
   </div>
 </template>
 
 <script>
-  import axios from 'axios'
-  import qs from 'querystringify'
-  
   export default {
     name: 'upload-list',
     props: {
+      isDisplay: {
+        type: Boolean
+      },
       isClose: {
         type: Boolean
+      },
+      getUpLoadTitle: {
+        type: String
+      },
+      getUploadType: {
+        type: String
       }
     },
     data() {
       return {
+        isShow: false,
+        uploadTitle: '',
+        uploadType: '',
         form: {
           imgUrl: '',
           name: ''
@@ -103,33 +110,33 @@
       }
     },
     methods: {
-     /* uploadImg() {
-        // console.log('upload');
-        let that = this;
-        console.log(that.imagelist.url);
-  
-        axios.post('/api/Home/BrandSave', {
-          DogType: 'a_dd',
-          BrandCode: '4',
-          BrandName: '品牌名称',
-          BrandShowText: '品牌简介',
-          BrandComments: '品牌描述',
-          ImgBase: that.imagelist.url
-        })
-          .then(data => {
-            console.log(data);
-            that.$message.success("上传成功");
-            that.pass = true;
-            that.$emit('closeDialog')
-            // that.isClose=false
-          })
-          .catch(e => {
-            console.log(e);
-          })
-      },*/
-     /* confirmUpload() {
-        this.$refs.upload.submit();
-      },*/
+      /* uploadImg() {
+		 // console.log('upload');
+		 let that = this;
+		 console.log(that.imagelist.url);
+   
+		 axios.post('/api/Home/BrandSave', {
+		   DogType: 'a_dd',
+		   BrandCode: '4',
+		   BrandName: '品牌名称',
+		   BrandShowText: '品牌简介',
+		   BrandComments: '品牌描述',
+		   ImgBase: that.imagelist.url
+		 })
+		   .then(data => {
+			 console.log(data);
+			 that.$message.success("上传成功");
+			 that.pass = true;
+			 that.$emit('closeDialog')
+			 // that.isClose=false
+		   })
+		   .catch(e => {
+			 console.log(e);
+		   })
+	   },*/
+      /* confirmUpload() {
+		 this.$refs.upload.submit();
+	   },*/
       uploadOnProgress(e, file) {//开始上传
         console.log(e.percent, file);
         this.progress = Math.floor(e.percent)
@@ -145,19 +152,25 @@
           //   url: file.url,
           //   name: '新增图片'
           // }
-          
-          const reader = new FileReader();
-          reader.readAsDataURL(file.raw);
-          var that = this;
-          reader.onload = function (e) {
-            // console.log(e.target.result);
-            that.imagelist = {
-              url: e.target.result,
-              name: '新增图片'
-            };
-            // console.log(that.imagelist);
-            that.$emit('getBase64Url',that.imagelist.url)
+          this.$emit('hasFile', file.raw);
+          let reader = new FileReader();
+          reader.readAsArrayBuffer(file.raw);
+          reader.onload=function(e){
+            console.log(this.result);
           };
+          if ( file.raw.type.indexOf('image') > -1 ) {
+            reader.readAsDataURL(file.raw);
+            var that = this;
+            reader.onload = function (e) {
+              console.log(e.target.result);
+              that.imagelist = {
+                url: e.target.result,
+                name: '新增图片'
+              };
+              // console.log(that.imagelist);
+              that.$emit('getBase64Url', that.imagelist.url)
+            };
+          }
           
         } else if ( file.status === 'fail' ) {
           this.$message.error("图片上传出错，请刷新重试！");
@@ -188,50 +201,52 @@
           this.isEnlargeImage = !this.isEnlargeImage;
         }
       },
-     /* handleFileName(file, i) {//修改名字
-        console.log(file, i);
-        let that = this;
-        this.$prompt("请输入新文件名：", "提示：", {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消'
-        }).then(({value}) => {
-          if ( !value ) {
-            return false;
-          }
-          //可添加ajax
-          this.$message.success("操作成功");
-          that.imagelist.name = value;
-          console.log(that.fileList);
-          
-        }).catch(() => {
-        })
-      },
-      handleFileRemove(file, i) {//删除图片
-        console.log(file, i);
-        if ( !file.url ) {
-          return false;
-        }
-        let that = this;
-        this.$confirm('是否删除此附件？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          //可添加ajax
-          that.imagelist.splice(i, 1);
-          that.fileList.splice(i, 1);
-          this.$message({
-            type: 'success',
-            message: '删除成功',
-            onClose: () => {
-            }
-          });
-          this.$message.success("删除成功")
-        }).catch((meg) => console.log(meg))
-      },*/
+      /* handleFileName(file, i) {//修改名字
+		 console.log(file, i);
+		 let that = this;
+		 this.$prompt("请输入新文件名：", "提示：", {
+		   confirmButtonText: '确定',
+		   cancelButtonText: '取消'
+		 }).then(({value}) => {
+		   if ( !value ) {
+			 return false;
+		   }
+		   //可添加ajax
+		   this.$message.success("操作成功");
+		   that.imagelist.name = value;
+		   console.log(that.fileList);
+		   
+		 }).catch(() => {
+		 })
+	   },
+	   handleFileRemove(file, i) {//删除图片
+		 console.log(file, i);
+		 if ( !file.url ) {
+		   return false;
+		 }
+		 let that = this;
+		 this.$confirm('是否删除此附件？', '提示', {
+		   confirmButtonText: '确定',
+		   cancelButtonText: '取消',
+		   type: 'warning'
+		 }).then(() => {
+		   //可添加ajax
+		   that.imagelist.splice(i, 1);
+		   that.fileList.splice(i, 1);
+		   this.$message({
+			 type: 'success',
+			 message: '删除成功',
+			 onClose: () => {
+			 }
+		   });
+		   this.$message.success("删除成功")
+		 }).catch((meg) => console.log(meg))
+	   },*/
     },
     mounted() {
-      console.log(this.isClose);
+      this.uploadTitle = this.getUpLoadTitle;
+      this.uploadType = this.getUploadType;
+      this.isShow = this.isDisplay;
     }
   }
 </script>
@@ -240,10 +255,12 @@
   * {
     box-sizing: border-box;
   }
-  .img-list>>>.el-upload-dragger
+  
+  .img-list >>> .el-upload-dragger
     width: 200px
     height auto
     border: none
+  
   .img-list {
     overflow: hidden;
     width: 100%;

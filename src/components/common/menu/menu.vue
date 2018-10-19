@@ -12,16 +12,16 @@
       </li>
     </ul>
     
-    <ul id="secondLevelNavigation" >
-        <router-link
-          tag="li"
-          v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
-          class="secondNavigation"
-          :to="eachSub.subIndex"
-          :key="index"
-        >
-          {{eachSub.subNavNam}}
-        </router-link>
+    <ul id="secondLevelNavigation">
+      <router-link
+        tag="li"
+        v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
+        class="secondNavigation"
+        :to="eachSub.subIndex"
+        :key="index"
+      >
+        {{eachSub.subNavNam}}
+      </router-link>
     </ul>
   </div>
 </template>
@@ -35,8 +35,8 @@
       return {
         isActive: 0,
         isSubActive: 0,
-        firstLevelNavigationArr: [],
-        secondNavigationArr:[],
+        firstLevelNavigationArr: [ {navName: '', subNav: []} ],
+        secondNavigationArr: [],
         firstLevelNavigationIndex: 0,
       }
     },
@@ -52,6 +52,7 @@
       axios.post('/api/Menu/GetRoleMenListByTree')
         .then(data => {
           console.log(data);
+          this.firstLevelNavigationArr=[];
           if ( data.data.state !== 1 ) {
             that.$router.push('/login');
             return
@@ -72,7 +73,7 @@
       showSecondNavigation(i) {
         this.firstLevelNavigationIndex = i;
         this.isActive = i;
-        this.$store.commit('changeMenu',i)
+        this.$store.commit('changeMenu', i)
         // console.log(this.firstLevelNavigationIndex);
       },
       secondNavigation(i) {

@@ -1,5 +1,4 @@
 <template>
-  
   <div id="contentListWrapper">
     <el-input
       autofocus
@@ -29,16 +28,21 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ApkName" width="180">
+      <el-table-column label="" prop="SupplierName" width="180">
       </el-table-column>
-      <el-table-column label="" prop="ApkCode" width="180">
+      <el-table-column label="" prop="SupplierContactCode" width="180">
+      </el-table-column>
+      <el-table-column label="" prop="SupplierContactPhone" width="180">
+      </el-table-column>
+      <el-table-column label="" prop="SupplierContactName" width="180">
       </el-table-column>
       <el-table-column label=""
-                       prop="ApkDec"
-                       width="660"
+                       width="300"
+                       prop="SupplierDec"
+                       align="center"
                        :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label="">
+      <el-table-column label="" prop="">
       </el-table-column>
     </el-table>
     
@@ -80,9 +84,11 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ApkName: '',
-          ApkCode: '',
-          ApkDec: '',
+          SupplierContactCode: '',
+          SupplierContactPhone: '',
+          SupplierContactName: '',
+          SupplierName: '',
+          SupplierDec: '',
           ID: '',
         }
         
@@ -96,10 +102,10 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadApkList')
+        axios.post('/api/Home/OnloadSupplierContactList')
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isSupplierUpdateData = false;
           })
       }
       
@@ -108,38 +114,39 @@
         this.add = '';
         this.isAlertShow = false
       }
-      ,
-      getData(index, row) {
+      , getData(index, row) {
         // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
-        this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
-        this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
+        this.sendDialogData.SupplierContactCode = this.list[ realIndex ].SupplierContactCode;
+        this.sendDialogData.SupplierName = this.list[ realIndex ].SupplierContactPhone;
+        this.sendDialogData.SupplierContactPhone = this.list[ realIndex ].SupplierContactPhone;
+        this.sendDialogData.SupplierContactName = this.list[ realIndex ].SupplierContactName;
+        this.sendDialogData.SupplierDec = this.list[ realIndex ].SupplierDec;
         this.sendDialogData.ID = row.ID;
       }
       , deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/ApkSave', {
+            axios.post('/api/Home/SupplierContactSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
+                axios.post('/api/Home/OnloadSupplierContactList', {
                   ApkName: this.keyWord
                 })
                   .then(res => {
                     that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
+                    that.$store.state.isSupplierUpdateData = false;
                   })
               })
           })
@@ -160,19 +167,19 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadApkList', {
-          ApkName: this.keyWord
+        axios.post('/api/Home/OnloadSupplierContactList', {
+          SupplierName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            that.$store.state.isSupplierUpdateData = false;
           })
       }
       
     },
     watch: {
-      '$store.state.isApkUpdateData': function () {
-        if ( this.$store.state.isApkUpdateData === true ) {
+      '$store.state.isSupplierUpdateData': function () {
+        if ( this.$store.state.isSupplierUpdateData === true ) {
           this.getApkList()
         }
       },
@@ -183,17 +190,14 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
-  #contentListWrapper >>> .el-input__inner
+  #contentListWrapper >>>.el-input__inner
     inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
+  #contentListWrapper>>>.el-table
+    box-shadow 0 5px 8px rgba(0,0,0,.2)
     margin-bottom: 40px
-  
   #contentListWrapper >>> .el-table__header-wrapper
     display none
-  
+
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important
   

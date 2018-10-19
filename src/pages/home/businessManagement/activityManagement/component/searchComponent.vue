@@ -89,9 +89,7 @@
     width: 1220px;
     margin: 0 auto 30px
     .el-icon-search
-      font-size: 30px
-      cursor pointer
-      vertical-align sub
+      filterIcon()
     .el-select
       width: 100%
       .el-icon-inner

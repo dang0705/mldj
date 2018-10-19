@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      title="新增品牌"
+      :title="alertTitle||'新增版本'"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -12,26 +12,23 @@
         :model="formData"
         :rules="uploadRules"
       >
-        <el-form-item prop="BrandCode">
-          <el-input v-model="formData.BrandCode" clearable placeholder="品牌编号" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="ApkCode">
+          <el-input v-model="formData.ApkCode" clearable placeholder="版本编号" minlength="1" maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="BrandName">
-          <el-input v-model="formData.BrandName" clearable placeholder="品牌名称" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="ApkName">
+          <el-input v-model="formData.ApkName" clearable placeholder="版本名称" minlength="1" maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input v-model="formData.BrandShowText" clearable placeholder="品牌简介" minlength="1"
-                    maxlength="15"></el-input>
+        <el-form-item prop="ApkDec">
+          <el-input type="textarea" v-model="formData.ApkDec" placeholder="版本描述" maxlength="250"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-input type="textarea" v-model="formData.BrandComments" placeholder="品牌描述"></el-input>
-        </el-form-item>
-        <div id="imgWrapper">
-          <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
-        </div>
+        <!--  <div id="imgWrapper">
+			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
+		  </div>-->
       </el-form>
       
       <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url"></upload>
+      <upload :isClose="isClose" @closeDialog="handleClose" :getUpLoadTitle="upLoadTitle"
+              :getUploadType="uploadType" @hasFile="hasFile"></upload>
       <!--<div slot="footer" class="dialog-footer">-->
       <el-button type="primary" @click="confirmUpload">确 定</el-button>
       <!--</div>-->
@@ -62,24 +59,24 @@
     },
     data() {
       return {
+        alertTitle: '',
+        upLoadTitle: '上传APK',
+        uploadType: '.apk',
         formData: {
-          BrandCode: '',
-          BrandName: '',
-          BrandComments: '',
-          BrandShowText: '',
-          ImgBase: '',
+          ApkCode: '',
+          ApkName: '',
+          ApkDec: '',
+          file: {},
           DogType: "a_dd"
         }
         ,
-        editFormData: {
-        
-        },
+        editFormData: {},
         
         uploadRules: {
-          BrandCode: [
+          ApkCode: [
             {
               required: true,
-              message: '品牌编号为必填项',
+              message: '版本编号为必填项',
               trigger: 'blur'
             },
             {
@@ -89,10 +86,10 @@
               trigger: 'blur'
             }
           ],
-          BrandName: [
+          ApkName: [
             {
               required: true,
-              message: '品牌名称为必填项',
+              message: '版本名称为必填项',
               trigger: 'blur'
             },
             {
@@ -124,14 +121,14 @@
           if ( this.isAlertShow === true ) {
             console.log(this.editData);
             this.editString = this.editOrAdd;
-            this.formData.BrandCode = this.editData.BrandCode;
-            this.formData.BrandName = this.editData.BrandName;
-            this.formData.BrandComments = this.editData.BrandComments;
-            this.formData.BrandShowText = this.editData.BrandShowText;
+            this.formData.ApkCode = this.editData.ApkCode;
+            this.formData.ApkName = this.editData.ApkName;
+            this.formData.ApkDec = this.editData.ApkDec;
             this.formData.ID = this.editData.ID;
-            this.editFormData.ImgBase = this.editData.ImgBase;
+            // this.editFormData.ImgBase = this.editData.ImgBase;
             this.formData.DogType = this.editString;
             console.log(this.formData.DogType);
+            this.alertTitle = '编辑版本'
           } else {
             this.editString = '';
           }
@@ -150,9 +147,8 @@
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
-        this.formData.ImgBase='';
-        this.editFormData.ImgBase=''
-  
+        // this.formData.ImgBase='';
+        // this.editFormData.ImgBase=''
         // this.$refs.uploadList.resetFields();
       },
       closed() {
@@ -160,67 +156,47 @@
         this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(this.imageUrl);
+      hasFile(hasFile) {
+        console.log(hasFile);
+        this.formData.file = hasFile;
       },
-      beforeAvatarUpload(file) {
-        const isJPG = file.type === 'image/jpeg';
-        const isPNG = file.type === 'image/png';
-        const isLt2M = file.size / 1024 / 1024 < 2;
-        if ( !isJPG && !isPNG ) {
-          this.$message.error('上传图片只能是 JPG 和 PNG 格式!');
-        }
-        
-        if ( !isLt2M ) {
-          this.$message.error('上传图片大小不能超过 2MB!');
-        }
-        
-        return (isJPG || isPNG) && isLt2M;
-        
-      },
-      /* closeDialog() {
-		 this.$emit('closeAlert')
-		 this.addOrEdit='';
-	   },*/
       confirmUpload() {
         let that = this;
-        if ( that.formData.BrandCode === '' ) {
-          that.$message.error('品牌编号不能为空');
+        if ( that.formData.ApkCode === '' ) {
+          that.$message.error('Apk编号不能为空');
           return
-        } else if ( that.formData.BrandName === '' ) {
-          that.$message.error('品牌名称不能为空');
+        } else if ( that.formData.ApkName === '' ) {
+          that.$message.error('Apk名称不能为空');
+          return
+        } else if ( !this.file && this.formData.DogType === 'a_dd' ) {
+          that.$message.error('Apk必须上传');
           return
         }
         
-        /*  if ( this.editString === 'edit' ) {
-		  
-		  } else {
-		  
-		  }*/
-        axios.post('/api/Home/BrandSave', this.formData)
+        
+        axios.post('/api/Home/ApkSave', this.formData)
           .then(data => {
             // console.log(data);
-            that.$message.success("上传成功");
-            that.pass = true;
-            that.$emit('closeAlert');
-            that.$store.commit('BrandUpdateData');
-            that.$refs[ 'upload' ].resetFields();
-            that.formData.ImgBase='';
+            let res = data.data
+            if ( res.state == 1 ) {
+              that.$message.success("上传成功");
+              that.pass = true;
+              that.$emit('closeAlert');
+              that.$store.commit('ApkUpdateData');
+              that.$refs[ 'upload' ].resetFields();
+            }
+            else {
+              that.$message.error(res.msg)
+            }
             // that.reload()
             // that.isClose=false
           })
           .catch(e => {
             console.log(e);
           })
-        
-        // console.log(this.formData.ImgBase);
-      },
-      getBase64Url(url) {
-        this.formData.ImgBase = url;
-        // console.log(this.formData.ImgBase);
       }
     }
+    
   }
 </script>
 

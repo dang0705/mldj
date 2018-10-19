@@ -29,14 +29,16 @@
       return {
         keyWord:'',
         titleList: [
-          '操作', '品牌名称', '品牌编号', '品牌logo', '增加+'
+          '操作', '品牌名称', '品牌编号', '品牌logo','品牌简介','品牌描述', '增加+'
         ]
         ,
         liStyleObj: [
-          {width: '140px'},
-          {width: '280px'},
-          {width: '320px'},
-          {width: '160px'},
+          {width: '60px',textAlign:'center'},
+          {width: '140px',textAlign:'center'},
+          {width: '140px',textAlign:'center'},
+          {width: '100px',textAlign:'center'},
+          {width: '220px',textAlign:'center'},
+          {width: '220px',textAlign:'center'},
           {
             width: '100px',
             margin: 0,

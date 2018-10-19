@@ -29,14 +29,16 @@
       return {
         keyWord:'',
         titleList: [
-          '操作', '版本名称', '版本编号', '版本描述', '增加+'
+          '操作','供应商名称','供应商编号', '联系人电话', '联系人姓名', '供应商描述', '增加+'
         ]
         ,
         liStyleObj: [
           {width: '60px',textAlign:'center'},
           {width: '140px',textAlign:'center'},
           {width: '140px',textAlign:'center'},
-          {width: '620px',textAlign:'center'},
+          {width: '140px',textAlign:'center'},
+          {width: '140px',textAlign:'center'},
+          {width: '260px',textAlign:'center'},
           {
             width: '100px',
             margin: 0,

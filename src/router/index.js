@@ -46,10 +46,16 @@ export default new Router({
           path: '/BrandManagement',
           name: 'BrandManagement',
           component: resolve => require([ '@/pages/home/baseInfoManagement/BrandManagement/BrandManagement' ], resolve)
-        },{
+        },
+        {
           path: '/ApkManagement',
           name: 'ApkManagement',
           component: resolve => require([ '@/pages/home/baseInfoManagement/ApkManagement/ApkManagement'], resolve)
+        },
+        {
+          path: '/SupplierManagement',
+          name: 'SupplierManagement',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/SupplierManagement/SupplierManagement'], resolve)
         },
         {
           path: '/channelManagement',
