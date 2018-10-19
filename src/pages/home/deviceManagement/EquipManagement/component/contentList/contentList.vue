@@ -18,7 +18,7 @@
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
-    
+
     >
       <el-table-column label="" width="100">
         <template slot-scope="scope">
@@ -28,45 +28,18 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="StoreName" width="140">
+      <el-table-column label="" prop="ChannelName" width="180">
       </el-table-column>
-      <el-table-column label="" prop="StoreCode" width="140">
-      </el-table-column>
-      <el-table-column label="" prop="ChannelCode" width="140">
-      </el-table-column>
-      <!-- <el-table-column label="" prop="ProvinceCode" width="140">
-	   </el-table-column>
-	   <el-table-column label="" prop="CityCode" width="140">
-	   </el-table-column>-->
-      <el-table-column label=""
-                       prop="ProvinceName"
-                       width="70"
-                       align="right"
-                       :show-overflow-tooltip="true"
-      >
+      <el-table-column label="" prop="ChannelCode" width="180">
       </el-table-column>
       <el-table-column label=""
-                       prop="CityName"
-                       width="70"
-                       align="left"
-                       :show-overflow-tooltip="true"
-      >
+                       prop="ChannelDec"
+                       width="660"
+                       :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label=""
-                       prop="AddInfo"
-                       width="260"
-                       :show-overflow-tooltip="true"
-      
-      >
-      </el-table-column>
-      <el-table-column label=""
-                       prop="ContactPhone"
-                       width="200"
-      
-      >
-      </el-table-column>
-      <el-table-column label="" prop="">
-      </el-table-column>
+      <el-table-column label="">
+    </el-table-column>
+    
     </el-table>
     
     <el-pagination
@@ -99,23 +72,18 @@
       return {
         list: [],
         rowStyle: {
-          height: '40px'
+          height: '40px',
         },
+        
         keyWord: '',
         currentPage: 1, //初始页
         pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          StoreCode: '',
-          StoreName: '',
           ChannelCode: '',
-          ProvinceCode: '',
-          ProvinceName:'省',
-          CityCode: '',
-          CityName:'市',
-          AddInfo: '',
-          ContactPhone: '',
+          ChannelDec: '',
+          ChannelName: '',
           ID: '',
         }
         
@@ -123,16 +91,16 @@
       }
     },
     mounted() {
-      this.getList()
+      this.getApkList()
     },
     methods: {
-      getList() {
+      getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadStorelList')
+        axios.post('/api/Home/OnloadChannelList')
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isStoreUpdateData = false;
+            that.$store.state.isChannelUpdateData = false;
           })
       }
       
@@ -142,42 +110,36 @@
         this.isAlertShow = false
       }
       , getData(index, row) {
+        // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.StoreCode = this.list[ realIndex ].StoreCode;
-        this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
-        
-        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName?this.list[ realIndex ].ProvinceName:'省份';
-        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
-        this.sendDialogData.CityName = this.list[ realIndex ].CityName?this.list[ realIndex ].CityName:'市';
-        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
-        this.sendDialogData.AddInfo = this.list[ realIndex ].AddInfo;
-        this.sendDialogData.ContactPhone = this.list[ realIndex ].ContactPhone;
+        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        this.sendDialogData.ChannelDec = this.list[ realIndex ].ChannelDec;
         this.sendDialogData.ID = row.ID;
       }
       , deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/StoreSave', {
+            axios.post('/api/Home/ChannelSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadStorelList', {
-                  StoreName: this.keyWord
+                axios.post('/api/Home/OnloadChannelList', {
+                  ChannelName: this.keyWord
                 })
                   .then(res => {
                     that.list = res.data.Content;
-                    that.$store.state.isStoreUpdateData = false;
+                    that.$store.state.isChannelUpdateData = false;
                   })
               })
           })
@@ -198,20 +160,20 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadStorelList', {
-          StoreName: this.keyWord
+        axios.post('/api/Home/OnloadChannelList', {
+          ChannelName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isStoreUpdateData = false;
+            that.$store.state.isChannelUpdateData = false;
           })
       }
       
     },
     watch: {
-      '$store.state.isStoreUpdateData': function () {
-        if ( this.$store.state.isStoreUpdateData === true ) {
-          this.getList()
+      '$store.state.isChannelUpdateData': function () {
+        if ( this.$store.state.isChannelUpdateData === true ) {
+          this.getApkList()
         }
       },
       

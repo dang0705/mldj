@@ -1,6 +1,6 @@
 <template>
   <div id="searchListWrapper">
-
+    
     <list-title>
       <li
         v-for="(item,i) in titleList"
@@ -11,7 +11,7 @@
         {{item}}
       </li>
     </list-title>
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" ></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert"></alert-dialog>
   </div>
 </template>
 
@@ -27,19 +27,18 @@
     },
     data() {
       return {
-        keyWord:'',
+        keyWord: '',
         titleList: [
-          '操作','门店名称','门店编号','渠道编号','省份/城市','门店地址', '联系方式', '增加+'
+          '操作', '设备名称', '当前登录人编号', '分配所有人编号', '省份/城市', '地址', '增加+'
         ]
         ,
         liStyleObj: [
-          {width: '60px',textAlign:'center'},
-          {width: '100px',textAlign:'center'},
-          {width: '100px',textAlign:'center'},
-          {width: '100px',textAlign:'center'},
-          {width: '100px',textAlign:'center'},
-          {width: '220px',textAlign:'center'},
-          {width: '160px',textAlign:'center'},
+          {width: '60px', textAlign: 'center'},
+          {width: '100px', textAlign: 'center'},
+          {width: '140px', textAlign: 'center'},
+          {width: '140px', textAlign: 'center'},
+          {width: '140px', textAlign: 'center'},
+          {width: '260px', textAlign: 'center'},
           {
             width: '100px',
             margin: 0,
@@ -50,7 +49,7 @@
         ]
         ,
         isAlertShow: false,
-        isUpdateDate:false
+        isUpdateDate: false
       }
     },
     methods: {
@@ -64,10 +63,10 @@
       
       /*父组件监听子组件关闭弹窗事件,改变隐藏标志*/
       closeAlert() {
-        this.add='';
+        this.add = '';
         this.isAlertShow = false
       }
-   
+      
     }
   }
 </script>
@@ -78,6 +77,7 @@
   #searchListWrapper
     margin: 80px 0 10px 0
     #title
+      width: $listWidth
       margin 0 auto
       background #fff
       text-align left

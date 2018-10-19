@@ -78,9 +78,9 @@ export default new Router({
           component: resolve => require([ '@/pages/home/baseInfoManagement/storeManagement/storeManagement' ], resolve)
         },
         {
-          path: '/deviceManagementPage',
-          name: 'deviceManagementPage',
-          component: resolve => require([ '@/pages/home/deviceManagement/deviceManagementPage/deviceManagementPage' ], resolve)
+          path: '/EquipManagement',
+          name: 'EquipManagement',
+          component: resolve => require([ '@/pages/home/deviceManagement/EquipManagement/EquipManagement'], resolve)
         },
         {
           path: '/deviceVersionManagement',
