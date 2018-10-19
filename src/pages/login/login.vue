@@ -1,5 +1,5 @@
 <template>
-  <div id="loginBg">
+  <div id="loginBg" @keyup.enter="handleLogin">
     <div id="loginWrapper">
       <img src="../../assets/img/logo.png" alt="" width="50%" style="margin: 0 auto 40px;display: block">
       <el-form
@@ -151,6 +151,8 @@
   #loginWrapper >>> .el-input__inner
     height: 50px
     line-height: 50px
+    border-color white
+    color white
   
   #loginWrapper >>> .el-checkbox__input.is-checked + .el-checkbox__label
     color white
@@ -166,6 +168,7 @@
     height: 100%
     background black
     padding-top 5%
+    box-sizing border-box
     #loginWrapper
       box-sizing border-box
       width 500px

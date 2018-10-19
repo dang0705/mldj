@@ -27,11 +27,9 @@
             minlength="1"
             maxlength="30"></el-input>
         </el-form-item>
-        
         <el-form-item>
           <city-select
             v-if="isAlertShow"
-            menuName="storeManagement"
             @provincesAndCities="provincesAndCities"
             :getEditCities="provinceTotalArr"
           ></city-select>
