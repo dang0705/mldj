@@ -1,26 +1,32 @@
 <template>
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"></citySelect>
+    </div>
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
+              @header-click="add"
     
     >
-      <el-table-column label="" width="100">
+      <el-table-column label="操作" width="100">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -28,76 +34,103 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="StoreName" width="140">
+      <el-table-column label="门店名称"
+                       prop="StoreName"
+                       width="140"
+                       align="center"
+      >
       </el-table-column>
-      <el-table-column label="" prop="StoreCode" width="140">
+      <el-table-column label="门店编号"
+                       prop="StoreCode"
+                       width="140"
+                       align="center"
+      >
       </el-table-column>
-      <el-table-column label="" prop="ChannelCode" width="140">
+      <el-table-column label="渠道编号"
+                       prop="ChannelCode"
+                       width="140"
+                       align="center"
+      >
       </el-table-column>
-      <!-- <el-table-column label="" prop="ProvinceCode" width="140">
-	   </el-table-column>
-	   <el-table-column label="" prop="CityCode" width="140">
-	   </el-table-column>-->
-      <el-table-column label=""
+      
+      <el-table-column label="省份"
                        prop="ProvinceName"
-                       width="70"
-                       align="right"
+                       width="80"
+                       align="center"
                        :show-overflow-tooltip="true"
       >
       </el-table-column>
-      <el-table-column label=""
+      <el-table-column label="城市"
                        prop="CityName"
-                       width="70"
-                       align="left"
+                       width="80"
+                       align="center"
                        :show-overflow-tooltip="true"
       >
       </el-table-column>
-      <el-table-column label=""
+      <el-table-column label="门店地址"
                        prop="AddInfo"
                        width="260"
+                       align="center"
                        :show-overflow-tooltip="true"
       
       >
       </el-table-column>
-      <el-table-column label=""
+      <el-table-column label="联系方式"
                        prop="ContactPhone"
-                       width="200"
-      
+                       width="180"
+                       align="center"
+                       :show-overflow-tooltip="true"
       >
       </el-table-column>
-      <el-table-column label="" prop="">
+      <el-table-column label="增加+" prop=""
+                       align="center"
+      >
       </el-table-column>
     </el-table>
-    
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
+  
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page.sync="currentPage"
       :page-sizes="[5, 10, 20, 40]"
       :page-size="pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
-                  :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :id="id"
+                  :editData="sendDialogData"
+    ></alert-dialog>
   
   </div>
 </template>
 
 <script>
   import axios from 'axios'
+  import citySelect from '@/components/common/citySelect/citySelect'
   import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      citySelect
     },
     data() {
       return {
         list: [],
+        isListEmpty: true,
+        dialogType: 'up_date',
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
         rowStyle: {
           height: '40px'
         },
@@ -111,37 +144,52 @@
           StoreName: '',
           ChannelCode: '',
           ProvinceCode: '',
-          ProvinceName:'省',
+          ProvinceName: '省',
           CityCode: '',
-          CityName:'市',
+          CityName: '市',
           AddInfo: '',
           ContactPhone: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
-      this.getList()
+      this.getList();
     },
     methods: {
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length - 1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column, event) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
       getList() {
         let that = this;
         that.list = [];
         axios.post('/api/Home/OnloadStorelList')
           .then(data => {
-            that.list = data.data.Content;
+            const res = data.data.Content;
+            if ( !res || !res.length||res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = res ? res : [];
             that.$store.state.isStoreUpdateData = false;
           })
       }
-      
       ,
+     
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
-      , getData(index, row) {
+      ,
+      getData(index, row) {
         // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
@@ -149,10 +197,9 @@
         this.sendDialogData.StoreCode = this.list[ realIndex ].StoreCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
-        
-        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName?this.list[ realIndex ].ProvinceName:'省份';
+        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
         this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
-        this.sendDialogData.CityName = this.list[ realIndex ].CityName?this.list[ realIndex ].CityName:'市';
+        this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
         this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
         this.sendDialogData.AddInfo = this.list[ realIndex ].AddInfo;
         this.sendDialogData.ContactPhone = this.list[ realIndex ].ContactPhone;
@@ -160,8 +207,7 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该门店, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -187,13 +233,14 @@
         
       }
       ,
-      handleSizeChange: function (size) {
+      handleSizeChange(size) {
         this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
+        console.log(this.pagesize)
+        //每页下拉显示数据
       },
-      handleCurrentChange: function (currentPage) {
+      handleCurrentChange(currentPage) {
         this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
+        console.log(this.currentPage)  //点击第几页
       }
       ,
       filter() {
@@ -204,6 +251,24 @@
           .then(data => {
             that.list = data.data.Content;
             that.$store.state.isStoreUpdateData = false;
+          })
+      },
+      cityFilter(city) {
+        const that = this;
+        let timer = null;
+        axios.post('/api/Home/OnloadStorelList', {
+          CityCode: city[ 1 ] || ''
+        })
+          .then(data => {
+            const res = data.data.Content;
+            if ( res.length ) {
+              that.list = data.data.Content;
+              clearTimeout(timer)
+            } else {
+              timer = that.$message.error('当前选择城市无数据');
+              setTimeout(that.getList, 1000)
+            }
+            console.log(data);
           })
       }
       
@@ -228,9 +293,6 @@
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
   
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
-  
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important
   
@@ -240,6 +302,7 @@
   
   #contentListWrapper
     listStyle()
+    
     .el-icon-search
       filterIcon()
     li
@@ -250,7 +313,13 @@
   .el-table__body-wrapper
     width: 100%
   
-  .activeName
+  .filterComponents
     filter()
-    width: 600px
+    width 1220px
+    .input, .citySelect
+      width: 40%
+      margin-right: 20px
+      display inline-block
+  
+  /*width: 600px*/
 </style>

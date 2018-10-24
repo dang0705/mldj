@@ -6,8 +6,8 @@
       :props="props"
       :placeholder="placeholder||'省份 / 市'"
       expand-trigger="hover"
-      @change='change'
       clearable
+      @change='change'
     ></el-cascader>
   </div>
 </template>
@@ -79,24 +79,26 @@
       },
       getProvinces() {
         let that = this;
-        
         that.placeholder = that.getEditCities;
-        axios.post('/api/Home/ProvinceList')
-          .then(data => {
-            console.log(data);
-            const provincesAndCitiesArr = data.data.Content,
-              length = provincesAndCitiesArr.length;
-            
-            if ( provincesAndCitiesArr ) {
-              for ( var i = 0; i < length; i++ ) {
-                that.selectedProvincesArr.push({
-                  label: provincesAndCitiesArr[ i ].ItemName,
-                  cities: [],
-                  ProvinceCode: provincesAndCitiesArr[ i ].ProvinceCode
-                })
+        if ( !that.selectedProvincesArr.length ) {
+          axios.post('/api/Home/ProvinceList')
+            .then(data => {
+              // console.log(data);
+              const provincesAndCitiesArr = data.data.Content,
+                length = provincesAndCitiesArr.length;
+      
+              if ( provincesAndCitiesArr ) {
+                for ( var i = 0; i < length; i++ ) {
+                  that.selectedProvincesArr.push({
+                    label: provincesAndCitiesArr[ i ].ItemName,
+                    cities: [],
+                    ProvinceCode: provincesAndCitiesArr[ i ].ProvinceCode
+                  })
+                }
               }
-            }
-          });
+            });
+        }
+
       }
     }
     ,
@@ -109,12 +111,15 @@
   @import '~@/assets/styles/mixin.styl'
   .citySelectWrapper >>> .el-input__inner
     inputNoBorder()
-  
+  .citySelectWrapper>>>.el-cascader__label
+    line-height 40px
+    
   .citySelectWrapper >>> .el-input__inner::-webkit-input-placeholder
     color: #000;
   
   .citySelectWrapper
     .el-cascader
+      line-height normal
       width 100%
-      line-height 40px
+    
 </style>

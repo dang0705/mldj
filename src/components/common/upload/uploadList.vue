@@ -41,7 +41,7 @@
                  :on-change="uploadOnChange"
                  :on-progress="uploadOnProgress"
       >
-        <el-button type="primary">{{uploadTitle}}</el-button>
+        <el-button icon="el-icon-plus" circle size="large"></el-button>
       </el-upload>
     </div>
     <el-dialog title=""
@@ -110,33 +110,6 @@
       }
     },
     methods: {
-      /* uploadImg() {
-		 // console.log('upload');
-		 let that = this;
-		 console.log(that.imagelist.url);
-   
-		 axios.post('/api/Home/BrandSave', {
-		   DogType: 'a_dd',
-		   BrandCode: '4',
-		   BrandName: '品牌名称',
-		   BrandShowText: '品牌简介',
-		   BrandComments: '品牌描述',
-		   ImgBase: that.imagelist.url
-		 })
-		   .then(data => {
-			 console.log(data);
-			 that.$message.success("上传成功");
-			 that.pass = true;
-			 that.$emit('closeDialog')
-			 // that.isClose=false
-		   })
-		   .catch(e => {
-			 console.log(e);
-		   })
-	   },*/
-      /* confirmUpload() {
-		 this.$refs.upload.submit();
-	   },*/
       uploadOnProgress(e, file) {//开始上传
         console.log(e.percent, file);
         this.progress = Math.floor(e.percent)
@@ -144,23 +117,21 @@
       uploadOnChange(file) {
         console.log("——————————change——————————");
         console.log(file);
+        let that = this;
         if ( file.status === 'ready' ) {
           console.log("ready");
           this.pass = null;
           this.progress = 0;
-          // this.imagelist={
-          //   url: file.url,
-          //   name: '新增图片'
-          // }
-          this.$emit('hasFile', file.raw);
-          let reader = new FileReader();
-          reader.readAsArrayBuffer(file.raw);
-          reader.onload=function(e){
-            console.log(this.result);
-          };
+          // this.$emit('hasFile', file);
+          /*          reader.readAsArrayBuffer(file.raw);
+					
+					reader.onload=function(e){
+					  that.$emit('hasFile', reader.result);
+					  console.log(reader.result);
+					};*/
           if ( file.raw.type.indexOf('image') > -1 ) {
+            let reader = new FileReader();
             reader.readAsDataURL(file.raw);
-            var that = this;
             reader.onload = function (e) {
               console.log(e.target.result);
               that.imagelist = {
@@ -170,6 +141,8 @@
               // console.log(that.imagelist);
               that.$emit('getBase64Url', that.imagelist.url)
             };
+          } else {
+            that.$emit('hasFile', file);
           }
           
         } else if ( file.status === 'fail' ) {

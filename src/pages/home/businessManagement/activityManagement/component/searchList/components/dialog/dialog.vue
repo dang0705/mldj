@@ -25,7 +25,6 @@
                           autofocus
                           clearable
                           class="input activeName"
-                          autoComplete="on"
                           placeholder="请输入活动名称">
                 </el-input>
               </el-form-item>
@@ -36,7 +35,6 @@
                           clearable
                           class="input activeNumber"
                           size="medium"
-                          autoComplete="on"
                           placeholder="请输入活动编号">
                 </el-input>
               </el-form-item>
@@ -60,7 +58,6 @@
                 <el-input v-model="form.activeAddress"
                           clearable
                           class="input"
-                          autoComplete="on"
                           placeholder="详细地址"></el-input>
               </el-form-item>
             </el-col>
@@ -80,7 +77,7 @@
                 <el-input v-model="form.CrmStore"
                           clearable
                           class="input crmStore"
-                          autoComplete="on"></el-input>
+                          ></el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -127,7 +124,6 @@
               <el-form-item prop="withDrawAddress">
                 <el-input v-model="form.withDrawAddress" class="input"
                           clearable
-                          autoComplete="on"
                           placeholder="详细地址">
                 </el-input>
               </el-form-item>

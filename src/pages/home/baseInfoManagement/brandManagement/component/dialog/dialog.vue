@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增品牌'"
+      :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -29,11 +29,15 @@
         <div id="imgWrapper">
           <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200">
         </div>
+        <!--上传图片插件-->
+        <el-form-item>
+          <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url"
+                  :getUpLoadTitle="upLoadTitle"
+                  :getUploadType="uploadType"></upload>
+        </el-form-item>
       </el-form>
       
-      <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url" :getUpLoadTitle="upLoadTitle"
-              :getUploadType="uploadType"></upload>
+      
       <!--<div slot="footer" class="dialog-footer">-->
       <el-button type="primary" @click="confirmUpload">确 定</el-button>
       <!--</div>-->
@@ -44,7 +48,7 @@
 <script>
   import upload from '@/components/common/upload/uploadList'
   import axios from 'axios'
-  
+  let Msg='';
   export default {
     // inject:['reload'],
     name: "brandManagement_dialog",
@@ -65,7 +69,7 @@
     data() {
       return {
         alertTitle: '',
-        upLoadTitle: '上传LOGO',
+        upLoadTitle: '',
         uploadType: 'image/jpeg',
         formData: {
           BrandCode: '',
@@ -123,41 +127,36 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.editOrAdd ) {
-          if ( this.isAlertShow === true ) {
-            console.log(this.editData);
-            this.editString = this.editOrAdd;
+        if ( this.isAlertShow === true ) {
+          if ( this.editOrAdd==='up_date' ) {
             this.formData.BrandCode = this.editData.BrandCode;
             this.formData.BrandName = this.editData.BrandName;
             this.formData.BrandComments = this.editData.BrandComments;
             this.formData.BrandShowText = this.editData.BrandShowText;
             this.formData.ID = this.editData.ID;
             this.editFormData.ImgBase = this.editData.ImgBase;
-            this.formData.DogType = this.editString;
-            console.log(this.formData.DogType);
             this.alertTitle = '编辑品牌'
-          } else {
-            this.editString = '';
+            Msg='编辑成功'
           }
-        } else {
-          console.log(this.formData.DogType);
+          else {
+            for ( var i in  this.formData ) {
+              this.formData[ i ] = ''
+            }
+            this.alertTitle = '新增品牌';
+            Msg='增加成功'
+          }
+          this.formData.DogType = this.editOrAdd;
         }
         
       }
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
         this.formData.ImgBase = '';
         this.editFormData.ImgBase = ''
-        
-        // this.$refs.uploadList.resetFields();
       },
       closed() {
         this.$store.commit('clearUpload');
@@ -183,10 +182,7 @@
         return (isJPG || isPNG) && isLt2M;
         
       },
-      /* closeDialog() {
-		 this.$emit('closeAlert')
-		 this.addOrEdit='';
-	   },*/
+
       confirmUpload() {
         let that = this;
         if ( that.formData.BrandCode === '' ) {
@@ -196,17 +192,12 @@
           that.$message.error('品牌名称不能为空');
           return
         }
-        
-        /*  if ( this.editString === 'edit' ) {
-		  
-		  } else {
-		  
-		  }*/
+  
         axios.post('/api/Home/BrandSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              that.$message.success("上传成功");
+              that.$message.success(Msg);
               that.pass = true;
               that.$emit('closeAlert');
               that.$store.commit('BrandUpdateData');

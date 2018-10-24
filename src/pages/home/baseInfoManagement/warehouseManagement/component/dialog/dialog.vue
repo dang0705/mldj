@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增仓库'"
+      :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -38,7 +38,7 @@
 <script>
   import upload from '@/components/common/upload/uploadList'
   import axios from 'axios'
-  
+  let Msg='';
   export default {
     // inject:['reload'],
     name: "SupplierManagement_dialog",
@@ -129,24 +129,24 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.editOrAdd ) {
-          if ( this.isAlertShow === true ) {
-            console.log(this.editData);
-            this.editString = this.editOrAdd;
+        if ( this.isAlertShow === true ) {
+          if ( this.editOrAdd === 'up_date' ) {
             this.formData.WarehouseCode = this.editData.WarehouseCode;
             this.formData.WarehouseName = this.editData.WarehouseName;
             this.formData.WarehouseAdd = this.editData.WarehouseAdd;
             this.formData.WarehouseDec = this.editData.WarehouseDec;
             this.formData.ID = this.editData.ID;
-            // this.editFormData.ImgBase = this.editData.ImgBase;
-            this.formData.DogType = this.editString;
             console.log(this.formData.DogType);
-            this.alertTitle = '编辑仓库'
+            this.alertTitle = '编辑仓库';
+            Msg='编辑成功';
           } else {
-            this.editString = '';
+            for ( var i in  this.formData ) {
+              this.formData[ i ] = ''
+            }
+            this.alertTitle = '新增仓库';
+            Msg='增加成功';
           }
-        } else {
-          console.log(this.formData.DogType);
+          this.formData.DogType = this.editOrAdd;
         }
         
       }
@@ -193,7 +193,7 @@
             let res = data.data;
             if ( res.state == 1 ) {
               
-              that.$message.success("上传成功");
+              that.$message.success(Msg);
               that.pass = true;
               that.$emit('closeAlert');
               that.$store.commit('WarehouseUpdateData');

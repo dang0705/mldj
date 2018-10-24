@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle"
+      :title="alertTitle||'新增用户'"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -19,10 +19,10 @@
             clearable
             placeholder="版本编号"
             minlength="1"
-            maxlength="10"></el-input>
+            maxlength="10" ></el-input>
         </el-form-item>
-        <el-form-item prop="ApkName">
-          <el-input v-model="formData.ApkName" clearable placeholder="版本名称" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="CompanyAbb">
+          <el-input v-model="formData.CompanyAbb" clearable placeholder="版本名称" minlength="1" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="ApkDec">
           <el-input type="textarea" v-model="formData.ApkDec" placeholder="版本描述" maxlength="250"></el-input>
@@ -31,8 +31,13 @@
           <upload :isClose="isClose" @closeDialog="handleClose" :getUpLoadTitle="upLoadTitle"
                   :getUploadType="uploadType" @hasFile="hasFile"></upload>
         </el-form-item>
+        <!--  <div id="imgWrapper">
+			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
+		  </div>-->
       </el-form>
       
+      <!--上传图片插件-->
+    
       <!--<div slot="footer" class="dialog-footer">-->
       <el-button type="primary" @click="confirmUpload">确 定</el-button>
       <!--</div>-->
@@ -46,7 +51,7 @@
   
   export default {
     // inject:['reload'],
-    name: "apkManagement_dialog",
+    name: "brandManagement_dialog",
     components: {
       upload
     },
@@ -68,10 +73,10 @@
         uploadType: '.apk',
         formData: {
           ApkCode: '',
-          ApkName: '',
+          CompanyAbb: '',
           ApkDec: '',
           UpBusinessLicense: {},
-          DogType: "up_date"
+          DogType: "a_dd"
         }
         ,
         editFormData: {},
@@ -90,7 +95,7 @@
               trigger: 'blur'
             }
           ],
-          ApkName: [
+          CompanyAbb: [
             {
               required: true,
               message: '版本名称为必填项',
@@ -121,29 +126,39 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.isAlertShow === true ) {
-          if ( this.editOrAdd === 'up_date' ) {
+        if ( this.editOrAdd ) {
+          if ( this.isAlertShow === true ) {
+            console.log(this.editData);
+            this.editString = this.editOrAdd;
             this.formData.ApkCode = this.editData.ApkCode;
-            this.formData.ApkName = this.editData.ApkName;
+            this.formData.CompanyAbb = this.editData.CompanyAbb;
             this.formData.ApkDec = this.editData.ApkDec;
             this.formData.ID = this.editData.ID;
+            // this.editFormData.ImgBase = this.editData.ImgBase;
+            this.formData.DogType = this.editString;
+            console.log(this.formData.DogType);
             this.alertTitle = '编辑版本'
           } else {
-            for ( var i in  this.formData ) {
-              this.formData[ i ] = ''
-            }
-            this.alertTitle = '新增版本';
+            this.editString = '';
           }
-          this.formData.DogType = this.editOrAdd;
+        } else {
           console.log(this.formData.DogType);
         }
+        
       }
     },
     
     methods: {
+      /*confirm() {
+        this.$emit('closeAlert');
+        this.addOrEdit='';
+      },*/
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
+        // this.formData.ImgBase='';
+        // this.editFormData.ImgBase=''
+        // this.$refs.uploadList.resetFields();
       },
       closed() {
         this.$store.commit('clearUpload');
@@ -159,10 +174,10 @@
         if ( that.formData.ApkCode === '' ) {
           that.$message.error('Apk编号不能为空');
           return
-        } else if ( that.formData.ApkName === '' ) {
+        } else if ( that.formData.CompanyAbb === '' ) {
           that.$message.error('Apk名称不能为空');
           return
-        } else if ( !this.formData.UpBusinessLicense && this.formData.DogType === 'a_dd' ) {
+        } else if ( !this.file && this.formData.DogType === 'a_dd' ) {
           that.$message.error('Apk必须上传');
           return
         }
@@ -171,7 +186,7 @@
         axios.post('/api/Home/ApkSave', this.formData)
           .then(data => {
             // console.log(data);
-            let res = data.data;
+            let res = data.data
             if ( res.state == 1 ) {
               that.$message.success("上传成功");
               that.pass = true;

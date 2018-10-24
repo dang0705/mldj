@@ -3,7 +3,7 @@
     <div class="filterComponents">
       <el-input
         autofocus
-        class="input activeName"
+        class="input"
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
@@ -16,6 +16,7 @@
         >
         </i>
       </el-input>
+      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"></citySelect>
     </div>
     
     <el-table width="100%"
@@ -24,52 +25,59 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              @selection-change="handleSelectionChange"
     >
-      <el-table-column label="操作" width="100" align="center">
+      <!--    <el-table-column
+			type="selection"
+			width="40"
+			class="selection"
+			prop='ID'
+		  ></el-table-column>-->
+      
+      <el-table-column
+        width="100"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
+          <el-button size="small"
+                     icon="el-icon-edit"
+                     circle
+                     @click="getData(scope.$index,scope.row)">
           </el-button>
+          
+          <el-switch
+            v-model="scope.row.Validity"
+            :active-value="1"
+            :inactive-value="0"
+            @change=switchChange(scope.$index,scope.row)
+          >
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column
-        label="供应商名称"
+        prop="LabelName"
+        label="标签名称"
         align="center"
-        prop="SupplierName"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="供应商编号"
-        align="center"
-        prop="SupplierContactCode"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="联系人电话"
-        align="center"
-        prop="SupplierContactPhone"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="联系人姓名"
-        align="center"
-        prop="SupplierContactName"
-        width="180">
-      </el-table-column>
-      <el-table-column
-        label="供应商描述"
-        width="300"
-        prop="SupplierDec"
-        align="center"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column
-        label="增加+"
-        prop=""
-        align="center"
+        width="980"
       >
       </el-table-column>
+ <!--     <el-table-column
+        prop="EmployeeName"
+        label="设备所属人"
+        align="center"
+        width="140"
+      >
+      </el-table-column>-->
+      
+      <el-table-column
+        label="增加+"
+        align="center"
+        width="140"
+      >
+      
+      </el-table-column>
+    
     </el-table>
     <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
     
@@ -83,20 +91,21 @@
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
-                  :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :editData="sendDialogData"></alert-dialog>
   
   </div>
 </template>
 
 <script>
   import axios from 'axios'
-  import alertDialog from '../dialog/dialog'
+  import citySelect from '@/components/common/citySelect/citySelect'
   
+  import alertDialog from '../dialog/dialog'
   export default {
     name: "contentList",
     components: {
       alertDialog,
+      citySelect
       // filter
     },
     data() {
@@ -104,6 +113,7 @@
         list: [],
         isListEmpty: true,
         dialogType: 'up_date',
+        switchData: '',
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -111,7 +121,7 @@
           color: '#000',
         },
         rowStyle: {
-          height: '40px'
+          height: '40px',
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -119,21 +129,23 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          SupplierContactCode: '',
-          SupplierContactPhone: '',
-          SupplierContactName: '',
-          SupplierName: '',
-          SupplierDec: '',
+          LabelName: '',
+          EmployeeCode: '',
+          AddEmployeeCode: '',
+          ProvinceName: '',
+          CityName: '',
+          Address: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
-      this.getApkList()
+      if ( !this.list.length ) {
+        this.getApkList()
+      }
     },
     methods: {
+      
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -146,64 +158,63 @@
           console.log(this.dialogType);
         }
       },
+      handleSelectionChange(val) {
+        console.log(val);
+      },
+      
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadSupplierContactList')
+        axios.post('/api/Home/OnloadDeviceLabelList')
           .then(data => {
+            console.log(data);
             const res = data.data.Content;
             if ( !res || !res.length || res.length ) {
               that.isListEmpty = false
             }
-            that.list = res ? res : [];
-            that.$store.state.isSupplierUpdateData = false;
+            that.list = res ? data.data.Content : [];
+            that.$store.state.isDeviceLabelUpdateData = false;
           })
       }
+      
       ,
       closeAlert() {
         this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       , getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
+        console.log(row);
         this.isAlertShow = true;
-        this.sendDialogData.SupplierContactCode = this.list[ realIndex ].SupplierContactCode;
-        this.sendDialogData.SupplierName = this.list[ realIndex ].SupplierContactPhone;
-        this.sendDialogData.SupplierContactPhone = this.list[ realIndex ].SupplierContactPhone;
-        this.sendDialogData.SupplierContactName = this.list[ realIndex ].SupplierContactName;
-        this.sendDialogData.SupplierDec = this.list[ realIndex ].SupplierDec;
+        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+        this.sendDialogData.LabelName = this.list[ realIndex ].LabelName;
+        this.sendDialogData.Address = this.list[ realIndex ].Address;
+        // this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
+        // this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
+        // this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
+        // this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
       }
-      , deleteItem(index, row) {
+      , switchChange(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        console.log(index, row);
+        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        axios.post('/api/Home/DeviceLabelSave', {
+          DogType: 'd_elete',
+          EmployeeCode: row.EmployeeCode,
+          Validity: row.Validity,
+          ID: row.ID
         })
-          .then(() => {
-            axios.post('/api/Home/SupplierContactSave', {
-              DogType: 'd_elete',
-              ID: row.ID
+          .then(data => {
+            axios.post('/api/Home/OnloadDeviceLabelList', {
+              DeviceName: this.keyWord
             })
-              .then(data => {
-                axios.post('/api/Home/OnloadSupplierContactList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isSupplierUpdateData = false;
-                  })
+              .then(res => {
+                that.list = res.data.Content;
+                that.$store.state.isDeviceLabelUpdateData = false;
               })
           })
-          .catch(() => {
-          
-          })
-        
       }
       ,
       handleSizeChange: function (size) {
@@ -217,19 +228,27 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadSupplierContactList', {
-          SupplierName: this.keyWord
+        axios.post('/api/Home/OnloadDeviceLabelList', {
+          DeviceName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isSupplierUpdateData = false;
+            that.$store.state.isDeviceLabelUpdateData = false;
+          })
+      },
+      cityFilter(city) {
+        axios.post('/api/Home/OnloadDeviceLabelList', {
+          CityCode: city[ 1 ]
+        })
+          .then(data => {
+            console.log(data);
           })
       }
       
     },
     watch: {
-      '$store.state.isSupplierUpdateData': function () {
-        if ( this.$store.state.isSupplierUpdateData === true ) {
+      '$store.state.isDeviceLabelUpdateData': function () {
+        if ( this.$store.state.isDeviceLabelUpdateData === true ) {
           this.getApkList()
         }
       },
@@ -240,12 +259,16 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
+  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   
   #contentListWrapper >>> .el-table
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
+  
+  /*  #contentListWrapper >>> .el-table__header-wrapper
+	  display none*/
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important
@@ -266,7 +289,9 @@
   .el-table__body-wrapper
     width: 100%
   
-  .activeName
-    filter()
-    width: 600px
+  .filterComponents
+    .input, .citySelect
+      width: 40%
+      margin-right: 20px
+      display inline-block
 </style>

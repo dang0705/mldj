@@ -83,6 +83,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/deviceManagement/EquipManagement/EquipManagement'], resolve)
         },
         {
+          path: '/LabelManagement',
+          name: 'LabelManagement',
+          component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement'], resolve)
+        },
+        {
           path: '/deviceVersionManagement',
           name: 'deviceVersionManagement',
           component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)

@@ -1,58 +1,117 @@
 <template>
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"></citySelect>
+    </div>
+    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
-
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
+              @header-click="add"
+              @selection-change="handleSelectionChange"
     >
-      <el-table-column label="" width="100">
+      <!--    <el-table-column
+			type="selection"
+			width="40"
+			class="selection"
+			prop='ID'
+		  ></el-table-column>-->
+      
+      <el-table-column
+        width="100"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
+          <el-button size="small"
+                     icon="el-icon-edit"
+                     circle
+                     @click="getData(scope.$index,scope.row)">
           </el-button>
+          
+          <el-switch
+            v-model="scope.row.Validity"
+            :active-value="1"
+            :inactive-value="0"
+            @change=switchChange(scope.$index,scope.row)
+          >
+          </el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ChannelName" width="180">
+      <el-table-column
+        prop="DeviceName"
+        label="设备名称"
+        align="center"
+        width="140"
+      >
       </el-table-column>
-      <el-table-column label="" prop="ChannelCode" width="180">
+      <el-table-column
+        prop="EmployeeName"
+        label="设备所属人"
+        align="center"
+        width="180"
+        :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label=""
-                       prop="ChannelDec"
-                       width="660"
-                       :show-overflow-tooltip="true">
+      
+      <el-table-column
+        prop="ProvinceName"
+        label="省份"
+        align="center"
+        width="80"
+      >
       </el-table-column>
-      <el-table-column label="">
-    </el-table-column>
+      <el-table-column
+        prop="CityName"
+        label="城市"
+        align="center"
+        width="80"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column
+        prop="Address"
+        label="地址"
+        align="center"
+        width="500"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      
+      <el-table-column
+        label="增加+"
+      >
+      
+      </el-table-column>
     
     </el-table>
-    
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
+  
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page.sync="currentPage"
       :page-sizes="[5, 10, 20, 40]"
       :page-size="pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -60,93 +119,125 @@
 
 <script>
   import axios from 'axios'
+  import citySelect from '@/components/common/citySelect/citySelect'
+  
   import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
+      citySelect
       // filter
     },
     data() {
       return {
         list: [],
+        isListEmpty: true,
+        dialogType: 'up_date',
+        switchData: '',
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
         rowStyle: {
           height: '40px',
         },
-        
         keyWord: '',
         currentPage: 1, //初始页
         pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ChannelCode: '',
-          ChannelDec: '',
-          ChannelName: '',
+          DeviceName: '',
+          EmployeeCode: '',
+          AddEmployeeCode: '',
+          ProvinceName: '',
+          CityName: '',
+          Address: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
-      this.getApkList()
+      if ( !this.list.length ) {
+        this.getApkList()
+      }
     },
     methods: {
+      
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length-1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column, event) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
+      handleSelectionChange(val) {
+        console.log(val);
+      },
+      
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadChannelList')
+        axios.post('/api/Home/OnloadEmployeeDeviceList')
           .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isChannelUpdateData = false;
+            const res = data.data.Content;
+            if ( !res || !res.length|| res.length) {
+              that.isListEmpty = false
+            }
+            that.list = res ? data.data.Content : [];
+            that.$store.state.isEmployeeDeviceUpdateData = false;
           })
+        
       }
       
       ,
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       , getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
+        console.log(row);
         this.isAlertShow = true;
-        this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
-        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
-        this.sendDialogData.ChannelDec = this.list[ realIndex ].ChannelDec;
+        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+        this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
+        this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
+        this.sendDialogData.Address = this.list[ realIndex ].Address;
+        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
+        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
+        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
+        this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
       }
-      , deleteItem(index, row) {
+      , switchChange(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        console.log(index, row);
+        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        axios.post('/api/Home/EmployeeDeviceSave', {
+          DogType: 'd_elete',
+          EmployeeCode: row.EmployeeCode,
+          Validity: row.Validity,
+          ID: row.ID
         })
-          .then(() => {
-            axios.post('/api/Home/ChannelSave', {
-              DogType: 'd_elete',
-              ID: row.ID
+          .then(data => {
+            axios.post('/api/Home/OnloadEmployeeDeviceList', {
+              DeviceName: this.keyWord
             })
-              .then(data => {
-                axios.post('/api/Home/OnloadChannelList', {
-                  ChannelName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isChannelUpdateData = false;
-                  })
+              .then(res => {
+                that.list = res.data.Content;
+                that.$store.state.isEmployeeDeviceUpdateData = false;
               })
           })
-          .catch(() => {
-          
-          })
-        
       }
       ,
       handleSizeChange: function (size) {
@@ -160,19 +251,27 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadChannelList', {
-          ChannelName: this.keyWord
+        axios.post('/api/Home/OnloadEmployeeDeviceList', {
+          DeviceName: this.keyWord
         })
           .then(data => {
             that.list = data.data.Content;
-            that.$store.state.isChannelUpdateData = false;
+            that.$store.state.isEmployeeDeviceUpdateData = false;
+          })
+      },
+      cityFilter(city) {
+        axios.post('/api/Home/OnloadEmployeeDeviceList', {
+          CityCode: city[ 1 ]
+        })
+          .then(data => {
+            console.log(data);
           })
       }
       
     },
     watch: {
-      '$store.state.isChannelUpdateData': function () {
-        if ( this.$store.state.isChannelUpdateData === true ) {
+      '$store.state.isEmployeeDeviceUpdateData': function () {
+        if ( this.$store.state.isEmployeeDeviceUpdateData === true ) {
           this.getApkList()
         }
       },
@@ -183,6 +282,7 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
+  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   
@@ -190,8 +290,8 @@
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
   
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
+  /*  #contentListWrapper >>> .el-table__header-wrapper
+	  display none*/
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important
@@ -212,7 +312,9 @@
   .el-table__body-wrapper
     width: 100%
   
-  .activeName
-    filter()
-    width: 600px
+  .filterComponents
+    .input, .citySelect
+      width: 40%
+      margin-right: 20px
+      display inline-block
 </style>

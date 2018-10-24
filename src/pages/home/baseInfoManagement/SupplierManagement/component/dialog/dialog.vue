@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增供应商'"
+      :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -48,7 +48,7 @@
 <script>
   import upload from '@/components/common/upload/uploadList'
   import axios from 'axios'
-  
+  let Msg='';
   export default {
     // inject:['reload'],
     name: "SupplierManagement_dialog",
@@ -155,26 +155,28 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.editOrAdd ) {
-          if ( this.isAlertShow === true ) {
+        if ( this.isAlertShow === true ) {
+          this.formData.DogType = this.editOrAdd;
+          if ( this.editOrAdd === 'up_date' ) {
             console.log(this.editData);
-            this.editString = this.editOrAdd;
             this.formData.SupplierContactCode = this.editData.SupplierContactCode;
             this.formData.SupplierName = this.editData.SupplierName;
             this.formData.SupplierContactPhone = this.editData.SupplierContactPhone;
             this.formData.SupplierContactName = this.editData.SupplierContactName;
             this.formData.SupplierDec = this.editData.SupplierDec;
             this.formData.ID = this.editData.ID;
-            // this.editFormData.ImgBase = this.editData.ImgBase;
-            this.formData.DogType = this.editString;
-            console.log(this.formData.DogType);
             this.alertTitle = '编辑供应商'
+            Msg='编辑成功'
           } else {
-            this.editString = '';
+            for ( var i in  this.formData ) {
+              this.formData[ i ] = ''
+            }
+            this.formData.DogType = this.editOrAdd;
+            this.alertTitle = '新增供应商';
+            Msg='增加成功'
           }
-        } else {
-          console.log(this.formData.DogType);
         }
+        
         
       }
     },
@@ -225,7 +227,7 @@
             let res = data.data;
             if ( res.state == 1 ) {
               
-              that.$message.success("上传成功");
+              that.$message.success(Msg);
               that.pass = true;
               that.$emit('closeAlert');
               that.$store.commit('SupplierUpdateData');

@@ -1,25 +1,30 @@
 <template>
-  
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input activeName"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+    </div>
+    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
+              @header-click="add"
     >
-      <el-table-column label=""
+      <el-table-column label="操作"
                        width="100"
                        align="center"
       >
@@ -30,17 +35,20 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="BrandName"
+      <el-table-column label="品牌名称"
+                       prop="BrandName"
                        width="180"
                        align="center"
       >
       </el-table-column>
-      <el-table-column label="" prop="BrandCode"
+      <el-table-column label="品牌编号"
+                       prop="BrandCode"
                        width="180"
                        align="center"
       >
       </el-table-column>
-      <el-table-column label="" prop="BrandLogoUrl"
+      <el-table-column label="品牌LOGO"
+                       prop="BrandLogoUrl"
                        width="140"
                        align="center"
       >
@@ -49,7 +57,7 @@
         </template>
       </el-table-column>
       
-      <el-table-column label=""
+      <el-table-column label="品牌简介"
                        prop="BrandShowText"
                        width="260"
                        align="center"
@@ -57,7 +65,7 @@
       
       >
       </el-table-column>
-      <el-table-column label=""
+      <el-table-column label="品牌描述"
                        prop="BrandComments"
                        width="260"
                        align="center"
@@ -65,10 +73,11 @@
       
       >
       </el-table-column>
-      <el-table-column label="">
+      <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
+  
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -79,7 +88,7 @@
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -99,7 +108,15 @@
     data() {
       return {
         list: [],
+        isListEmpty: true,
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
         keyWord: '',
+        dialogType: 'up_date',
         noLogo: 'static/img/noData.jpg',
         currentPage: 1, //初始页
         pagesize: 5,    //    每页的数据
@@ -121,19 +138,35 @@
       this.getBrandList()
     },
     methods: {
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length - 1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
       getBrandList() {
         let that = this;
         that.list = [];
         axios.post('/api/Home/OnloadBrandList')
           .then(data => {
-            that.list = data.data.Content;
+            const res = data.data.Content;
+            if ( !res || !res.length||res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = res ? res : [];
             that.$store.state.isBrandUpdateData = false;
           })
       }
       
       ,
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       , getData(index, row) {
@@ -216,9 +249,6 @@
   #contentListWrapper >>> .el-table
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
-  
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important

@@ -1,7 +1,9 @@
 <template>
   <div id="loginBg" @keyup.enter="handleLogin">
     <div id="loginWrapper">
-      <img src="../../assets/img/logo.png" alt="" width="50%" style="margin: 0 auto 40px;display: block">
+      <div id="logoWrapper" style="width: 50%;margin: 0 auto 40px;height: 0;padding-bottom: 50%">
+        <img src="../../assets/img/logo.png" alt="" width="100%" style="display: block">
+      </div>
       <el-form
         ref="login"
         :model="loginData"
@@ -9,7 +11,7 @@
       >
         <el-form-item prop="userName">
           <el-input v-model="loginData.userName" autofocus="true" placeholder="用户名:" clearable></el-input>
-        </el-form-item >
+        </el-form-item>
         <el-form-item prop="password">
           <el-input v-model="loginData.password" placeholder="密 码:" type="password" clearable></el-input>
         </el-form-item>
@@ -95,11 +97,14 @@
           ValidateCode: '59898989'
         }).then(data => {
           console.log(data);
+          const res = data.data.Content.UserInfo;
           if ( data.data.state == 1 ) {
             this.$router.push('/activityManagement');
             storage.setItem('userName', this.loginData.userName);
             storage.setItem('password', this.loginData.password);
             storage.setItem('isHoldLogin', this.loginData.holdLogin);
+            storage.setItem('RoleID', res.RoleID);
+            storage.setItem('CompanyID', res.CompanyID)
           } else {
             this.$message.error('用户名或密码错误');
             this.createCode();

@@ -1,27 +1,32 @@
 <template>
-  
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input activeName"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+    </div>
+    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
-
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
+              @header-click="add"
+    
     >
-      <el-table-column label="" width="100">
+      <el-table-column label="操作" width="100">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -29,19 +34,29 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ApkName" width="180">
+      <el-table-column
+        label="版本名称"
+        prop="ApkName"
+        align="center"
+        width="180">
       </el-table-column>
-      <el-table-column label="" prop="ApkCode" width="180">
+      <el-table-column
+        label="版本编号"
+        prop="ApkCode"
+        align="center"
+        width="180">
       </el-table-column>
-      <el-table-column label=""
-                       prop="ApkDec"
-                       width="660"
-                       :show-overflow-tooltip="true">
+      <el-table-column
+        label="版本描述"
+        prop="ApkDec"
+        align="center"
+        width="660"
+        :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label="">
+      <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
@@ -52,7 +67,7 @@
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -71,8 +86,16 @@
     data() {
       return {
         list: [],
-        rowStyle:{
-          height:'40px'
+        dialogType: 'up_date',
+        isListEmpty:true,
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
+        rowStyle: {
+          height: '40px'
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -93,19 +116,35 @@
       this.getApkList()
     },
     methods: {
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length - 1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column, event) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
       getApkList() {
         let that = this;
         that.list = [];
         axios.post('/api/Home/OnloadApkList')
           .then(data => {
-            that.list = data.data.Content;
+            const res = data.data.Content;
+            if ( !res || !res.length||res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = data.data.Content||[];
             that.$store.state.isApkUpdateData = false;
           })
       }
       
       ,
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       ,
@@ -191,11 +230,7 @@
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
   
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
-  
-  #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
-    width: 100% !important
+ 
   
   #contentListWrapper >>> .el-table__row
     td

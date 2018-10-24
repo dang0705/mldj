@@ -1,26 +1,36 @@
 <template>
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      
+      <el-input
+        autofocus
+        class="input activeName"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+    </div>
+    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
               :row-style="rowStyle"
-
+              @header-click="add"
     >
-      <el-table-column label="" width="100">
+      <el-table-column
+        label="操作"
+        width="100"
+        align="center"
+      >
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -28,31 +38,46 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="ChannelName" width="180">
+      
+      <el-table-column
+        label="渠道名称"
+        prop="ChannelName"
+        width="180"
+        align="center"
+      >
       </el-table-column>
-      <el-table-column label="" prop="ChannelCode" width="180">
+      <el-table-column
+        label="渠道编号"
+        prop="ChannelCode"
+        width="180"
+        align="center"
+      >
       </el-table-column>
-      <el-table-column label=""
-                       prop="ChannelDec"
-                       width="660"
-                       :show-overflow-tooltip="true">
+      <el-table-column
+        label="渠道描述"
+        prop="ChannelDec"
+        width="660"
+        :show-overflow-tooltip="true"
+        align="center"
+      >
       </el-table-column>
-      <el-table-column label="">
-    </el-table-column>
+      <el-table-column label="增加+">
+      </el-table-column>
     
     </el-table>
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
     
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page.sync="currentPage"
       :page-sizes="[5, 10, 20, 40]"
       :page-size="pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -71,6 +96,14 @@
     data() {
       return {
         list: [],
+        isListEmpty: true,
+        dialogType: 'up_date',
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
         rowStyle: {
           height: '40px',
         },
@@ -94,26 +127,39 @@
       this.getApkList()
     },
     methods: {
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length - 1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column, event) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
       getApkList() {
         let that = this;
         that.list = [];
         axios.post('/api/Home/OnloadChannelList')
           .then(data => {
-            that.list = data.data.Content;
+            const res = data.data.Content;
+            if ( !res || !res.length||res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = res ? res : [];
             that.$store.state.isChannelUpdateData = false;
           })
       }
       
       ,
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       , getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
         this.isAlertShow = true;
         this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
@@ -122,7 +168,6 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -189,9 +234,6 @@
   #contentListWrapper >>> .el-table
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
-  
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important

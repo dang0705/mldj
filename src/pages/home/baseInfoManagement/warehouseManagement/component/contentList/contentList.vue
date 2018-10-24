@@ -1,26 +1,31 @@
 <template>
   <div id="contentListWrapper">
-    <el-input
-      autofocus
-      class="input activeName"
-      v-model="keyWord"
-      autocomplete="on"
-      placeholder="名称"
-      @keyup.enter.native="filter"
-    >
-      <i
-        class="el-icon-search el-input__icon"
-        slot="suffix"
-        @click="filter"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input activeName"
+        v-model="keyWord"
+        autocomplete="on"
+        placeholder="名称"
+        @keyup.enter.native="filter"
       >
-      </i>
-    </el-input>
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="filter"
+        >
+        </i>
+      </el-input>
+    </div>
+    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
-
+              :header-row-style="headerStyle"
+              :header-cell-class-name="addBtn"
+              @header-click="add"
     >
-      <el-table-column label="" width="100">
+      <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -28,35 +33,50 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="" prop="WarehouseName" width="180">
+      <el-table-column
+        label="仓库名称"
+        align="center"
+        prop="WarehouseName"
+        width="180">
       </el-table-column>
-      <el-table-column label="" prop="WarehouseCode" width="180">
+      <el-table-column
+        label="仓库编号"
+        align="center"
+        prop="WarehouseCode"
+        width="180">
       </el-table-column>
-      <el-table-column label=""
-                       prop="WarehouseAdd"
-                       width="340"
-                       :show-overflow-tooltip="true">
+      <el-table-column
+        label="仓库地址"
+        align="center"
+        prop="WarehouseAdd"
+        width="340"
+        :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label=""
-                       prop="WarehouseDec"
-                       width="320"
-                       :show-overflow-tooltip="true">
+      <el-table-column
+        label="仓库描述"
+        align="center"
+        prop="WarehouseDec"
+        width="320"
+        :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label=""  >
+      <el-table-column
+        label="增加+"
+        align="center">
       </el-table-column>
     </el-table>
-    
+    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
+  
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage"
+      :current-page.sync="currentPage"
       :page-sizes="[5, 10, 20, 40]"
       :page-size="pagesize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" editOrAdd="up_date" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -75,8 +95,16 @@
     data() {
       return {
         list: [],
-        rowStyle:{
-          height:'40px'
+        isListEmpty: true,
+        dialogType: 'up_date',
+        headerStyle: {
+          height: '100%',
+          textAlign: 'center',
+          fontSize: '20px',
+          color: '#000',
+        },
+        rowStyle: {
+          height: '40px'
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -98,19 +126,35 @@
       this.getApkList()
     },
     methods: {
+      addBtn({row, column, rowIndex, columnIndex}) {
+        if ( columnIndex === row.length - 1 ) {
+          return 'addBtn'
+        }
+      },
+      add(column, event) {
+        if ( column.label === '增加+' ) {
+          this.isAlertShow = true;
+          this.dialogType = 'a_dd';
+          console.log(this.dialogType);
+        }
+      },
       getApkList() {
         let that = this;
         that.list = [];
         axios.post('/api/Home/OnloadWarehouseList')
           .then(data => {
-            that.list = data.data.Content;
+            const res = data.data.Content;
+            if ( !res || !res.length||res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = res ? res : [];
             that.$store.state.isWarehouseUpdateData = false;
           })
       }
       
       ,
       closeAlert() {
-        this.add = '';
+        this.dialogType = 'up_date';
         this.isAlertShow = false
       }
       , getData(index, row) {
@@ -127,7 +171,6 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -189,14 +232,12 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  #contentListWrapper >>>.el-input__inner
+  #contentListWrapper >>> .el-input__inner
     inputNoBorder()
-  #contentListWrapper>>>.el-table
-    box-shadow 0 5px 8px rgba(0,0,0,.2)
+  
+  #contentListWrapper >>> .el-table
+    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
-
-  #contentListWrapper >>> .el-table__header-wrapper
-    display none
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important

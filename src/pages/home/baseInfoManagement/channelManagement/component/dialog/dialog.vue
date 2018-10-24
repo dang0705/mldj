@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增渠道'"
+      :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -40,10 +40,11 @@
 <script>
   import upload from '@/components/common/upload/uploadList'
   import axios from 'axios'
-  
+  let Msg='';
+
   export default {
     // inject:['reload'],
-    name: "SupplierManagement_dialog",
+    name: "channelManagement_dialog",
     components: {
       upload
     },
@@ -60,7 +61,6 @@
     },
     data() {
       return {
-        // upLoadTitle: '上传APK',
         alertTitle: '',
         isDisplay: true,
         uploadType: '.apk',
@@ -119,25 +119,25 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.editOrAdd ) {
-          if ( this.isAlertShow === true ) {
-            console.log(this.editData);
-            this.editString = this.editOrAdd;
+        if ( this.isAlertShow === true ) {
+          if ( this.editOrAdd === 'up_date' ) {
             this.formData.ChannelCode = this.editData.ChannelCode;
             this.formData.ChannelName = this.editData.ChannelName;
             this.formData.ChannelDec = this.editData.ChannelDec;
             this.formData.ID = this.editData.ID;
-            // this.editFormData.ImgBase = this.editData.ImgBase;
-            this.formData.DogType = this.editString;
-            console.log(this.formData.DogType);
             this.alertTitle = '编辑渠道'
-          } else {
-            this.editString = '';
+            Msg='编辑成功';
           }
-        } else {
-          console.log(this.formData.DogType);
+          else {
+            for ( var i in  this.formData ) {
+              this.formData[ i ] = ''
+            }
+            this.alertTitle = '新增渠道'
+            Msg='增加成功';
+          }
+          this.formData.DogType = this.editOrAdd;
+  
         }
-        
       }
     },
     
@@ -178,7 +178,7 @@
             let res = data.data;
             if ( res.state == 1 ) {
               
-              that.$message.success("上传成功");
+              that.$message.success(Msg);
               that.pass = true;
               that.$emit('closeAlert');
               that.$store.commit('ChannelUpdateData');

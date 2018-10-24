@@ -1,5 +1,5 @@
 <template>
-  <div id="channelManagementWrapper">
+  <div id="LabelManagementWrapper">
 
     <content-list>
     </content-list>
@@ -9,7 +9,7 @@
 <script>
   import contentList from './component/contentList/contentList'
 	export default {
-		name: "ApkManagement",
+		name: "LabelManagement",
     components: {
       contentList
     }

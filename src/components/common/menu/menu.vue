@@ -1,6 +1,8 @@
 <template>
   <div class="menu">
-    <img src="../../../assets/img/logo.png" alt="" width="80px" style="position: absolute;left: 5%;top: 0; z-index: 10">
+    <div id="logoWrapper" style="width: 80px;height: 0;padding-bottom: 80px;position: absolute;left: 5%;top: 0; z-index: 10">
+      <img src="../../../assets/img/logo.png" alt="" width="100%" >
+    </div>
     <ul id="firstLevelNavigation">
       <li
         v-for="(item,i) of firstLevelNavigationArr"

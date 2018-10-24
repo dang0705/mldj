@@ -2,7 +2,7 @@
   <div class="dialogWrapper">
     <el-dialog
       :visible.sync="isAlertShow"
-      :title="alertTitle||'新增门店'"
+      :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
@@ -52,8 +52,9 @@
   import citySelect from '@/components/common/citySelect/citySelect'
   import axios from 'axios'
   
+  let Msg='';
   export default {
-    name: "SupplierManagement_dialog",
+    name: "storeManagement_dialog",
     components: {
       citySelect
     },
@@ -82,7 +83,7 @@
           CityName: '市',
           AddInfo: '',
           ContactPhone: '',
-          DogType: "a_dd"
+          DogType: ""
         }
         ,
         editFormData: {},
@@ -133,10 +134,8 @@
     },
     watch: {
       'isAlertShow': function () {
-        if ( this.editOrAdd ) {
-          if ( this.isAlertShow === true ) {
-            console.log(this.editData);
-            this.editString = this.editOrAdd;
+        if ( this.isAlertShow === true ) {
+          if ( this.editOrAdd === 'up_date' ) {
             this.formData.StoreCode = this.editData.StoreCode;
             this.formData.StoreName = this.editData.StoreName;
             this.formData.ChannelCode = this.editData.ChannelCode;
@@ -147,18 +146,23 @@
             this.formData.AddInfo = this.editData.AddInfo;
             this.formData.ContactPhone = this.editData.ContactPhone;
             this.formData.ID = this.editData.ID;
-            this.formData.DogType = this.editString;
             this.alertTitle = '编辑门店';
-            this.provinceTotalArr =  this.formData.ProvinceName+' / '+this.formData.CityName ;
-         /*   this.provinceTotalArr = [this.formData.ProvinceName, {
-              cities: [ {label: this.formData.CityName} ]
-            } ];*/
-            console.log(this.formData);
+            this.provinceTotalArr = this.formData.ProvinceName + ' / ' + this.formData.CityName;
+            Msg='编辑成功';
           } else {
-            this.editString = '';
+            for ( var i in  this.formData ) {
+              this.formData[ i ] = ''
+            }
+            this.alertTitle = '新增门店';
+            this.provinceTotalArr = '省 / 市';
+            Msg='增加成功';
           }
+          this.formData.DogType = this.editOrAdd;
         } else {
+          this.formData.ProvinceCode = '';
+          this.formData.CityCode = '';
         }
+        
       }
     },
     methods: {
@@ -187,8 +191,7 @@
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              
-              that.$message.success("上传成功");
+              that.$message.success(Msg);
               that.pass = true;
               that.$emit('closeAlert');
               that.$store.commit('StoreUpdateData');

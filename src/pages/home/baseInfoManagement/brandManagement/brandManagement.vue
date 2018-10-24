@@ -1,21 +1,16 @@
 <template>
   <div id="brandManagementWrapper">
-    <search-list>
-    </search-list>
-    
     <content-list>
     </content-list>
   </div>
 </template>
 
 <script>
-  import searchList from './component/searchList/searchList'
   import contentList from './component/contentList/contentList'
   
   export default {
     name: "brandManagement",
     components: {
-      searchList,
       contentList
     }
   }
