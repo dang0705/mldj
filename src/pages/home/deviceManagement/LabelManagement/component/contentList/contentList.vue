@@ -184,7 +184,6 @@
       }
       , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(row);
         this.isAlertShow = true;
         this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
         this.sendDialogData.LabelName = this.list[ realIndex ].LabelName;

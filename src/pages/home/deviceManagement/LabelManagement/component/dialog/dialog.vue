@@ -20,7 +20,7 @@
             minlength="1"
             maxlength="10"></el-input>
         </el-form-item>
-        
+
         <el-form-item prop="EmployeeCode">
           <el-select
             v-model="formData.EmployeeCode"
@@ -41,7 +41,7 @@
       <el-table
         ref="select"
         :data="selectList"
-        style="width: 400px;float: left;max-height: 350px;overflow: auto"
+        style="width: 400px;float: left;height: 500px;overflow: auto"
         @selection-change="handleSelectChange"
         v-show="this.editOrAdd==='up_date'"
       >
@@ -50,13 +50,13 @@
           align="left"
           :render-header="renderHeader"
         >
-          
+
           <el-table-column
             type="selection"
             prop='ID'
             width="30">
           </el-table-column>
-          
+
           <el-table-column
             prop="DeviceName"
             label="设备名称"
@@ -72,14 +72,15 @@
           </el-table-column>
         </el-table-column>
       </el-table>
-      
-      
+      <i v-show="!selectList.length" class="listLoading el-icon-loading"></i>
+
+
       <el-table
         ref="selected"
         :data="selectedList"
-        style="width: 400px;float: right;max-height: 350px;overflow: auto"
+        style="width: 400px;float: right;height: 500px;overflow: auto"
         v-if="this.editOrAdd==='up_date'"
-      
+
       >
         <el-table-column
           label="已选设备"
@@ -95,7 +96,7 @@
                          @click="deleteItem(scope.$index,scope.row)"></el-button>
             </template>
           </el-table-column>
-          
+
           <el-table-column
             prop="DeviceName"
             label="设备名称"
@@ -118,12 +119,12 @@
 
 <script>
   import axios from 'axios'
-  
+
   let Msg = '';
   const storage = window.localStorage;
   export default {
     name: "LabelManagement_dialog",
-    
+
     props: {
       isAlertShow: {
         type: Boolean
@@ -139,7 +140,14 @@
       return {
         list: [],
         selectList: [],
-        provinceTotalArr: '',
+        selectedList: [],
+        selectedArr: [],
+        isFilter: false,
+        newArr2: [],
+        selectTempList: [],
+        selectedTempList: [],
+        // provinceTotalArr: '',
+        keyWord: '',
         alertTitle: '',
         formData: {
           LabelName: '',
@@ -151,8 +159,7 @@
         ,
         isAdd: false,
         editFormData: {},
-        selectedArr: [],
-        selectedList: [],
+
         uploadRules: {
           LabelName: [
             {
@@ -180,7 +187,7 @@
               trigger: 'blur'
             }
           ]
-          
+
         }
       }
     },
@@ -191,7 +198,7 @@
           return !clearImg
         },
         set: function () {
-        
+
         }
       }
     },
@@ -207,7 +214,7 @@
             that.formData.EmployeeCode = storage.getItem('userName');
             that.formData.EmployeeName = that.editData.EmployeeName;
             that.alertTitle = '编辑标签';
-            that.provinceTotalArr = that.formData.ProvinceName + ' / ' + that.formData.CityName;
+            // that.provinceTotalArr = that.formData.ProvinceName + ' / ' + that.formData.CityName;
             /*       for ( var i = 0; i < length; i++ ) {
 					 if ( that.formData.EmployeeName === that.list[ i ].label ) {
 					   that.formData.AddEmployeeCode = that.list[ i ].value;
@@ -217,7 +224,7 @@
 				   }*/
             Msg = '编辑成功';
             that.formData.DogType = that.editOrAdd;
-            
+
           }
           else {
             this.isAdd = true;
@@ -225,71 +232,174 @@
               this.formData[ i ] = ''
             }
             this.alertTitle = '新增标签';
-            this.provinceTotalArr = '省 / 市';
+            // this.provinceTotalArr = '省 / 市';
             Msg = '增加成功'
           }
         } else {
           that.selectList = [];
+          that.keyWord = '';
         }
       }
     },
     methods: {
-      renderHeader:(h, params) => {
-        return h('div', [
-          h('el-input', {
-            props: {
-              type: 'alert'
+      renderHeader(h, params) {
+        let that = this;
+        return h('div', {
+          class: 'tableHeader',
+          on: {
+            'keyup'(e) {
+              if ( (e.code === 'Enter' || e.code === 'NumpadEnter') && that.keyWord ) {
+                for ( var i = 0; i < that.selectList.length; i++ ) {
+                  if ( that.selectList[ i ].DeviceName.indexOf(that.keyWord) > -1 ) {
+                    that.filter();
+                    break;
+                  }
+                }
+              } else if ( e.code === 'Backspace' && !that.keyWord ) {
+                console.log(that.selectTempList);
+                that.selectList = that.selectTempList;
+
+                that.$nextTick(function () {
+                  that.selectedList.forEach(row => {
+                    that.$refs.select.toggleRowSelection(row, true);
+                  })
+                });
+                // that.isFilter = false;
+              }
+              // alert(0)
             }
-          }),
-          h('strong', params.column.title)
+          }
+        }, [
+          h('p', {}, '待选设备'),
+          h('el-input', {
+            class: 'search',
+            on: {
+              'input'(val) {
+                that.keyWord = val
+              }
+            },
+            props: {
+              type: 'text',
+              placeholder: "名称",
+              value: that.keyWord
+            },
+          }, [
+            h('i', {
+              slot: 'suffix',
+              class: "el-icon-search el-input__icon",
+              on: {
+                'click'() {
+                  if ( that.keyWord ) {
+                    for ( var i = 0; i < that.selectList.length; i++ ) {
+                      if ( that.selectList[ i ].DeviceName.indexOf(that.keyWord) > -1 ) {
+                        that.filter();
+                        break;
+                      }
+                    }
+                  }
+                }
+              }
+            })
+          ]),
         ]);
+      }
+      ,
+      /*选择*/
+      handleSelectChange(val) {
+        console.log(val);
+        if ( !this.isFilter ) {
+          this.selectedList = val;
+          console.log(this.selectedList);
+        } else {
+          console.log(this.selectedList.concat(val));
+          this.selectedList = this.selectedTempList.concat(val);
+          let hash = {};
+          this.selectedList = this.selectedList.reduceRight((item, next) => {
+            hash[ next.DeviceName ] ? '' : hash[ next.DeviceName ] = true && item.push(next);
+            return item
+          }, []);
+          console.log('this.selectedList', this.selectedList);
+          console.log('this.selectedTempList', this.selectedTempList);
+          // console.log(isSelectedHas);
+        }
+      }
+      ,
+      deleteItem(index, row) {
+        console.log(index, row);
+        console.log('beforeSplit', this.selectedList);
+        // this.selectedList.splice(index, 1);
+        this.$refs.select.toggleRowSelection(this.selectedList.find(d => d.DeviceName === row.DeviceName));
+
+        this.selectedList.splice(index, 1);
+        this.selectedTempList.splice(index, 1);
+
+        // this.selectedTempList.splice(index, 1);
+        // this.selectedList=this.selectedTempList;
+        console.log(this.selectedList);
+        console.log(this.selectedTempList);
       },
-      deleteItem(val, row) {
-        console.log(val, row);
-        this.selectedList.splice(val, 1);
-        this.$refs.select.toggleRowSelection(this.selectedArr[val]);
-        this.selectedArr.splice(val, 1);
-        console.log(this.selectedArr);
+      filter() {
+        this.isFilter = true;
+        let that = this;
+        let newArr = [];
+        for ( var j = 0; j < that.selectList.length; j++ ) {
+          if ( that.selectList[ j ].DeviceName.indexOf(that.keyWord) > -1 ) {
+            newArr.push(that.selectList[ j ]);
+          }
+        }
+        that.selectList = newArr;
+        that.newArr2 = [];
+        for ( var i = 0; i < that.selectedList.length; i++ ) {
+          for ( var k = 0; k < that.selectList.length; k++ ) {
+            if ( that.selectedList[ i ].DeviceName === that.selectList[ k ].DeviceName ) {
+              that.newArr2.push(that.selectList[ k ]);
+            }
+          }
+        }
+
+        that.$nextTick(function () {
+          that.newArr2.forEach(row => {
+            that.$refs.select.toggleRowSelection(row, true)
+          })
+        });
+        console.log(that.selectedList);
+        // this.isFilter = false;
       },
       getSelectList() {
         let that = this, selectedLength = '';
-        if ( that.editOrAdd === 'up_date' ) {
-          that.selectedArr=[];
-          axios.post('api/HOME/EmployeeDeviceMappingByLabelId', {
-            ID: that.formData.ID
-          })
-            .then(selectedData => {
-              console.log(selectedData);
-              const res = selectedData.data.Content;
-              selectedLength = res.length;
-              that.selectedList = res;
-              axios.post('api/HOME/OnloadEmployeeDeviceList')
-                .then(selectData => {
-                  console.log(selectData);
-                  const res = selectData.data.Content, selectLength = res.length;
-                  if ( selectLength ) {
-                    that.selectList = res;
-                    for ( var i = 0; i < selectLength; i++ ) {
-                      for ( var j = 0; j < selectedLength; j++ ) {
-                        if ( that.selectList[ i ].ID === that.selectedList[ j ].ID ) {
-                          console.log(i);
-                          that.selectedArr.push(that.selectList[ i ])
-                        }
+        that.selectedArr = [];
+        axios.post('api/HOME/EmployeeDeviceMappingByLabelId', {
+          ID: that.formData.ID
+        })
+          .then(selectedData => {
+            const res = selectedData.data.Content;
+            selectedLength = res.length;
+            that.selectedTempList = that.selectedList = res;
+            axios.post('api/HOME/OnloadEmployeeDeviceList')
+              .then(selectData => {
+                const res = selectData.data.Content, selectLength = res.length;
+                if ( selectLength ) {
+                  that.selectTempList = that.selectList = res;
+                  for ( var i = 0; i < selectLength; i++ ) {
+                    for ( var j = 0; j < selectedLength; j++ ) {
+                      if ( that.selectList[ i ].ID === that.selectedList[ j ].ID ) {
+                        that.selectedArr.push(that.selectList[ i ])
                       }
                     }
-                    console.log(that.selectedArr);
-                    that.$nextTick(function () {
-                      that.selectedArr.forEach(row => {
-                        that.$refs.select.toggleRowSelection(row, true);
-                      })
-                    })
                   }
-                })
-            });
-        }
-        
+                  console.log(that.selectedTempList);
+                  that.$nextTick(function () {
+                    that.selectedArr.forEach(row => {
+                      that.$refs.select.toggleRowSelection(row, true);
+                    })
+                  })
+                }
+              })
+          });
+        this.isFilter = false;
+
       }
-      
+
       ,
       handleClose() {
         this.$emit('closeAlert');
@@ -309,7 +419,7 @@
         if ( that.formData.LabelName === '' ) {
           that.$message.error('标签名称不能为空');
           return
-          
+
         } else if ( that.formData.EmployeeCode === '' ) {
           that.$message.error('设备所属人不能为空');
           return
@@ -367,53 +477,58 @@
                 value: res[ i ].EmployeeCode
               })
             }
-            console.log(that.list);
           });
-        
       }
-      ,
-      handleSelectChange(val) {
-        console.log(val);
-        this.selectedList = val;
-      }
-      
+
+
     },
     mounted() {
       this.getUserList();
-      
+
     }
   }
 </script>
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
+  .dialogWrapper >>> .tableHeader
+    width: 100%
+    text-align center
+
+  .dialogWrapper >>> .el-table th div
+    line-height: 30px
+
+  .dialogWrapper >>> .search .el-input__inner
+    height: 30px
+    line-height 30px
+
   .dialogWrapper >>> .el-select
     width: 100%
-  
+
   .confirmUpdate
     position: absolute
     width: 20%
     left calc(50% - (20% / 2))
     bottom: 2%
-  
+
   .dialogWrapper >>> .el-form
     .el-form-item
       display inline-block
       margin 0 40px 40px
-  
+
   .dialogWrapper >>> .el-table::before
     height: 0
-  
+
   .dialogWrapper >>> .el-dialog__body
     overflow hidden
-  
+
   .dialogWrapper >>> .el-input__inner
     inputNoBorder()
-  
+
   .dialogWrapper >>> .el-dialog
     width 900px
     text-align center
-  
+
   .dialogWrapper >>> .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
@@ -421,11 +536,11 @@
     position: relative;
     overflow: hidden;
   }
-  
+
   .dialogWrapper >>> .avatar-uploader .el-upload:hover {
     border-color: #409EFF;
   }
-  
+
   .dialogWrapper >>> .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
@@ -434,7 +549,7 @@
     line-height: 178px;
     text-align: center;
   }
-  
+
   .avatar {
     width: 178px;
     height: 178px;
