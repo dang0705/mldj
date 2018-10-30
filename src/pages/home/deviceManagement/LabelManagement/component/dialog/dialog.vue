@@ -256,15 +256,14 @@
                   }
                 }
               } else if ( e.code === 'Backspace' && !that.keyWord ) {
-                console.log(that.selectTempList);
+                console.log(that.selectedList);
                 that.selectList = that.selectTempList;
-
                 that.$nextTick(function () {
                   that.selectedList.forEach(row => {
                     that.$refs.select.toggleRowSelection(row, true);
                   })
                 });
-                // that.isFilter = false;
+                 //that.isFilter = false;
               }
               // alert(0)
             }
@@ -325,23 +324,15 @@
       }
       ,
       deleteItem(index, row) {
-        console.log(index, row);
-        console.log('beforeSplit', this.selectedList);
-        // this.selectedList.splice(index, 1);
-        this.$refs.select.toggleRowSelection(this.selectedList.find(d => d.DeviceName === row.DeviceName));
-
-        this.selectedList.splice(index, 1);
-        this.selectedTempList.splice(index, 1);
-
-        // this.selectedTempList.splice(index, 1);
-        // this.selectedList=this.selectedTempList;
-        console.log(this.selectedList);
-        console.log(this.selectedTempList);
+        if ( !this.isFilter ) {
+          this.$refs.select.toggleRowSelection(this.selectedList.find(d => d.DeviceName === row.DeviceName));
+        }
+     
       },
       filter() {
-        this.isFilter = true;
         let that = this;
         let newArr = [];
+        that.isFilter = true;
         for ( var j = 0; j < that.selectList.length; j++ ) {
           if ( that.selectList[ j ].DeviceName.indexOf(that.keyWord) > -1 ) {
             newArr.push(that.selectList[ j ]);
