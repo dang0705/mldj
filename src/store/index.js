@@ -25,6 +25,7 @@ export default new Vuex.Store({
     isStoreUpdateData:false,
     isEmployeeDeviceUpdateData:false,
     isDeviceLabelUpdateData:false,
+    isCompanyUpdateData:false,
   },
   // actions:{
   //   changeMenu (ctx,menuIndex){
@@ -87,6 +88,9 @@ export default new Vuex.Store({
     },
     DeviceLabelUpdateData(state){
       state.isDeviceLabelUpdateData = true
+    },
+    CompanyUpdateData(state){
+      state.isCompanyUpdateData = true
     },
 
   }

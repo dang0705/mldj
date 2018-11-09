@@ -8,18 +8,8 @@
         <el-form-item prop="imgUrl">
           <img :src="clearSrc" v-model="form.imgUrl" width="200px">
         </el-form-item>
-        <!-- <el-form-item prop="name">
-		   <div class="name">
-			 <div v-model="form.name">{{ imagelist.name }}</div>
-			 <el-button type="text" @click="handleFileName()">修改名字</el-button>
-		   </div>
-		 </el-form-item>-->
       </el-form>
-      <!-- 删除icon -->
-      <!-- <div class="del">
-		 <i @click="handleFileRemove()" class="el-icon-delete"></i>
-	   </div>-->
-      <!-- 放大icon -->
+
       <div class="layer" @click="handleFileEnlarge(imagelist.url)">
         <i class="el-icon-view"></i>
       </div>

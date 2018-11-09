@@ -8,7 +8,12 @@ import './assets/styles/reset.css'
 import fastClick from 'fastclick'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import uploadFiles from 'vue-simple-uploader'
+import axios from 'axios'
+Vue.prototype.$axios = axios;
+
 Vue.use(ElementUI);
+Vue.use(uploadFiles);
 Vue.config.productionTip = false;
 fastClick.attach(document.body);
 /* eslint-disable no-new */

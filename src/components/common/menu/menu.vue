@@ -67,7 +67,6 @@
               that.firstLevelNavigationArr[ i ].subNav.push({subNavNam: MenuList.MenuName, subIndex: MenuList.MenuCode})
             }
           }
-          console.log(that.firstLevelNavigationArr);
         })
     },
     

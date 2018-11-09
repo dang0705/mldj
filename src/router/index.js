@@ -88,6 +88,16 @@ export default new Router({
           component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement'], resolve)
         },
         {
+          path: '/CompanyManagement',
+          name: 'CompanyManagement',
+          component: resolve => require([ '@/pages/home/systemManagement/CompanyManagement/CompanyManagement'], resolve)
+        },
+        {
+          path: '/SourceManagement',
+          name: 'SourceManagement',
+          component: resolve => require([ '@/pages/home/playManagement/SourceManagement/SourceManagement'], resolve)
+        },
+        {
           path: '/deviceVersionManagement',
           name: 'deviceVersionManagement',
           component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)

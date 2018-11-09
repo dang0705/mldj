@@ -25,7 +25,6 @@
         axios.get('../../../static/list.json').then(this.getRes)
       },
       getRes(res){
-        console.log('res.data='+res.data);
         this.list=res.data
       },
       handelClick(i){
