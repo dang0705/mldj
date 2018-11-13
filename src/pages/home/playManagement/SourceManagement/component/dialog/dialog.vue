@@ -10,9 +10,8 @@
       <el-form
         ref="upload"
         :model="formData"
-        :rules="uploadRules"
       >
-        <el-form-item prop="ApkCode">
+       <!-- <el-form-item prop="ApkCode">
           <el-input
             :autofocus="true"
             v-model="formData.ApkCode"
@@ -26,18 +25,18 @@
         </el-form-item>
         <el-form-item prop="ApkDec">
           <el-input type="textarea" v-model="formData.ApkDec" placeholder="版本描述" maxlength="250"></el-input>
-        </el-form-item>
+        </el-form-item>-->
         <el-form-item>
           <upload-files
             :isAlertShow="isAlertShow"
+            :getUploadType="uploadType"
+            @uploaded="getUploadStatus"
           >
-          
           </upload-files>
         </el-form-item>
       </el-form>
-      
       <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <!--<el-button type="primary" @click="confirmUpload">确 定</el-button>-->
       <!--</div>-->
     </el-dialog>
   </div>
@@ -45,8 +44,7 @@
 
 <script>
   // import upload from '@/components/common/upload/uploadList'
-  import uploadFiles from '@/components/common/uploadFiles/uploadFiles'
-  import axios from 'axios'
+  import uploadFiles from './uploader/uploader'
   
   export default {
     // inject:['reload'],
@@ -67,48 +65,17 @@
     },
     data() {
       return {
-        alertTitle: '',
-        upLoadTitle: '上传APK',
-        uploadType: '',
+        alertTitle: '新增素材',
+        isUploaded:false,
+        uploadType: 'image/jpg,image/jpeg,image/png,video/mp4,.apk',
         formData: {
           ApkCode: '',
           ApkName: '',
           ApkDec: '',
-          UpBusinessLicense: {},
           DogType: "up_date"
         }
         ,
         editFormData: {},
-        
-        uploadRules: {
-          ApkCode: [
-            {
-              required: true,
-              message: '版本编号为必填项',
-              trigger: 'blur'
-            },
-            {
-              min: 1,
-              max: 20,
-              message: '长度请在1~20个字符',
-              trigger: 'blur'
-            }
-          ],
-          ApkName: [
-            {
-              required: true,
-              message: '版本名称为必填项',
-              trigger: 'blur'
-            },
-            {
-              min: 1,
-              max: 20,
-              message: '长度请在1~20个字符',
-              trigger: 'blur'
-            }
-          ]
-        }
-        ,
         editString: ''
       }
     },
@@ -123,7 +90,7 @@
         }
       }
     },
-    watch: {
+/*    watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
@@ -136,18 +103,22 @@
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
-            this.alertTitle = '新增版本';
+            this.alertTitle = '新增素材';
           }
           this.formData.DogType = this.editOrAdd;
           console.log(this.formData.DogType);
         }
       }
-    },
+    },*/
     
     methods: {
-      selectFile(event){
-        alert(0)
-        // this.uploadFile()
+      getUploadStatus(val){
+        const that=this;
+        that.isUploaded=val;
+        setTimeout(function () {
+          that.$emit('closeAlert');
+          that.$emit('updateList')
+        },2000)
       },
       handleClose() {
         this.$emit('closeAlert');
@@ -159,12 +130,14 @@
         this.isClose = true;
       },
       hasFile(hasFile) {
-        console.log(hasFile);
-        this.formData.UpBusinessLicense = hasFile;
-      },
-      confirmUpload() {
+      }
+      /*confirmUpload() {
         let that = this;
-        if ( that.formData.ApkCode === '' ) {
+        if ( !that.isUploaded ) {
+          that.$message.error('素材必须上传');
+          return false;
+        }
+       /!* if ( that.formData.ApkCode === '' ) {
           that.$message.error('Apk编号不能为空');
           return
         } else if ( that.formData.ApkName === '' ) {
@@ -173,17 +146,14 @@
         } else if ( !this.formData.UpBusinessLicense && this.formData.DogType === 'a_dd' ) {
           that.$message.error('Apk必须上传');
           return
-        }
-        
-        
-        axios.post('/api/Home/ApkSave', this.formData)
+        }*!/
+        that.$axios.post('/api/Home/ApkSave', this.formData)
           .then(data => {
             // console.log(data);
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success("上传成功");
               that.pass = true;
-              that.$emit('closeAlert');
               that.$store.commit('ApkUpdateData');
               that.$refs[ 'upload' ].resetFields();
             }
@@ -196,7 +166,7 @@
           .catch(e => {
             console.log(e);
           })
-      }
+      }*/
     }
     
   }

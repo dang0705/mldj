@@ -4,7 +4,7 @@
       <el-input
         autofocus
         class="input activeName"
-        v-model="fileName"
+        v-model="sendDialogData.PlayItemName"
         autocomplete="on"
         placeholder="名称"
         @keyup.enter.native="filter"
@@ -16,13 +16,10 @@
         >
         </i>
       </el-input>
-      <el-select v-model="fileType" placeholder="请选择" @change="change">
-        <el-option
-          v-for="item in typeList"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
+      <el-select
+        v-model="Validity"
+      >
+      
       </el-select>
     </div>
     
@@ -34,44 +31,53 @@
               @header-click="add"
     
     >
-      <el-table-column label="下载" width="100"
-                       align="center"
-      >
+      <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
-          <a :href="scope.row.OpenFileUrl" class="el-icon-download download" :download="scope.row.FileName" title="下载至本地"></a>
+          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
+          <el-button type="danger" icon="el-icon-delete" circle size="small"
+                     @click="deleteItem(scope.$index,scope.row)">
+          </el-button>
         </template>
       </el-table-column>
+      
       <el-table-column
-        label="素材名称"
-        prop="FileName"
+        label="播放项名称"
+        prop="PlayItemName"
         align="center"
-        width="380"
+        width="255"
         :show-overflow-tooltip="true"
       >
       </el-table-column>
       <el-table-column
-        label="时长(秒)"
-        prop="TimeLong"
+        label="播放时长(秒)"
+        prop="Duration"
         align="center"
-        width="100">
-      </el-table-column>
-      <el-table-column
-        label="素材来源"
-        prop="CompanyAbb"
-        align="center"
-        width="260"
+        width="140"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
-        label="上传状态"
-        :formatter="formatter"
+        label="播放素材"
+        prop="FileName"
+        align="center"
+        width="345"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+     <!-- <el-table-column
+        label="跳转路径"
         prop="ApkDec"
+        align="center"
+        width="180"
+        :show-overflow-tooltip="true">
+      </el-table-column>-->
+      <el-table-column
+        label="创建人"
+        prop="EmployeeName"
         align="center"
         width="100"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
-        label="上传日期"
+        label="创建时间"
         prop="DateCreated"
         align="center"
         width="180"
@@ -91,39 +97,39 @@
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog
-      :isAlertShow.sync="isAlertShow"
-      @closeAlert="closeAlert"
-      @updateList="updateList"
-      :editOrAdd="dialogType"
-      :id="id"
-      :editData="sendDialogData"></alert-dialog>
-  
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :id="id"
+                  :editData="sendDialogData"></alert-dialog>
+    <!--<sourcelist-dialog-->
+      <!--:isSourceListShow.sync="isSourceListShow"-->
+      <!--@getIsSourceListShow="getIsSourceListShow"-->
+    <!--&gt;</sourcelist-dialog>-->
   </div>
 </template>
 
 <script>
   import axios from 'axios'
   import alertDialog from '../dialog/dialog'
+  // import sourcelistDialog from '../dialog/sourceListDialog/sourceListDialog'
   
-  const storage = window.localStorage;
-  
+  const storage=window.localStorage;
   export default {
     name: "contentList",
     components: {
       alertDialog,
+      // sourcelistDialog
       // filter
     },
     data() {
       return {
+        isSourceListShow: false,
+        FileType:'',
         list: [],
-        typeList: [
-          {value: 0, label: '图片'},
-          {value: 1, label: '视频'},
-          {value: '', label: '全部'},
-        ],
         dialogType: 'up_date',
         isListEmpty: true,
+        Validity:'',
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -133,52 +139,31 @@
         rowStyle: {
           height: '40px'
         },
-        fileName: '',
-        fileType: '',
+        keyWord: '',
         currentPage: 1, //初始页
         pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ApkName: '',
-          ApkCode: '',
-          ApkDec: '',
-          ID: '',
+          FileName: '',
+          FileType: '',
+          PlayItemName: '',
+          Duration: '',//播放时长
+          TimeLong: '',//素材时长
+          OperationType: "up_date",
+          FileId: '',
+          EmployeeCode: storage.getItem('userName') ,
+          Navigation: '',
+          sourceType: ''
         }
         
         // isUpdateDate:false
       }
     },
     mounted() {
-      this.updateList()
+      this.getList()
     },
     methods: {
-      change(){
-        this.updateList()
-      },
-      formatter(row, index) {
-        // console.log(row, index);
-        let finishStatus;
-        return finishStatus = row.Finished = 1 ? '已完成' : '未完成'
-      },
-      updateList() {
-        const that = this,
-          url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
-        that.$axios.post('/api/PlayManage/EmployeeFileAllList', url)
-          .then(data => {
-            if ( data.data.Content ) {
-              const res = data.data.Content.Rows;
-              if ( !res || !res.length || res.length ) {
-                that.isListEmpty = false
-              }
-              that.list = res ? res : [];
-            } else {
-              that.list = [];
-              that.isListEmpty = false
-            }
-            console.log(that.list);
-          })
-      },
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -191,6 +176,26 @@
           console.log(this.dialogType);
         }
       },
+      getList() {
+        let that = this,
+          params = '&PageSize=1000&PageIndex=1&PlayItemName=' + that.sendDialogData.FileName +
+            '&Validity=' + that.sendDialogData.FileType +
+            '&EmployeeCode=' + that.sendDialogData.EmployeeCode+
+            '&RoleId='+storage.getItem('RoleID')+
+            '&FileType='+that.sendDialogData.FileType;
+        // that.list = [];
+        axios.post('/api/PlayManage/EmployeePlayItemList',params)
+          .then(data => {
+            console.log(data);
+            const res = data.data.Content.Rows;
+            if ( !res || !res.length || res.length ) {
+              that.isListEmpty = false
+            }
+            that.list = res || [];
+          })
+      }
+      
+      ,
       closeAlert() {
         this.dialogType = 'up_date';
         this.isAlertShow = false
@@ -202,9 +207,12 @@
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
-        this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
-        this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
+        this.sendDialogData.FileName = this.list[ realIndex ].FileName;
+        this.sendDialogData.FileType = this.list[ realIndex ].FileType;
+        this.sendDialogData.PlayItemName = this.list[ realIndex ].PlayItemName;
+        this.sendDialogData.Duration = this.list[ realIndex ].Duration;
+        this.sendDialogData.TimeLong = this.list[ realIndex ].TimeLong;
+        this.sendDialogData.FileId = this.list[ realIndex ].FileId;
         this.sendDialogData.ID = row.ID;
       }
       , deleteItem(index, row) {
@@ -246,8 +254,23 @@
       }
       ,
       filter() {
-        this.updateList()
+        let that = this;
+        axios.post('/api/Home/OnloadApkList', {
+          ApkName: this.keyWord
+        })
+          .then(data => {
+            that.list = data.data.Content;
+            that.$store.state.isApkUpdateData = false;
+          })
       }
+      
+    },
+    watch: {
+      '$store.state.isApkUpdateData': function () {
+        if ( this.$store.state.isApkUpdateData === true ) {
+          this.getApkList()
+        }
+      },
       
     }
   }
@@ -255,11 +278,7 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  .download
-    display inline-block
-    text-decoration none
-    color #000
-    font-size: 1.2rem
+  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   

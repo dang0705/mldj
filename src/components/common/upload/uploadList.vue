@@ -20,7 +20,8 @@
     </div>
     
     <div class="img-upload">
-      <el-upload class="uploader" :accept="uploadType"
+      <el-upload class="uploader"
+                 :accept="uploadType"
                  ref="upload"
                  list-type="picture"
                  drag
@@ -112,13 +113,6 @@
           console.log("ready");
           this.pass = null;
           this.progress = 0;
-          // this.$emit('hasFile', file);
-          /*          reader.readAsArrayBuffer(file.raw);
-					
-					reader.onload=function(e){
-					  that.$emit('hasFile', reader.result);
-					  console.log(reader.result);
-					};*/
           if ( file.raw.type.indexOf('image') > -1 ) {
             let reader = new FileReader();
             reader.readAsDataURL(file.raw);
@@ -139,23 +133,6 @@
           this.$message.error("图片上传出错，请刷新重试！");
         }
       },
-      uploadOnSuccess(e, file, fileList) {//上传附件
-        // console.log("——————————success——————————");
-        // const reader = new FileReader();
-        // reader.readAsDataURL(file.raw);
-        // var that = this;
-        // reader.onload = function (e) {
-        //   console.log(e.target.result);
-        //   that.imagelist.push({
-        //     url: e.target.result,
-        //     name: '新增图片'
-        //   });
-        //   console.log(that.imagelist);
-        // };
-        // this.pass = true;
-        // this.$message.success("上传成功");
-        
-      },
       
       handleFileEnlarge(_url) {//放大图片
         // console.log(_url);
@@ -164,47 +141,6 @@
           this.isEnlargeImage = !this.isEnlargeImage;
         }
       },
-      /* handleFileName(file, i) {//修改名字
-		 console.log(file, i);
-		 let that = this;
-		 this.$prompt("请输入新文件名：", "提示：", {
-		   confirmButtonText: '确定',
-		   cancelButtonText: '取消'
-		 }).then(({value}) => {
-		   if ( !value ) {
-			 return false;
-		   }
-		   //可添加ajax
-		   this.$message.success("操作成功");
-		   that.imagelist.name = value;
-		   console.log(that.fileList);
-		   
-		 }).catch(() => {
-		 })
-	   },
-	   handleFileRemove(file, i) {//删除图片
-		 console.log(file, i);
-		 if ( !file.url ) {
-		   return false;
-		 }
-		 let that = this;
-		 this.$confirm('是否删除此附件？', '提示', {
-		   confirmButtonText: '确定',
-		   cancelButtonText: '取消',
-		   type: 'warning'
-		 }).then(() => {
-		   //可添加ajax
-		   that.imagelist.splice(i, 1);
-		   that.fileList.splice(i, 1);
-		   this.$message({
-			 type: 'success',
-			 message: '删除成功',
-			 onClose: () => {
-			 }
-		   });
-		   this.$message.success("删除成功")
-		 }).catch((meg) => console.log(meg))
-	   },*/
     },
     mounted() {
       this.uploadTitle = this.getUpLoadTitle;

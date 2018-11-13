@@ -4,6 +4,8 @@
     :options="options"
     class="uploader-example"
     @file-added="fileAdded"
+    @file-progress="fileProgress"
+    @upload="startUpload"
     :autoStart="false"
     :file-status-text="statusText"
   >
@@ -35,27 +37,19 @@
         uploadUrl: 'api/Handler/UploadFileHandler.ashx',
         fileName: '',
         fileType: '',
-        fileSize:'',
+        fileSize: '',
         videoDuration: '',
         checkFileParams: '',
+        chunksOffset: '',
         EmployeeCode: storage.getItem('userName'),
         options: {
           // 可通过 https://github.com/simple-uploader/Uploader/tree/develop/samples/Node.js 示例启动服务
           singleFile: true,
-          testChunks: false,
-       /*   uploadMethod: 'POST',
-          testMethod:'POST',*/
-          target: 'api/Handler/UploadFileHandler.ashx'
-        ,
-          query: {
-            EmployeeCode:this.EmployeeCode,
-            action: 'uploadfile',
-            // hash:this.hash,
-            // endPosition:this.fileSize,
-          },
+          testMethod: 'POST',
+          target: 'api/Handler/UploadFileHandler.ashx',
+          maxChunkRetries: 3,
+          query: {},
           chunkSize: 4 * 1024 * 1024,
-          // uploadMethod: this.uploadMethod
-          // testChunks: false
         },
         statusText: {
           success: '上传成功',
@@ -72,13 +66,25 @@
     }
     ,
     methods: {
-      uploadMethod() {
-        const that = this;
-        this.$axios.post(that.uploadUrl)
-          .then(res => {
-            console.log(res);
-          })
+      startUpload(){
+        allert(0)
       },
+      fileProgress(rootFile, file, chunk) {
+        console.log(rootFile, file, chunk);
+        const that = this;
+        if ( chunk.offset === that.chunksOffset ) {
+          let time_long = that.fileType !== 1 ? 0 : that.videoDuration;
+          let params = '&action=endfileupload' + '&filename=' + that.fileName + '&hash='
+            + that.hash + '&endPosition=' + that.fileSize + '&time_long=' + time_long +
+            '&EmployeeCode=' + that.EmployeeCode + '&FileType=' + that.fileType;
+          
+          this.$axios.post(that.uploadUrl, params)
+            .then(res => {
+              console.log(res);
+            })
+        }
+      }
+      ,
       fileAdded(val) {
         console.log(val);
         const that = this,
@@ -93,7 +99,8 @@
             return;
           }
           that.fileName = val.name;
-          that.fileSize=val.size;
+          that.fileSize = val.size;
+          that.chunksOffset = val.chunks.length - 1;
           if ( val.fileType === 'video/mp4' ) {
             let url = null,
               video = document.getElementById('video');
@@ -121,6 +128,13 @@
             that.hash = md5(e.target.result);
             console.log(that.hash);
             that.checkFileParams += '&action=checkfile&filename=' + val.name + '&hash=' + that.hash + '&EmployeeCode=' + that.EmployeeCode;
+            uploader.opts.query = {
+              EmployeeCode: that.EmployeeCode,
+              action: 'uploadfile',
+              hash: that.hash,
+              filename: val.name,
+              endPosition: val.size
+            };
             /* that.checkFileParams += '&filename=' + val.name;
 			 that.checkFileParams += '&hash=' + that.hash;
 			 that.checkFileParams += '&EmployeeCode=' + that.EmployeeCode;*/
@@ -166,6 +180,7 @@
     mounted() {
       this.$nextTick(() => {
         window.uploader = this.$refs.uploader.uploader
+        console.log(window.uploader);
       })
       // this.isUploaderListShow = this.isAlertShow;
     }

@@ -29,7 +29,10 @@
     color #fff
     text-align center
     font-size 20px
-  
+  #app >>> .el-dialog
+    width: 450px
+  #app>>>.el-form-item__label
+    text-align left
   #app >>> .el-input__inner
     inputNoBorder()
   
