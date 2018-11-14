@@ -27,13 +27,6 @@
               @header-click="add"
               @selection-change="handleSelectionChange"
     >
-      <!--    <el-table-column
-			type="selection"
-			width="40"
-			class="selection"
-			prop='ID'
-		  ></el-table-column>-->
-      
       <el-table-column
         width="100"
         label="操作"

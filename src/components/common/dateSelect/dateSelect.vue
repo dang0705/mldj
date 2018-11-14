@@ -22,11 +22,12 @@
     name: "dateSelect",
     props: {
       isAlertShow: {
-        type: Boolean
+        type: Boolean,
+        default: () => true
       }
       ,
       selectedDate: {
-        default: []
+        default: () => []
       }
     },
     watch: {
@@ -37,31 +38,22 @@
         }
       }
     },
-    // components:{Bus},
     data() {
       return {
         pickerOptions: {
           disabledDate: time => {
             return time.getTime() < Date.now() - 8.64e7
           }
-    
+          
         },
         value: [],
-        // pickerTitle:''
       };
     },
     methods: {
       getDate(val) {
         console.log(val);
-        let commitName = '';
         this.$emit('getDate', val)
-        // if ( val ) {
-        //   commitName=this.$store.state.dataPickerTitle==='startAndEndDateSelect'?'startAndEndDateSelect':'advanceAndWithDrawlDateSelect';
-        //   this.$store.commit(commitName,val);
-        //   console.log(val);
-        // }
       }
-      
     }
     ,
     mounted() {
@@ -73,6 +65,9 @@
 <style scoped lang="stylus">
   #dateWrapper
     display inline-block
+    vertical-align top
     > div
       width 100%
+  #dateWrapper >>> .el-range-input
+      background transparent
 </style>

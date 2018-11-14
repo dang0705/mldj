@@ -48,7 +48,8 @@
                          align="center"
         >
           <template slot-scope="scope">
-            <el-radio class="radio" v-model="sourceInfo.FileId" :label="scope.row.ID"
+            <el-radio class="radio" v-model="sourceInfo.FileId"
+                      :label="scope.row.ID.toString()"
                       @change="select(scope.row)"></el-radio>
           </template>
         </el-table-column>
@@ -100,7 +101,12 @@
       isSourceListShow: {
         type: Boolean
       }
-      , OperationType: {
+      ,
+      OperationType: {
+        type: String
+      }
+      ,
+      sendFileId: {
         type: String
       }
     },
@@ -166,11 +172,13 @@
         that.$axios.post('/api/PlayManage/EmployeeFileAllList', params)
           .then(data => {
             console.log(data);
-            const res = data.data.Content.Rows;
-            if ( !res || !res.length || res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              const res = data.data.Content.Rows;
+              if ( !res || !res.length || res.length ) {
+                that.isListEmpty = false
+              }
+              that.list = res || [];
             }
-            that.list = res || [];
           })
       },
       
@@ -182,6 +190,7 @@
       },
       handleClose() {
         this.$emit('closeThis');
+        this.FileType=this.FileName='';
       },
       handleSizeChange: function (size) {
         this.pagesize = size;
@@ -199,14 +208,16 @@
       }
     },
     mounted() {
-      this.getSourceList()
+      this.getSourceList();
+      this.sourceInfo.FileId = this.sendFileId;
+      console.log(this.sourceInfo.FileId);
     },
     watch: {
       'isSourceListShow': function () {
         console.log(this.OperationType);
-        /* if ( this.isSourceListShow ) {
-		 
-		 }*/
+        this.sourceInfo.FileId = this.sendFileId
+        console.log(this.sourceInfo.FileId);
+        
       }
     }
   }

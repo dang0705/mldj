@@ -204,6 +204,7 @@
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
+        this.formData.serviceTime = [];
         // this.formData.ImgBase='';
         // this.editFormData.ImgBase=''
         // this.$refs.uploadList.resetFields();

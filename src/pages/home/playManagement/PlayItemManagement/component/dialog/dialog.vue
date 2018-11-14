@@ -18,7 +18,7 @@
           label-width="120px"
           align="left"
         >
-          <el-button type="primary" size="large" @click="selectSource">{{formData.FileName}}</el-button>
+          <el-button type="primary" size="large" @click="selectSource" class="selectSource" >{{formData.FileName}}</el-button>
         </el-form-item>
         <el-form-item
           prop="PlayItemName"
@@ -76,7 +76,7 @@
       </el-form>
       
       <div slot="footer" class="dialog-footer">
-        <el-button @click="handleClose">确 定</el-button>
+        <el-button @click="handleClose">取消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
     </el-dialog>
@@ -85,6 +85,7 @@
       @closeThis="closeThis"
       :OperationType="formData.OperationType"
       @selectedSource="selectedSource"
+      :sendFileId="formData.FileId"
     ></sourcelist-dialog>
   </div>
 </template>
@@ -129,7 +130,9 @@
           sourceType: ''
         }
         ,
-        editFormData: {},
+        editFormData: {
+        
+        },
         
         uploadRules: {
           FileName: [
@@ -192,16 +195,14 @@
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-            /* this.formData.ApkCode = this.editData.ApkCode;
-			 this.formData.ApkName = this.editData.ApkName;
-			 this.formData.ApkDec = this.editData.ApkDec;*/
-            this.formData.ID = this.editData.ID;
-            this.alertTitle = '编辑版本'
+           this.formData=this.editData;
+            // this.formData.ID = this.editData.ID;
+            this.alertTitle = '编辑播放项'
           } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
-            this.alertTitle = '新增版本';
+            this.alertTitle = '新增播放项';
             this.formData.FileName = '上传素材'
           }
         }
@@ -267,7 +268,6 @@
               that.$message.success("上传成功");
               that.pass = true;
               that.$emit('closeAlert');
-              that.$store.commit('ApkUpdateData');
               that.$refs[ 'upload' ].resetFields();
             }
             else {
@@ -290,6 +290,8 @@
 </script>
 
 <style scoped lang="stylus">
+  @import '~@/assets/styles/mixin.styl'
+  
   .dialogWrapper >>> .el-dialog
     width 450px
     max-width 800px
@@ -320,5 +322,9 @@
     width: 178px;
     height: 178px;
     display: block;
+  }
+  .selectSource{
+    max-width: 100%;
+    textOverFlow()
   }
 </style>

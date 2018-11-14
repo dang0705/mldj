@@ -4,22 +4,44 @@
       <el-input
         autofocus
         class="input activeName"
-        v-model="sendDialogData.PlayItemName"
+        v-model="searchData.PlayItemName"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
       <el-select
-        v-model="Validity"
+        v-model="searchData.FileType"
+        @change="getList"
       >
+        <el-option
+          v-for="(item,i) in typeList"
+          :key="i"
+          :label="item.label"
+          :value="item.value"
+        >
+        
+        </el-option>
+      </el-select>
       
+      <el-select
+        v-model="searchData.Validity"
+        @change="getList"
+      >
+        <el-option
+          v-for="(item,i) in statusList"
+          :key="i"
+          :label="item.label"
+          :value="item.value"
+        >
+        
+        </el-option>
       </el-select>
     </div>
     
@@ -34,9 +56,15 @@
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>
+          <!-- <el-button type="danger" icon="el-icon-delete" circle size="small"
+					  @click="deleteItem(scope.$index,scope.row)">
+		   </el-button>-->
+          <el-switch
+            v-model="scope.row.Validity"
+            :active-value="1"
+            :inactive-value="0"
+            @change="switchChange(scope.$index,scope.row)"
+          ></el-switch>
         </template>
       </el-table-column>
       
@@ -62,13 +90,13 @@
         width="345"
         :show-overflow-tooltip="true">
       </el-table-column>
-     <!-- <el-table-column
-        label="跳转路径"
-        prop="ApkDec"
-        align="center"
-        width="180"
-        :show-overflow-tooltip="true">
-      </el-table-column>-->
+      <!-- <el-table-column
+		 label="跳转路径"
+		 prop="ApkDec"
+		 align="center"
+		 width="180"
+		 :show-overflow-tooltip="true">
+	   </el-table-column>-->
       <el-table-column
         label="创建人"
         prop="EmployeeName"
@@ -103,8 +131,8 @@
                   :id="id"
                   :editData="sendDialogData"></alert-dialog>
     <!--<sourcelist-dialog-->
-      <!--:isSourceListShow.sync="isSourceListShow"-->
-      <!--@getIsSourceListShow="getIsSourceListShow"-->
+    <!--:isSourceListShow.sync="isSourceListShow"-->
+    <!--@getIsSourceListShow="getIsSourceListShow"-->
     <!--&gt;</sourcelist-dialog>-->
   </div>
 </template>
@@ -114,7 +142,7 @@
   import alertDialog from '../dialog/dialog'
   // import sourcelistDialog from '../dialog/sourceListDialog/sourceListDialog'
   
-  const storage=window.localStorage;
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -125,11 +153,21 @@
     data() {
       return {
         isSourceListShow: false,
-        FileType:'',
+        FileType: '',
         list: [],
         dialogType: 'up_date',
         isListEmpty: true,
-        Validity:'',
+        typeList: [
+          {value: '', label: '全部'},
+          {value: 0, label: '图片'},
+          {value: 1, label: '视频'},
+          {value: 2, label: '游戏'}
+        ],
+        statusList: [
+          {value: '', label: '全部'},
+          {value: 0, label: '停用'},
+          {value: 1, label: '启用'}
+        ],
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -144,6 +182,11 @@
         pagesize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
+        searchData: {
+          PlayItemName: '',
+          FileType: '',
+          Validity: ''
+        },
         sendDialogData: {
           FileName: '',
           FileType: '',
@@ -152,11 +195,11 @@
           TimeLong: '',//素材时长
           OperationType: "up_date",
           FileId: '',
-          EmployeeCode: storage.getItem('userName') ,
+          EmployeeCode: storage.getItem('userName'),
           Navigation: '',
-          sourceType: ''
+          sourceType: '',
+          Validity: 1
         }
-        
         // isUpdateDate:false
       }
     },
@@ -178,27 +221,33 @@
       },
       getList() {
         let that = this,
-          params = '&PageSize=1000&PageIndex=1&PlayItemName=' + that.sendDialogData.FileName +
-            '&Validity=' + that.sendDialogData.FileType +
-            '&EmployeeCode=' + that.sendDialogData.EmployeeCode+
-            '&RoleId='+storage.getItem('RoleID')+
-            '&FileType='+that.sendDialogData.FileType;
+          params = '&PageSize=1000&PageIndex=1&PlayItemName=' + that.searchData.PlayItemName +
+            '&Validity=' + that.searchData.Validity +
+            '&EmployeeCode=' + that.sendDialogData.EmployeeCode +
+            '&RoleId=' + storage.getItem('RoleID') +
+            '&FileType=' + that.searchData.FileType;
         // that.list = [];
-        axios.post('/api/PlayManage/EmployeePlayItemList',params)
+        axios.post('/api/PlayManage/EmployeePlayItemList', params)
           .then(data => {
             console.log(data);
-            const res = data.data.Content.Rows;
-            if ( !res || !res.length || res.length ) {
+            if ( data.data.state == 1 ) {
+              const res = data.data.Content.Rows;
+              if ( !res || !res.length || res.length ) {
+                that.isListEmpty = false
+              }
+              that.list = res || [];
+            } else {
+              that.list = [];
               that.isListEmpty = false
             }
-            that.list = res || [];
           })
       }
       
       ,
       closeAlert() {
         this.dialogType = 'up_date';
-        this.isAlertShow = false
+        this.isAlertShow = false;
+        this.getList()
       }
       ,
       getData(index, row) {
@@ -215,53 +264,29 @@
         this.sendDialogData.FileId = this.list[ realIndex ].FileId;
         this.sendDialogData.ID = row.ID;
       }
-      , deleteItem(index, row) {
-        let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            axios.post('/api/Home/ApkSave', {
-              DogType: 'd_elete',
-              ID: row.ID
-            })
-              .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
-                  })
-              })
-          })
-          .catch(() => {
-          
-          })
-        
-      }
+      
       ,
       handleSizeChange: function (size) {
         this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
       },
       handleCurrentChange: function (currentPage) {
         this.currentPage = currentPage;
         // console.log(this.currentPage)  //点击第几页
       }
       ,
-      filter() {
-        let that = this;
-        axios.post('/api/Home/OnloadApkList', {
-          ApkName: this.keyWord
+      switchChange(i, row) {
+        console.log(i, row);
+        let that=this;
+        that.$axios.post('/api/PlayManage/EmployeePlayUpdateStatus', {
+          EmployeeCode:that.sendDialogData.EmployeeCode,
+          ID: row.ID,
+          Validity:row.Validity
+          
         })
           .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
+            console.log(data);
           })
+        // this.getList()
       }
       
     },

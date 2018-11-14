@@ -103,6 +103,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/playManagement/PlayItemManagement/PlayItemManagement'], resolve)
         },
         {
+          path: '/PlayListManagement',
+          name: 'PlayListManagement',
+          component: resolve => require([ '@/pages/home/playManagement/PlayListManagement/PlayListManagement'], resolve)
+        },
+        {
           path: '/deviceVersionManagement',
           name: 'deviceVersionManagement',
           component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)
