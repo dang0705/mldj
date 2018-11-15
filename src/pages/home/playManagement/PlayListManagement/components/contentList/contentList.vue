@@ -39,7 +39,6 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
-    
     >
       <el-table-column label="操作" align="center" width="100">
         <template slot-scope="scope">
@@ -62,14 +61,17 @@
       <el-table-column label="播放日期" align="center" width="220" :formatter="formatter"
                        :show-overflow-tooltip="true"
       ></el-table-column>
-      <el-table-column label="推送操作" align="center" width="140"
+      <el-table-column label="推送操作" align="center" width="160"
                        :show-overflow-tooltip="true"
       >
         <template slot-scope="scope">
-          <el-button type="success" round size="small" @click="">推送设备选择</el-button>
+          <el-button
+            type="success" round size="small"
+            @click="pushDeviceSelect(scope.$index,scope.row)">{{pushDeviceSelectText}}
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="推送历史" align="center" width="160"
+      <el-table-column label="推送历史" align="center" width="140"
                        :show-overflow-tooltip="true"
       ></el-table-column>
       <el-table-column label="屏幕播放项设置" align="center" width="180"
@@ -101,7 +103,7 @@
     
     <player-dialog
       :isPlayerDialogShow.sync="isPlayerDialogShow"
-
+      @closePlayerAlert="closePlayerAlert"
     >
     
     </player-dialog>
@@ -134,6 +136,7 @@
         isPushHistoryAndStatusShow: false,  //显示隐藏推送历史弹框
         isPlayItemSelectShow: false,        //显示隐藏屏幕播放项弹框
         isListEmpty: false,
+        pushDeviceSelectText: '',
         dialogType: 'up_date',
         statusList: [
           {value: '', label: '列表状态'},
@@ -165,7 +168,20 @@
     ,
     methods: {
       getList() {
-        const that = this;
+        let that = this,
+          date = new Date(),
+          year = date.getFullYear(),
+          month = date.getMonth() + 1,
+          day = date.getDate(),
+          dateStr = year + '-' + month + '-' + day,
+          now = new Date(dateStr).getTime();
+        /* date = new Date(),
+		 year = date.getFullYear(),
+		 month = date.getMonth() + 1,
+		 day = date.getDate(),
+		 dateStr = year + '-' + month + '-' + day,
+		 now = date.getTime(dateStr);*/
+        console.log(new Date().getTime());
         that.$axios.post('/api/PlayManage/EmployeePlayListList', that.searchInfo)
           .then(data => {
             console.log(data);
@@ -175,6 +191,17 @@
                 that.isListEmpty = false
               }
               that.list = res || [];
+              let length = that.list.length;
+              for ( var i = 0; i < length; i++ ) {
+                if ( new Date(that.list[ i ].PlayListEndDate).getTime() < now ) {
+                  that.pushDeviceSelectText = '时间已过,无法推送'
+                } else {
+                  that.pushDeviceSelectText = '推送设备选择'
+                }
+              }
+              /* console.log(that.list.filter((item, index, array) => {
+				 return item.ID == 0
+			   }));*/
             } else {
               that.list = [];
               that.isListEmpty = false
@@ -209,6 +236,10 @@
         this.isAddAndEditPlayListShow = false
       }
       ,
+      closePlayerAlert(){
+        this.isPlayerDialogShow=false;
+      }
+      ,
       addOrEditSuccess() {
         this.getList()
       }
@@ -226,14 +257,29 @@
         return date
       }
       ,
-      edit(i,row){
+      edit(i, row) {
         // console.log(i, row);
         var realIndex = this.currentPage > 1 ? i + ((this.currentPage - 1) * this.pagesize) : i;
         this.isAddAndEditPlayListShow = true;
         this.searchInfo.PlayListName = this.list[ realIndex ].PlayListName;
         this.searchInfo.PlayListStartDate = this.list[ realIndex ].PlayListStartDate;
         this.searchInfo.PlayListEndDate = this.list[ realIndex ].PlayListEndDate;
-        this.dialogType='up_date';
+        this.dialogType = 'up_date';
+      }
+      ,
+      pushDeviceSelect(i, row) {
+        console.log(i, row);
+        let date = new Date(),
+          year = date.getFullYear(),
+          month = date.getMonth() + 1,
+          day = date.getDate(),
+          dateStr = year + '-' + month + '-' + day,
+          now = new Date(dateStr).getTime();
+        if ( new Date(row.PlayListEndDate).getTime() < now ) {
+          this.$message.error('无法推送')
+        } else {
+          this.isPlayerDialogShow=true;
+        }
       }
     }
     ,

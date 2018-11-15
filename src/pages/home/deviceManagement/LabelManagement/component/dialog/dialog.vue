@@ -41,7 +41,6 @@
       <el-transfer
         style="text-align: left; display: inline-block"
         v-if="editOrAdd==='up_date'"
-        
         v-model="selected"
         filterable
         filter-placeholder="请输入设备名称"

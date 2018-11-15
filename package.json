@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "el-tree-transfer": "^1.9.7",
     "element-ui": "^2.4.6",
     "fastclick": "^1.0.6",
     "stylus": "^0.54.5",
