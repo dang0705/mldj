@@ -16,7 +16,7 @@
         :mode='mode'
         height='540px'
         filter
-        >
+      >
       </tree-transfer>
     </el-dialog>
   </div>
@@ -24,6 +24,7 @@
 
 <script>
   import treeTransfer from 'el-tree-transfer' // 引入
+  const storage = window.localStorage;
   export default {
     name: "PlayerDialog",
     props: {
@@ -38,7 +39,13 @@
       return {
         title: [ '待选标签/设备', '已选标签/设备' ],
         isAlertShow: false,
+        allDeviceList: [],
+        allLabelList: [],
+        allLabelIdList: [],
+        allLabeledDeviceIdList: [],
+        unLabeledArr: [],
         mode: "transfer", // transfer addressList
+        EmployeeCode: storage.getItem('userName'),
         fromData: [
           {
             id: "1",
@@ -65,19 +72,69 @@
     }
     ,
     methods: {
-      getList(){},
+      getAllDeviceList() {
+        const that = this;
+        return that.$axios.post('/api/Equip/EmployeeDeviceListList', {
+          PageIndex: 1,
+          PageSize: 1000,
+          DeviceName: '',
+          EmployeeCode: that.EmployeeCode,
+          Validity: 1
+        })
+      },
+      getAllLabelList() {
+        const that = this;
+        return that.$axios.post('/api/Equip/EmployeeDeviceLableList', {
+          PageIndex: 1,
+          PageSize: 1000,
+          DeviceName: '',
+          EmployeeCode: that.EmployeeCode,
+          Validity: 1
+        })
+      },
       
+      getAllDvcAndLblList() {
+        const that = this;
+        that.$axios.all([ that.getAllDeviceList(), that.getAllLabelList() ])
+          .then(that.$axios.spread((allDeviceList, allLabelList) => {
+            console.log(allDeviceList, allLabelList);
+            that.allDeviceList = allDeviceList.data.Content.Rows;
+            that.allLabelList = allLabelList.data.Content.Rows;
+            console.log(that.allLabelList);
+            for ( var i = 0; i < that.allLabelList.length; i++ ) {
+              that.allLabelIdList.push(that.allLabelList[ i ].ID)
+            }
+            console.log(that.allLabelIdList);
+            that.getLabeledDeviceList()
+          }))
+      },
+      getLabeledDeviceList() {
+        const that = this;
+        let res, length;
+        for ( var j = 0; j < that.allLabelIdList.length; j++ ) {
+          that.$axios.post('/api/Equip/EmployeeDeviceMappingByLabelId', {
+            ID: that.allLabelIdList[ j ]
+          })
+            .then(data => {
+              console.log(data);
+              res = data.data.Content;
+              length = res.length;
+              for ( var i = 0; i < length; i++ ) {
+                if ( res[ i ].Validity == 1 ) {
+                  that.allLabeledDeviceIdList.push(res[ i ].DevicelId)
+                }
+              }
+              that.allLabeledDeviceIdList = Array.from(new Set(that.allLabeledDeviceIdList));
+              console.log(that.allLabeledDeviceIdList);
+            })
+        }
+        
+        
+      },
       handleClose() {
         this.$emit('closePlayerAlert');
       }
       ,
-      changeMode() {
-        if ( this.mode == "transfer" ) {
-          this.mode = "addressList";
-        } else {
-          this.mode = "transfer";
-        }
-      },
       // 监听穿梭框组件添加
       add(fromData, toData, obj) {
         // 树形穿梭框模式transfer时，返回参数为左侧树移动后数据、右侧树移动后数据、移动的{keys,nodes,halfKeys,halfNodes}对象
@@ -96,11 +153,13 @@
       }
     },
     mounted() {
-    
     },
     watch: {
       'isPlayerDialogShow': function () {
-        this.isAlertShow = this.isPlayerDialogShow
+        this.isAlertShow = this.isPlayerDialogShow;
+        if ( this.isAlertShow && !this.allLabeledDeviceIdList.length ) {
+          this.getAllDvcAndLblList();
+        }
       }
     }
   }
@@ -108,5 +167,5 @@
 
 <style scoped lang="stylus">
   #player >>> .el-dialog
-      width: 800px
+    width: 800px
 </style>

@@ -180,13 +180,21 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadEmployeeDeviceList')
+        axios.post('/api/Home/OnloadEmployeeDeviceList',{
+        })
           .then(data => {
             const res = data.data.Content;
-            if ( !res || !res.length|| res.length) {
+            if ( data.data.state == 1 ) {
+              if ( !res || !res.length|| res.length) {
+                that.isListEmpty = false
+              }
+              that.list = res ? data.data.Content : [];
+            }else {
+              that.list=[];
               that.isListEmpty = false
+  
             }
-            that.list = res ? data.data.Content : [];
+          
             that.$store.state.isEmployeeDeviceUpdateData = false;
           })
         

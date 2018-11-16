@@ -63,8 +63,8 @@
 
 <script>
   import axios from 'axios'
-
-
+  
+  
   let Msg = '';
   const storage = window.localStorage;
   export default {
@@ -76,7 +76,7 @@
       },
       editOrAdd: {
         type: String,
-        default:'add'
+        default: 'add'
       },
       editData: {
         type: Object
@@ -131,60 +131,7 @@
           
         }
       }
-      /* return {
-		 
-		 list: [],
-		 selectList: [],
-		 selectedList: [],
-		 selectedArr: [],
-		 isFilter: false,
-		 newArr2: [],
-		 selectTempList: [],
-		 selectedTempList: [],
-		 // provinceTotalArr: '',
-		 keyWord: '',
-		 alertTitle: '',
-		 formData: {
-		   LabelName: '',
-		   DogType: "",
-		   EmployeeCode: '',
-		   EmployeeName: '',
-		   ID: ''
-		 }
-		 ,
-		 isAdd: false,
-		 editFormData: {},
- 
-		 uploadRules: {
-		   LabelName: [
-			 {
-			   required: true,
-			   message: '标签名称为必填项',
-			   trigger: 'blur'
-			 },
-			 {
-			   min: 1,
-			   max: 10,
-			   message: '长度请在1~10个字符',
-			   trigger: 'blur'
-			 }
-		   ]
-		   , EmployeeName: [
-			 {
-			   required: true,
-			   message: '分配所有人为必填项',
-			   trigger: 'blur'
-			 },
-			 {
-			   min: 1,
-			   max: 10,
-			   message: '长度请在1~10个字符',
-			   trigger: 'blur'
-			 }
-		   ]
- 
-		 }
-	   }*/
+      
     },
     computed: {
       isClose: {
@@ -209,14 +156,6 @@
             that.formData.EmployeeCode = storage.getItem('userName');
             that.formData.EmployeeName = that.editData.EmployeeName;
             that.alertTitle = '编辑标签';
-            // that.provinceTotalArr = that.formData.ProvinceName + ' / ' + that.formData.CityName;
-            /*       for ( var i = 0; i < length; i++ ) {
-					 if ( that.formData.EmployeeName === that.list[ i ].label ) {
-					   that.formData.AddEmployeeCode = that.list[ i ].value;
-					   console.log(that.formData.AddEmployeeCode);
-					   break;
-					 }
-				   }*/
             Msg = '编辑成功';
             that.formData.DogType = that.editOrAdd;
           }
@@ -246,40 +185,55 @@
             console.log(data);
             let res = data.data.Content, length = res.length;
             for ( let i = 0; i < length; i++ ) {
-              if ( res[ i ].DeviceName ) {
-                that.selectList.push({
-                  key: res[ i ].ID,
-                  label: res[ i ].DeviceName,
-                  deviceAddress: res[ i ].Address
-                });
-              } else {
-                that.selectList.push({
-                  key: res[ i ].ID,
-                  label: '未命名设备',
-                  deviceAddress: res[ i ].Address
-                });
-              }
+              that.selectList.push({
+                key: res[ i ].ID,
+                label: res[ i ].Validity ? res[ i ].DeviceName : res[ i ].DeviceName + '-已停用',
+                disabled: !res[ i ].Validity,
+                deviceAddress: res[ i ].Address
+              });
             }
           });
       },
       renderFunc(h, option) {
+        console.log(option);
         // return <p><span class='deviceName'>{option.label}</span><span class='deviceAddress'>{option.deviceAddress}</span></p>;
-        return h(
-          'p', {}, [
-            h('span', {
-              class: 'deviceName',
-              attrs:{
-                title:'设备名'
-              }
-            }, option.label),
-            h('span', {
-              class: 'deviceAddress',
-              attrs:{
-                title:'设备地址'
-              }
-            }, option.deviceAddress)
-          ]
-        )
+        if ( option.disabled ) {
+          return h(
+            'p', {}, [
+              h('span', {
+                class: 'deviceName',
+                attrs: {
+                  title: '可以进入设备列表启用该设备'
+                }
+              }, option.label),
+              h('span', {
+                class: 'deviceAddress',
+                attrs: {
+                  title: '设备地址'
+                }
+              }, option.deviceAddress)
+            ]
+          )
+        } else {
+          return h(
+            'p', {}, [
+              h('span', {
+                class: 'deviceName',
+                attrs: {
+                  title: '设备名称'
+                }
+              }, option.label),
+              h('span', {
+                class: 'deviceAddress',
+                attrs: {
+                  title: '设备地址'
+                }
+              }, option.deviceAddress)
+            ]
+          )
+          
+        }
+        
       },
       handleChange(value, direction, movedKeys) {
         console.log(value, direction, movedKeys);
@@ -297,6 +251,7 @@
             for ( var i = 0; i < length; i++ ) {
               that.selected.push(res[ i ].ID)
             }
+            console.log(that.selected);
           })
       }
       
@@ -388,7 +343,7 @@
       console.log(storage.getItem('RoleId'));
       this.getUserList();
       this.generateData();
-  
+      
     }
   }
 </script>
@@ -420,9 +375,9 @@
       textOverFlow()
     
     .deviceName
-      width: 30%
+      width: 45%
     .deviceAddress
-      width: 70%
+      width: 65%
   
   .confirmUpdate
     width: 20%

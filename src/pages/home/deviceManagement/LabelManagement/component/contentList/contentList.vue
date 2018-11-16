@@ -61,14 +61,25 @@
         align="center"
         width="980"
       >
+        <template slot-scope="scope">
+          <el-tree
+            :load="getNodesChildren"
+            @node-click="nodeClick"
+            node-key="id"
+            lazy
+            :props="defaultProps"
+            accordion
+          >
+          </el-tree>
+        </template>
       </el-table-column>
- <!--     <el-table-column
-        prop="EmployeeName"
-        label="设备所属人"
-        align="center"
-        width="140"
-      >
-      </el-table-column>-->
+      <!--     <el-table-column
+			 prop="EmployeeName"
+			 label="设备所属人"
+			 align="center"
+			 width="140"
+		   >
+		   </el-table-column>-->
       
       <el-table-column
         label="增加+"
@@ -91,7 +102,8 @@
       :total="list.length">
     </el-pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType"
+                  :editData="sendDialogData"></alert-dialog>
   
   </div>
 </template>
@@ -101,6 +113,7 @@
   import citySelect from '@/components/common/citySelect/citySelect'
   
   import alertDialog from '../dialog/dialog'
+  
   export default {
     name: "contentList",
     components: {
@@ -112,6 +125,7 @@
       return {
         list: [],
         isListEmpty: true,
+        labelTree: [],
         dialogType: 'up_date',
         switchData: '',
         headerStyle: {
@@ -137,6 +151,11 @@
           Address: '',
           ID: '',
         }
+        ,
+        defaultProps: {
+          children: 'children',
+          label: 'label'
+        }
       }
     },
     mounted() {
@@ -145,7 +164,40 @@
       }
     },
     methods: {
-      
+      getNodesChildren(node, resolve) {
+        console.log(node);
+        console.log(resolve);
+      },
+      nodeClick(data) {
+        console.log(data.id);
+        const that = this;
+        console.log(that.labelTree);
+        for ( var i = 0; i < that.labelTree.length; i++ ) {
+          let index;
+          if ( that.labelTree[ i ][ 0 ].id == data.id ) {
+            index = i;
+            that.$axios.post('api/HOME/EmployeeDeviceMappingByLabelId', {
+              ID: data.id
+            })
+              .then(res => {
+                console.log(res);
+                if ( res.data.state == 1 ) {
+                  var data = res.data.Content, length = data.length;
+                  for ( var j = 0; j < length; j++ ) {
+                    that.labelTree[ index ][ 0 ].children[ j ] = {
+                      id: data[ j ].DevicelId,
+                      label: data[ j ].DeviceName
+                    }
+                  }
+                  console.log(that.labelTree);
+                }
+                
+                
+              })
+          }
+        }
+        
+      },
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -165,15 +217,44 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadDeviceLabelList')
+        axios.post('/api/Home/OnloadDeviceLabelList', {})
           .then(data => {
             console.log(data);
-            const res = data.data.Content;
-            if ( !res || !res.length || res.length ) {
+            if ( data.data.state == 1 ) {
+              if ( !data.data.Content || !data.data.Content.length ) {
+                that.isListEmpty = false
+              }
+              else {
+                that.list = data.data.Content;
+                that.isListEmpty = false;
+                console.log(that.list);
+                let length = that.list.length;
+                for ( var i = 0; i < length; i++ ) {
+                  let index = i;
+                  that.$axios.post('/api/HOME/EmployeeDeviceMappingByLabelId', {
+                    id: that.list[ i ].ID
+                  })
+                    .then(res => {
+                      console.log(res);
+                      if ( res.data.state == 1 ) {
+                        that.labelTree.push([ {
+                          id: that.list[ index ].ID,
+                          label: that.list[ index ].LabelName,
+                          children: []
+                        } ])
+                      }
+                    })
+                  
+                  
+                }
+              }
+              
+              that.$store.state.isDeviceLabelUpdateData = false;
+            } else {
+              that.list = [];
               that.isListEmpty = false
             }
-            that.list = res ? data.data.Content : [];
-            that.$store.state.isDeviceLabelUpdateData = false;
+            
           })
       }
       
@@ -183,6 +264,7 @@
         this.isAlertShow = false
       }
       , getData(index, row) {
+        console.log(row);
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         this.isAlertShow = true;
         this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
@@ -195,7 +277,8 @@
         this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
       }
-      , switchChange(index, row) {
+      ,
+      switchChange(index, row) {
         let that = this;
         console.log(index, row);
         // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;

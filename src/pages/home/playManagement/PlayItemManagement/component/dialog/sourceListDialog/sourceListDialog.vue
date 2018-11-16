@@ -43,7 +43,7 @@
                 :header-row-style="headerStyle"
       
       >
-        <el-table-column label="选中"
+        <el-table-column label="单选"
                          width="80"
                          align="center"
         >
@@ -132,7 +132,8 @@
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
-          {value: 1, label: '视频'}
+          {value: 1, label: '视频'},
+          {value: 2, label: '游戏'}
         ],
         headerStyle: {
           height: '100%',
@@ -239,4 +240,5 @@
   
   .souceListDialogWrapper >>> .el-dialog
     width: 750px !important
+    margin-top: 20%!important
 </style>
