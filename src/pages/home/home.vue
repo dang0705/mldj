@@ -7,8 +7,8 @@
 </template>
 
 <script>
-  import menuSelect from '@/components/common/menu/menu'
-  // import homeHeader from '@/components/common/header/header'
+  import menuSelect from '@/component/common/menu/menu'
+  // import homeHeader from '@/component/common/header/header'
   import axios from 'axios'
   
   export default {

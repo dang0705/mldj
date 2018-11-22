@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    menuList: [],
     menuIndex: '',
     activeCity: [],
     withDrawCity: [],
@@ -15,17 +16,17 @@ export default new Vuex.Store({
     endDate: '',
     advanceDate: '',
     withDrawlDate: '',
-    ProvinceAndCityCode:'',
+    ProvinceAndCityCode: '',
     clearUpload: false,
     isBrandUpdateData: false,
     isApkUpdateData: false,
-    isSupplierUpdateData:false,
-    isWarehouseUpdateData:false,
-    isChannelUpdateData:false,
-    isStoreUpdateData:false,
-    isEmployeeDeviceUpdateData:false,
-    isDeviceLabelUpdateData:false,
-    isCompanyUpdateData:false,
+    isSupplierUpdateData: false,
+    isWarehouseUpdateData: false,
+    isChannelUpdateData: false,
+    isStoreUpdateData: false,
+    isEmployeeDeviceUpdateData: false,
+    isDeviceLabelUpdateData: false,
+    isCompanyUpdateData: false,
   },
   // actions:{
   //   changeMenu (ctx,menuIndex){
@@ -33,32 +34,35 @@ export default new Vuex.Store({
   //   }
   // },
   mutations: {
+    updateMenuList(state, menuList) {
+      state.menuList = menuList;
+    },
     changeMenu(state, menuIndex) {
       state.menuIndex = menuIndex
     }
     ,
-  /*  /!*更改活动地点*!/
-    changeActiveCity(state, activeCity) {
-      state.activeCity = activeCity;
-    }
-    ,
-    /!*更改撤场地点*!/
-    changeWithDrawlCity(state, withDrawCity) {
-      state.withDrawCity = withDrawCity;
-    }
-    ,
-    /!*活动管理弹框开始结束日期选择*!/
-    startAndEndDateSelect(state, date) {
-      state.startDate = date[ 0 ];
-      state.endDate = date[ 1 ];
-    }
-    ,
-    /!*活动管理弹框进场撤场日期选择*!/
-    advanceAndWithDrawlDateSelect(state, date) {
-      state.advanceDate = date[ 0 ];
-      state.withDrawlDate = date[ 1 ];
-    }
-    ,*/
+    /*  /!*更改活动地点*!/
+	  changeActiveCity(state, activeCity) {
+		state.activeCity = activeCity;
+	  }
+	  ,
+	  /!*更改撤场地点*!/
+	  changeWithDrawlCity(state, withDrawCity) {
+		state.withDrawCity = withDrawCity;
+	  }
+	  ,
+	  /!*活动管理弹框开始结束日期选择*!/
+	  startAndEndDateSelect(state, date) {
+		state.startDate = date[ 0 ];
+		state.endDate = date[ 1 ];
+	  }
+	  ,
+	  /!*活动管理弹框进场撤场日期选择*!/
+	  advanceAndWithDrawlDateSelect(state, date) {
+		state.advanceDate = date[ 0 ];
+		state.withDrawlDate = date[ 1 ];
+	  }
+	  ,*/
     clearUpload(state) {
       state.clearUpload = true;
     }
@@ -74,22 +78,22 @@ export default new Vuex.Store({
     SupplierUpdateData(state) {
       state.isSupplierUpdateData = true
     },
-    WarehouseUpdateData(state){
+    WarehouseUpdateData(state) {
       state.isWarehouseUpdateData = true
     },
-    ChannelUpdateData(state){
+    ChannelUpdateData(state) {
       state.isChannelUpdateData = true
     },
-    StoreUpdateData(state){
+    StoreUpdateData(state) {
       state.isStoreUpdateData = true
     },
-    EmployeeDeviceUpdateData(state){
+    EmployeeDeviceUpdateData(state) {
       state.isEmployeeDeviceUpdateData = true
     },
-    DeviceLabelUpdateData(state){
+    DeviceLabelUpdateData(state) {
       state.isDeviceLabelUpdateData = true
     },
-    CompanyUpdateData(state){
+    CompanyUpdateData(state) {
       state.isCompanyUpdateData = true
     },
 

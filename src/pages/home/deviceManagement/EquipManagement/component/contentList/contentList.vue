@@ -112,7 +112,7 @@
 
 <script>
   import axios from 'axios'
-  import citySelect from '@/components/common/citySelect/citySelect'
+  import citySelect from '@/component/common/citySelect/citySelect'
   
   import alertDialog from '../dialog/dialog'
   

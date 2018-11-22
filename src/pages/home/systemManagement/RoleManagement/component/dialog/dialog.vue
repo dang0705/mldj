@@ -12,48 +12,29 @@
         :model="formData"
         :rules="uploadRules"
       >
-        <el-form-item prop="ChannelCode">
-          <el-input v-model="formData.ChannelCode" clearable placeholder="渠道编号" minlength="1"
-                    maxlength="10"></el-input>
+        <el-form-item prop="RoleName">
+          <el-input v-model="formData.RoleName" clearable placeholder="角色名称" minlength="1"
+                    maxlength="20"></el-input>
         </el-form-item>
-        <el-form-item prop="ChannelName">
-          <el-input v-model="formData.ChannelName" clearable placeholder="渠道名称" minlength="1"
-                    maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="ChannelDec">
-          <el-input type="textarea" v-model="formData.ChannelDec" placeholder="渠道描述" maxlength="250"></el-input>
-        </el-form-item>
-        <!--  <div id="imgWrapper">
-			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
-		  </div>-->
       </el-form>
-      
-      <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" :isDisplay="isDisplay"></upload>
-      <!--<div slot="footer" class="dialog-footer">-->
       <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import upload from '@/component/common/upload/uploadList'
   import axios from 'axios'
-  let Msg='';
-
+  
+  let Msg = '';
   export default {
-    // inject:['reload'],
-    name: "channelManagement_dialog",
-    components: {
-      upload
-    },
+    name: "roleManagement_dialog",
     props: {
       isAlertShow: {
         type: Boolean
       },
       editOrAdd: {
-        type: String
+        type: String,
+        default: 'up_date'
       },
       editData: {
         type: Object
@@ -62,36 +43,23 @@
     data() {
       return {
         alertTitle: '',
+        alertShow: false,
         isDisplay: true,
-        uploadType: '.apk',
         file: false,
         formData: {
-          ChannelCode: '',
-          ChannelName: '',
-          ChannelDec: '',
-          DogType: "a_dd"
+          RoleName: '',
+          AccountName: '',
+          ID: '',
         }
         ,
+        postUrl: '',
         editFormData: {},
         
         uploadRules: {
-          ChannelCode: [
+          RoleName: [
             {
               required: true,
-              message: '渠道编号为必填项',
-              trigger: 'blur'
-            },
-            {
-              min: 1,
-              max: 20,
-              message: '长度请在1~20个字符',
-              trigger: 'blur'
-            }
-          ],
-          ChannelName: [
-            {
-              required: true,
-              message: '渠道名称为必填项',
+              message: '角色名称为必填项',
               trigger: 'blur'
             },
             {
@@ -106,37 +74,26 @@
         editString: ''
       }
     },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
-      }
-    },
+
     watch: {
       'isAlertShow': function () {
+        this.alertShow = this.isAlertShow;
         if ( this.isAlertShow === true ) {
+          console.log(this.editOrAdd);
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData.ChannelCode = this.editData.ChannelCode;
-            this.formData.ChannelName = this.editData.ChannelName;
-            this.formData.ChannelDec = this.editData.ChannelDec;
+            this.formData.RoleName = this.editData.RoleName;
             this.formData.ID = this.editData.ID;
-            this.alertTitle = '编辑渠道'
-            Msg='编辑成功';
+            this.alertTitle = '编辑角色';
+            Msg = '编辑成功';
           }
           else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
-            this.alertTitle = '新增渠道'
-            Msg='增加成功';
+            this.alertTitle = '新增角色';
+            Msg = '增加成功';
           }
           this.formData.DogType = this.editOrAdd;
-  
         }
       }
     },
@@ -146,9 +103,16 @@
         this.$emit('closeAlert');
         this.addOrEdit='';
       },*/
+      getDate(val) {
+        console.log(val);
+        if ( val ) {
+          this.formData.serviceTime = val;
+        }
+      },
       handleClose() {
         this.$emit('closeAlert');
         this.editString = '';
+        this.formData.serviceTime = [];
         // this.formData.ImgBase='';
         // this.editFormData.ImgBase=''
         // this.$refs.uploadList.resetFields();
@@ -162,38 +126,51 @@
         console.log(hasFile);
         this.file = hasFile;
       },
+      
       confirmUpload() {
         let that = this;
-        if ( that.formData.ChannelCode === '' ) {
-          that.$message.error('供应商编号不能为空');
+        if ( that.formData.RoleName === '' ) {
+          that.$message.error('公司名称不能为空');
           return
         }
-        else if ( that.formData.ChannelName === '' ) {
-          that.$message.error('供应商名称不能为空');
-          return
+        that.postData()
+        
+        
+      }
+      ,
+      postData() {
+        const that = this;
+        var params = '';
+        params += '&RoleName=' + that.formData.RoleName;
+        if ( that.formData.DogType === 'a_dd' ) {
+          that.postUrl = '/api/OrganizationalRole/AddRole'
+        } else {
+          that.postUrl = '/api/OrganizationalRole/UpdRole';
+          params += '&ID=' + that.formData.ID;
         }
         
-        axios.post('/api/Home/ChannelSave', this.formData)
+        
+        console.log(that.formData.serviceTime);
+        
+        axios.post(that.postUrl, params)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              
               that.$message.success(Msg);
-              that.pass = true;
               that.$emit('closeAlert');
-              that.$store.commit('ChannelUpdateData');
               that.$refs[ 'upload' ].resetFields();
             }
             else {
               that.$message.error(res.msg);
             }
-            // that.reload()
-            // that.isClose=false
           })
           .catch(e => {
             console.log(e);
           })
       }
+    }
+    ,
+    mounted() {
     }
   }
 </script>

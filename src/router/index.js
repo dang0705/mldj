@@ -88,9 +88,19 @@ export default new Router({
           component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement'], resolve)
         },
         {
+          path: '/deviceVersionManagement',
+          name: 'deviceVersionManagement',
+          component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)
+        },
+        {
           path: '/CompanyManagement',
           name: 'CompanyManagement',
           component: resolve => require([ '@/pages/home/systemManagement/CompanyManagement/CompanyManagement'], resolve)
+        },
+        {
+          path: '/RoleManagement',
+          name: 'RoleManagement',
+          component: resolve => require([ '@/pages/home/systemManagement/RoleManagement/RoleManagement'], resolve)
         },
         {
           path: '/SourceManagement',
@@ -107,16 +117,7 @@ export default new Router({
           name: 'PlayListManagement',
           component: resolve => require([ '@/pages/home/playManagement/PlayListManagement/PlayListManagement'], resolve)
         },
-        {
-          path: '/deviceVersionManagement',
-          name: 'deviceVersionManagement',
-          component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)
-        },
-        {
-          path: '/mediaManagement',
-          name: 'mediaManagement',
-          component: resolve => require([ '@/pages/home/deviceManagement/mediaManagement/mediaManagement' ], resolve)
-        },
+
         {
           path: '/personnelManagementPage',
           name: 'personnelManagementPage',

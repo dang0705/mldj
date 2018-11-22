@@ -222,7 +222,6 @@
           }
         }
         if ( i < that.chunksLength ) {
-          
           var url = that.uploadUrl + '?action=uploadfile&filename=' + that.fileName + "&hash=" + that.hash + "&endPosition=" + that.fileSize + "&EmployeeCode=" + that.EmployeeCode;
           if ( that.requestCount === 0 ) {
             url += '&Keyid=' + 0;
@@ -241,7 +240,6 @@
           } else {
             chunks = that.file.slice(that.chunkSize * i, that.fileSize);
           }
-          
           // alert(1);
           xhr.open("POST", url);
           xhr.onload = function (evt) {
@@ -272,6 +270,8 @@
               that.uploadFile(i + 1);
             }
           };
+          
+          
           xhr.onerror = function (evt) {
             that.$message.error("上传素材发生了错误尝试");
           };

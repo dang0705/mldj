@@ -59,7 +59,7 @@
 </template>
 
 <script>
-  import citySelect from '@/components/common/citySelect/citySelect'
+  import citySelect from '@/component/common/citySelect/citySelect'
   import axios from 'axios'
   let Msg='';
   const storage = window.localStorage;

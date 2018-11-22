@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import upload from '@/components/common/upload/uploadList'
+  import upload from '@/component/common/upload/uploadList'
   import axios from 'axios'
   
   export default {

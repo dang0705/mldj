@@ -25,7 +25,6 @@
         </el-option>
       </el-select>
     </div>
-    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
               :row-style="rowStyle"
@@ -38,16 +37,36 @@
                        align="center"
       >
         <template slot-scope="scope">
-          <a :href="scope.row.OpenFileUrl" class="el-icon-download download" :download="scope.row.FileName" title="下载至本地"></a>
+          <a :href="scope.row.OpenFileUrl" class="el-icon-download download" :download="scope.row.FileName"
+             title="下载至本地"></a>
         </template>
       </el-table-column>
       <el-table-column
         label="素材名称"
         prop="FileName"
-        align="center"
+        align="left"
         width="380"
         :show-overflow-tooltip="true"
+      
       >
+        <template slot-scope="scope">
+          <el-popover
+            placement="right"
+            v-if="scope.row.FileType!=2"
+            :width="imgWidth||'800'"
+            trigger="click"
+            @show="afterEnterPopover(scope.row)"
+          >
+            <img width="100%" :src="scope.row.OpenFileUrl" alt="" v-if="scope.row.FileType==0"
+                 v-show="imgWidth">
+            <video width="100%" :src="scope.row.OpenFileUrl" v-if="scope.row.FileType==1" autoplay controls></video>
+            <el-button type="text" slot="reference"
+                       :icon="scope.row.FileType==0?'el-icon-picture':'el-icon-caret-right'">{{scope.row.FileName}}
+            </el-button>
+          </el-popover>
+          
+          <span v-if="scope.row.FileType==2">{{scope.row.FileName}}</span>
+        </template>
       </el-table-column>
       <el-table-column
         label="时长(秒)"
@@ -117,10 +136,12 @@
     data() {
       return {
         list: [],
+        imgWidth: '',
         typeList: [
+          {value: '', label: '全部'},
           {value: 0, label: '图片'},
           {value: 1, label: '视频'},
-          {value: '', label: '全部'},
+          {value: 2, label: '游戏'}
         ],
         dialogType: 'up_date',
         isListEmpty: true,
@@ -153,13 +174,16 @@
       this.updateList()
     },
     methods: {
-      change(){
+      change() {
         this.updateList()
       },
       formatter(row, index) {
         // console.log(row, index);
         let finishStatus;
         return finishStatus = row.Finished = 1 ? '已完成' : '未完成'
+      },
+      sourcePreview(i, row) {
+        console.log(row);
       },
       updateList() {
         const that = this,
@@ -248,6 +272,23 @@
       filter() {
         this.updateList()
       }
+      ,
+      afterEnterPopover(val) {
+        const img = new Image(),
+          that = this;
+        img.src = val.OpenFileUrl;
+        console.log(img.height);
+        
+        img.onload = function () {
+          if ( img.height / img.width > 1.2 ) {
+            that.imgWidth = '500'
+          } else {
+            that.imgWidth = '1080'
+            
+          }
+        }
+      }
+    
       
     }
   }
@@ -260,16 +301,13 @@
     text-decoration none
     color #000
     font-size: 1.2rem
+  
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
   
   #contentListWrapper >>> .el-table
     box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
-  
-  #contentListWrapper >>> .el-table__row
-    td
-      text-align center
   
   #contentListWrapper
     listStyle()

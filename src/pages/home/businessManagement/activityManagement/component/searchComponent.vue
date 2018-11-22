@@ -44,7 +44,7 @@
 </template>
 
 <script>
-  import citySelect from '@/components/common/citySelect/citySelect'
+  import citySelect from '@/component/common/citySelect/citySelect'
   
   export default {
     name: "searchComponent",

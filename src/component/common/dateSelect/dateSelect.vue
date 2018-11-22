@@ -28,6 +28,10 @@
       ,
       selectedDate: {
         default: () => []
+      },
+      allDate: {
+        type: Boolean,
+        default:false
       }
     },
     watch: {
@@ -42,7 +46,9 @@
       return {
         pickerOptions: {
           disabledDate: time => {
-            return time.getTime() < Date.now() - 8.64e7
+            if ( !this.allDate ) {
+              return time.getTime() < Date.now() - 8.64e7
+            }
           }
           
         },
@@ -68,6 +74,7 @@
     vertical-align top
     > div
       width 100%
+  
   #dateWrapper >>> .el-range-input
-      background transparent
+    background transparent
 </style>

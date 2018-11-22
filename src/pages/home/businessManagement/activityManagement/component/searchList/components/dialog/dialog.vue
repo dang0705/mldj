@@ -164,8 +164,8 @@
 </template>
 
 <script>
-  import citySelect from '@/components/common/citySelect/citySelect'
-  import dateSelect from '@/components/common/dateSelect/dateSelect'
+  import citySelect from '@/component/common/citySelect/citySelect'
+  import dateSelect from '@/component/common/dateSelect/dateSelect'
   
   export default {
     name: "alertDialog",

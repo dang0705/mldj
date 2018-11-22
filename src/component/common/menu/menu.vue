@@ -22,7 +22,7 @@
         :to="eachSub.subIndex"
         :key="index"
       >
-        {{eachSub.subNavNam}}
+        {{eachSub.navName}}
       </router-link>
     </ul>
   </div>
@@ -53,7 +53,6 @@
       var that = this;
       axios.post('/api/Menu/GetRoleMenListByTree')
         .then(data => {
-          console.log(data);
           this.firstLevelNavigationArr=[];
           if ( data.data.state !== 1 ) {
             that.$router.push('/login');
@@ -61,12 +60,14 @@
           }
           const myData = data.data.Content;
           for ( var i = 0; i < myData.length; i++ ) {
-            that.firstLevelNavigationArr.push({navName: myData[ i ].MenuName, subNav: []});
+            that.firstLevelNavigationArr.push({navName: myData[ i ].MenuName, subNav: [],subIndex:myData[i].MenuCode});
             for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
               var MenuList = myData[ i ].MenuList[ j ];
-              that.firstLevelNavigationArr[ i ].subNav.push({subNavNam: MenuList.MenuName, subIndex: MenuList.MenuCode})
+              that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
             }
           }
+          that.$store.commit('updateMenuList',that.firstLevelNavigationArr);
+  
         })
     },
     

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-  import listTitle from '@/components/common/listTitle/listTitle'
+  import listTitle from '@/component/common/listTitle/listTitle'
   import alertDialog from '../dialog/dialog'
   
   export default {

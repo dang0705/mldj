@@ -46,8 +46,8 @@
 </template>
 
 <script>
-  // import upload from '@/components/common/upload/uploadList'
-  import dateSelect from '@/components/common/dateSelect/dateSelect'
+  // import upload from '@/component/common/upload/uploadList'
+  import dateSelect from '@/component/common/dateSelect/dateSelect'
   import axios from 'axios'
   
   let Msg = '';

@@ -44,7 +44,7 @@
 
 <script>
   const storage = window.localStorage;
-  import dataPicker from '@/components/common/dateSelect/dateSelect'
+  import dataPicker from '@/component/common/dateSelect/dateSelect'
   
   export default {
     name: "addAndEditPlayList",
@@ -91,13 +91,13 @@
         that.$axios.post('/api/PlayManage/EmployeePlayListOperation', that.formData)
           .then(data => {
             console.log(data);
-            if ( data.data.msg == 1 ) {
+            if ( data.data.state == 1 ) {
               if ( that.formData.OperationType === 'up_date' ) {
                 that.$message.success('编辑播放列表成功')
               } else {
                 that.$message.success('新增播放列表成功')
               }
-              that.$emit('addOrEditSuccess')
+              that.$emit('closePlayListAlert')
               
             } else {
               that.$message.error(data.data.msg)

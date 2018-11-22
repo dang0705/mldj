@@ -96,7 +96,7 @@
 
 <script>
   import axios from 'axios'
-  // import filter from '@/components/common/filter/filter'
+  // import filter from '@/component/common/filter/filter'
   import alertDialog from '../dialog/dialog'
   
   export default {
