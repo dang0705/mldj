@@ -209,7 +209,6 @@
           CompanyName: filter ? this.keyWord : ''
         })
           .then(data => {
-            console.log(data);
             const res = data.data.Content.DataList;
             if ( !res || !res.length || res.length ) {
               that.isListEmpty = false

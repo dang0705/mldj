@@ -5,11 +5,12 @@
       :visible.sync="isAlertShow"
       :before-close="handleClose"
       :close-on-click-modal="false"
+      width="70%"
+      align="center"
     >
       <!-- <el-radio v-model="isShowAddress" :label="true">显示地址</el-radio>
 	   <el-radio v-model="isShowAddress" :label="false">隐藏地址</el-radio>-->
       <tree-transfer
-        :v-loading="true"
         ref="tree"
         placeholder="输入设备名称进行过滤"
         v-if="loadDateSuccess"
@@ -24,6 +25,8 @@
         height='540px'
         filter
         openAll
+        :renderContent="renderFunc"
+      
       >
       </tree-transfer>
       <i v-show="!loadDateSuccess" class="el-icon-loading" style="font-size: 4rem;text-align: center"></i>
@@ -66,49 +69,7 @@
         loadDateSuccess: false,
         mode: "transfer", // transfer addressList
         EmployeeCode: storage.getItem('userName'),
-        /*  fromData: [
-			{
-			  id: "1",
-			  pid: 0,
-			  label: "一级 1",
-			  children: [
-				{
-				  id: "1-1",
-				  pid: "1",
-				  label: "二级 1-1",
-				  children: []
-				},
-			  ]
-			},
-			{
-			  id: '2',
-			  pid: 0,
-			  label: '一级 2',
-			  children: [
-				{
-				  id: '2-1',
-				  pid: '2',
-				  label: '二级 2-1',
-				  children: []
-				}
-			  ]
-			},
-			{
-			  id: '3',
-			  pid: 0,
-			  label: '一级 3',
-			  children: [
-				{
-				  id: '3-1',
-				  pid: '3',
-				  label: '二级 3-1',
-				  children: []
-				}
-			  ]
-			}
-		  ],*/
         toData: []
-        
       }
     }
     ,
@@ -133,6 +94,7 @@
         })
       },
       
+      /*获取所有设备以及标签*/
       getAllDvcAndLblList() {
         const that = this;
         if ( !that.allLabelList.length ) {
@@ -164,9 +126,11 @@
               }
               // console.log(that.allLabelIdList);
               that.getLabeledDeviceList()
+              
             }))
         }
       },
+      /*设置过标签的设备划分至相应分组,未设置过标签的设备进入未分组*/
       getLabeledDeviceList() {
         const that = this;
         that.allLabeledDeviceIdList = [];
@@ -188,7 +152,8 @@
                     that.allLabelList[ i ].children.push({
                       id: that.allLabelList[ i ].id + '-' + res[ k ].DevicelId,
                       pid: that.allLabelList[ i ].id,
-                      label: res[ k ].DeviceName + ' - ' + res[ k ].Address,
+                      label: res[ k ].DeviceName,
+                      address: res[ k ].Address,
                       disabled: !res[ k ].Validity
                     });
                   }
@@ -204,6 +169,7 @@
                         id: '0' + '-' + that.allDeviceList[ j ].ID,
                         pid: '0',
                         label: that.allDeviceList[ j ].DeviceName,
+                        address: that.allDeviceList[ j ].Address,
                         disabled: !that.allDeviceList[ j ].Validity
                       });
                     }
@@ -211,18 +177,25 @@
                     break
                   }
                 }
+                
+                
               }
               
             })
         }
         
-        
       },
-      handleClose() {
+      handleClose(obj) {
+        console.log(obj);
         if ( this.loadDateSuccess ) {
           this.toData = [];
           this.toData = this.allDeviceList = this.allLabelList = this.allLabelIdList = this.allLabeledDeviceIdList = [];
-          this.$emit('closePlayerAlert');
+          if ( obj.target.innerText === '取 消' ) {
+            this.$emit('closePlayerAlert');
+          } else {
+            this.$emit('closePlayerAlert', 'n');
+            
+          }
         }
         this.loadDateSuccess = false;
       }
@@ -262,7 +235,7 @@
       remove(fromData, toData, obj) {
         // 树形穿梭框模式transfer时，返回参数为左侧树移动后数据、右侧树移动后数据、移动的{keys,nodes,halfKeys,halfNodes}对象
         // 通讯录模式addressList时，返回参数为右侧收件人列表、右侧抄送人列表、右侧密送人列表
-       
+        
         console.log(this.deviceNameStr, this.deviceIdStr);
         const toDataLength = toData.length,
           that = this;
@@ -346,7 +319,98 @@
             });
         }
       }
-      
+      ,
+      renderFunc(h, option) {
+        if ( option.node.level == 1 ) {
+          if ( option.data.id > 0 ) {
+            return h(
+              'div', {}, [
+                h('el-tag', {
+                  class: 'labelName',
+                  attrs: {
+                    size: 'medium',
+                    type: 'success'
+                  }
+                }, option.data.label)
+              ]
+            )
+          } else {
+            return h(
+              'div', {}, [
+                h('el-tag', {
+                  class: 'labelName',
+                  attrs: {
+                    size: 'medium',
+                    type: 'warning'
+                  }
+                }, option.data.label)
+              ]
+            )
+          }
+          
+        } else {
+          if ( !option.data.disabled ) {
+            if ( option.data.address ) {
+              return h(
+                'ul', {class: 'device'}, [
+                  h('li', {
+                    class: 'deviceName',
+                    attrs: {
+                      title: '设备名称'
+                    }
+                  }, option.data.label),
+                  h('li', {
+                    class: 'deviceAddress',
+                    
+                  }, ' 设备地址：' + option.data.address)
+                ]
+              )
+            } else {
+              return h(
+                'ul', {class: 'device'}, [
+                  h('li', {
+                    class: 'deviceName',
+                    attrs: {
+                      title: '设备名称'
+                    }
+                  }, option.data.label)
+                ]
+              )
+            }
+            
+          } else {
+            if ( option.data.address ) {
+              return h(
+                'ul', {class: 'deviceDisabled'}, [
+                  h('li', {
+                    class: 'deviceName',
+                    attrs: {
+                      title: '可以进入设备列表启用该设备',
+                    }
+                  }, '已停用 — ' + option.data.label),
+                  h('li', {
+                    class: 'deviceDisabled',
+                    
+                  }, ' 设备地址：' + option.data.address)
+                ]
+              )
+            } else {
+              return h(
+                'ul', {class: 'deviceDisabled'}, [
+                  h('li', {
+                    class: 'deviceName',
+                    attrs: {
+                      title: '可以进入设备列表启用该设备',
+                    }
+                  }, '已停用 — ' + option.data.label)
+                ]
+              )
+            }
+            
+          }
+        }
+        
+      },
     },
     mounted() {
       // this.getAllDvcAndLblList();
@@ -358,6 +422,7 @@
         if ( this.isAlertShow && !this.allLabeledDeviceIdList.length ) {
           console.log(this.playListId);
           this.getAllDvcAndLblList();
+          
         }
       }
     }
@@ -365,6 +430,32 @@
 </script>
 
 <style scoped lang="stylus">
+  @import '~@/assets/styles/mixin.styl'
   #player >>> .el-dialog
     width: 800px
+  
+  #player >>> .el-tree-node__content
+    height auto
+    ul
+      width 100%
+      margin-bottom: 10px
+      border-bottom 1px solid #eee
+      text-align left
+      li
+        overflow hidden;
+        display inline-block
+        height 18px;
+        line-height: 20px
+        textOverFlow()
+    .deviceName
+      width: 30%
+      margin-right: 5%
+    .deviceAddress
+      width: 65%
+      color #409eff
+    
+    .deviceDisabled
+      color #ccc
+
+
 </style>

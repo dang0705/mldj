@@ -22,7 +22,11 @@
     // },
     methods: {},
     mounted() {
-      this.$router.push('/activityManagement')
+      history.pushState(null, null, document.URL);
+      window.addEventListener('popstate', function () {
+        history.pushState(null, null, document.URL);
+      });
+      // this.$router.push('/EmployeeMenu')
     },
   }
 </script>

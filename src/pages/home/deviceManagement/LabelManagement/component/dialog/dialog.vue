@@ -375,9 +375,9 @@
       textOverFlow()
     
     .deviceName
-      width: 45%
+      width: 40%
     .deviceAddress
-      width: 65%
+      width: 60%
   
   .confirmUpdate
     width: 20%

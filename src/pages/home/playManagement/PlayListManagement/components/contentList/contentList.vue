@@ -8,7 +8,7 @@
       <el-input
         autofocus
         class="input activeName"
-        v-model="searchInfo.PlayListName"
+        v-model="defaultAndSearchInfo.PlayListName"
         autocomplete="on"
         placeholder="播放列表名称"
         @keyup.enter.native="getList"
@@ -21,7 +21,7 @@
         </i>
       </el-input>
       <el-select
-        v-model="searchInfo.Validity"
+        v-model="defaultAndSearchInfo.Validity"
         @change="getList"
         placeholder="设备状态"
       >
@@ -63,12 +63,27 @@
       ></el-table-column>
       <el-table-column label="播放日期" align="center" width="200" :formatter="formatter"
                        :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column label="推送操作" align="center" width="160"
+      <el-table-column label="播放项设置" align="center" width="160"
+                       :show-overflow-tooltip="true"
+      >
+        <template slot-scope="scope">
+          <el-button
+            type="success" round size="small"
+            :disabled="playItemSettingsDisabledFormatter(scope.$index,scope.row)"
+            v-text="playItemSettingsTxtFormatter(scope.$index,scope.row)"
+            @click="screenSettings(scope.$index,scope.row)"
+          >
+            屏幕播放项设置
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="推送操作" align="center" width="180"
                        :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <el-button v-text="pushBtnTxtFormatter(scope.$index,scope.row)"
                      :disabled="pushDisabledFormatter(scope.$index,scope.row)"
-                     :type="pushPrimaryFormatter(scope.$index,scope.row)" round size="small"
+                     type="primary"
+                     round size="small"
                      @click="pushDeviceSelect(scope.$index,scope.row)">推送设备选择
           </el-button>
         </template>
@@ -78,23 +93,12 @@
       >
         <template slot-scope="scope">
           <el-button type="info" round size="small"
+                     v-text="pushBtnTxtFormatter(scope.$index,scope.row)"
                      :disabled="pushDisabledFormatter(scope.$index,scope.row)"
                      @click="pushHistoryAlertShow(scope.$index,scope.row)">查看推送历史
           </el-button>
         </template>
       
-      </el-table-column>
-      <el-table-column label="播放项设置" align="center" width="180"
-                       :show-overflow-tooltip="true"
-      >
-        <template slot-scope="scope">
-          <el-button
-            type="success" round size="small"
-            @click="screenSettings(scope.$index,scope.row)"
-          >
-            屏幕播放项设置
-          </el-button>
-        </template>
       </el-table-column>
       <el-table-column label="增加+" align="center">
       </el-table-column>
@@ -113,9 +117,11 @@
     <add-and-edit-playList
       :isAddAndEditPlayListShow.sync="isAddAndEditPlayListShow"
       :dialogType="dialogType"
+      :editData="sendToDialog"
       @closePlayListAlert="closePlayListAlert"
-      :editData="searchInfo"
+    
     >
+    
     </add-and-edit-playList>
     
     <player-dialog
@@ -171,13 +177,12 @@
         isPushHistoryAndStatusShow: false,  //显示隐藏推送历史弹框
         isSSDialogShow: false,              //显示隐藏屏幕播放项弹框
         ExecPlayListCode: '',
-        dialogType: 'up_date',
         statusList: [
           {value: '', label: '全部'},
           {value: 1, label: '启用'},
           {value: 0, label: '停用'},
         ],
-        searchInfo: {
+        defaultAndSearchInfo: {
           PageIndex: 1,
           PageSize: 1000,
           PlayListName: '',
@@ -186,6 +191,16 @@
           PlayListEndDate: '',
           EmployeeCode: storage.getItem('userName')
         },
+        sendToDialog: {
+          PlayListName: '',
+          Validity: '',
+          PlayListStartDate: '',
+          PlayListEndDate: '',
+          PlayListType: '',
+          PlayListDefault: '',
+          EmployeeCode: storage.getItem('userName')
+        },
+        dialogType: '',
         rowStyle: {
           height: '40px'
         },
@@ -203,8 +218,9 @@
     methods: {
       getList() {
         let that = this;
+        
         that.tableLoading = true;
-        that.$axios.post('/api/PlayManage/EmployeePlayListList', that.searchInfo)
+        that.$axios.post('/api/PlayManage/EmployeePlayListList', that.defaultAndSearchInfo)
           .then(data => {
             that.tableLoading = false;
             if ( data.data.state == 1 ) {
@@ -227,8 +243,8 @@
         that.$axios.post('/api/PlayManage/EmployeePlayListUpdateStatus', {
           ID: row.ID,
           Validity: row.Validity,
-          EmployeeCode: that.searchInfo.EmployeeCode
-        }).then(()=>{
+          EmployeeCode: that.sendToDialog.EmployeeCode
+        }).then(() => {
           that.getList()
         })
       }
@@ -251,10 +267,11 @@
         
       }
       ,
-      closePlayerAlert() {
+      closePlayerAlert(n) {
         this.isPlayerDialogShow = false;
-        this.getList()
-        
+        if ( n ) {
+          this.getList()
+        }
       }
       ,
       closeSSAlert() {
@@ -263,12 +280,12 @@
       },
       closePHASAlert() {
         this.isPushHistoryAndStatusShow = false;
-        this.getList();
+        // this.getList();
       }
       ,
       getDate(val) {
-        this.searchInfo.PlayListStartDate = val[ 0 ];
-        this.searchInfo.PlayListEndDate = val[ 1 ];
+        this.defaultAndSearchInfo.PlayListStartDate = val[ 0 ];
+        this.defaultAndSearchInfo.PlayListEndDate = val[ 1 ];
         this.getList()
       }
       ,
@@ -279,7 +296,6 @@
       }
       ,
       pushBtnTxtFormatter(i, row) {
-        console.log(row);
         let date = new Date(),
           year = date.getFullYear(),
           month = date.getMonth() + 1,
@@ -287,11 +303,7 @@
           dateStr = year + '-' + month + '-' + day,
           now = new Date(Date.parse(dateStr)),
           playDate = new Date(Date.parse(row.PlayListEndDate));
-        /*        if ( new Date(that.list[ i ].PlayListEndDate).getTime() < now ) {
-				  that.pushDeviceSelectText = '时间已过,无法推送';
-				} else {
-				  that.pushDeviceSelectText = '推送设备选择';
-				}*/
+        
         if ( row.ItemCount == 0 && playDate >= now && row.Validity ) {
           return '无播放项';
         }
@@ -300,9 +312,6 @@
         }
         else if ( !row.Validity && row.ItemCount > 0 && playDate >= now ) {
           return '已停用'
-        }
-        else if ( !row.Validity && playDate >= now && row.ItemCount > 0 ) {
-          return '播放列表已禁用'
         }
         else if ( row.ItemCount == 0 && playDate < now && !row.Validity ) {
           return '已停用/已过期/无播放项'
@@ -321,29 +330,59 @@
         }
       }
       ,
-      pushDisabledFormatter(i, row) {
-        let that = this,
-          date = new Date(),
+      playItemSettingsTxtFormatter(i, row) {
+        let date = new Date(),
           year = date.getFullYear(),
           month = date.getMonth() + 1,
           day = date.getDate(),
           dateStr = year + '-' + month + '-' + day,
-          now = new Date(dateStr).getTime();
-        return row.ItemCount == 0 || !row.Validity || new Date(that.list[ i ].PlayListEndDate).getTime() < now ? true : false
+          now = new Date(Date.parse(dateStr)),
+          playDate = new Date(Date.parse(row.PlayListEndDate));
+        if ( playDate < now && row.Validity ) {
+          return '已过期'
+        } else if ( !row.Validity && playDate >= now ) {
+          return '已停用'
+        } else if ( !row.Validity && playDate < now ) {
+          return '已停用/已过期'
+        } else {
+          return '播放项设置';
+        }
+      },
+      pushDisabledFormatter(i, row) {
+        let date = new Date(),
+          year = date.getFullYear(),
+          month = date.getMonth() + 1,
+          day = date.getDate(),
+          dateStr = year + '-' + month + '-' + day,
+          now = new Date(Date.parse(dateStr)),
+          playDate = new Date(Date.parse(row.PlayListEndDate));
+        return row.ItemCount == 0 || !row.Validity || playDate < now ? true : false
       }
       ,
-      pushPrimaryFormatter(i, row) {
-        return row.ItemCount == 0 ? 'info' : 'primary'
-      }
-      ,
+      playItemSettingsDisabledFormatter(i, row) {
+        let date = new Date(),
+          year = date.getFullYear(),
+          month = date.getMonth() + 1,
+          day = date.getDate(),
+          dateStr = year + '-' + month + '-' + day,
+          now = new Date(Date.parse(dateStr)),
+          playDate = new Date(Date.parse(row.PlayListEndDate));
+        return !row.Validity || playDate < now ? true : false
+      },
+      
       edit(i, row) {
         // console.log(i, row);
+        this.dialogType = 'up_date';
+        this.sendToDialog = {};
         var realIndex = this.currentPage > 1 ? i + ((this.currentPage - 1) * this.pagesize) : i;
         this.isAddAndEditPlayListShow = true;
-        this.searchInfo.PlayListName = this.list[ realIndex ].PlayListName;
-        this.searchInfo.PlayListStartDate = this.list[ realIndex ].PlayListStartDate;
-        this.searchInfo.PlayListEndDate = this.list[ realIndex ].PlayListEndDate;
-        this.dialogType = 'up_date';
+        this.sendToDialog.PlayListName = this.list[ realIndex ].PlayListName;
+        this.sendToDialog.PlayListStartDate = this.list[ realIndex ].PlayListStartDate;
+        this.sendToDialog.PlayListEndDate = this.list[ realIndex ].PlayListEndDate;
+        this.sendToDialog.PlayListType = this.list[ realIndex ].PlayListType;
+        this.sendToDialog.PlayListDefault = this.list[ realIndex ].PlayListDefault;
+        this.sendToDialog.ID = this.list[ realIndex ].ID;
+        this.sendToDialog.EmployeeCode = this.list[ realIndex ].EmployeeCode;
       }
       ,
       pushDeviceSelect(i, row) {

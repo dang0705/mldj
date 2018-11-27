@@ -1,5 +1,5 @@
 <template>
-  <div id="employeeMenuWrapper">
+  <div id="organizationManagement">
 
     <content-list>
     </content-list>
@@ -9,15 +9,9 @@
 <script>
   import contentList from './component/contentList/contentList'
 	export default {
-		name: "EmployeeMenu",
+		name: "organizationManagement",
     components: {
       contentList
-    },
-    mounted(){
-      history.pushState(null, null, document.URL);
-      window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-      });
     }
 	}
 </script>

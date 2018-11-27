@@ -7,7 +7,7 @@
       <!--推送历史列表-->
       <div class="tableWrapper">
         <el-tag type="info">推送历史列表</el-tag>
-        <el-select v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史">
+        <el-select v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史" v-loading="pushHistorySelectLoading">
           <el-option
             v-for="(item,i) in myPushHistorySelectList"
             :key="i"
@@ -61,7 +61,11 @@
         >
           <el-table-column label="设备名称" align="center" width="200" prop="DeviceName"></el-table-column>
           <el-table-column label="推送状态" align="center" prop="MediaUpdateStatus"
-                           :formatter="pushStatusFormatter"></el-table-column>
+          >
+            <template slot-scope="scope">
+              <el-tag :type="getPushStatus(scope.$index,scope.row)">{{pushStatus}}</el-tag>
+            </template>
+          </el-table-column>
         </el-table>
         <el-pagination
           :page-size="pushProgressPageSize"
@@ -95,13 +99,15 @@
     },
     data() {
       return {
+        pushStatus: '',
         isAlertShow: false,
         myExecPlayListCode: '',
         myPushHistorySelectList: [],
         myPushHistoryList: [],
         pushList: [],
-        pushHistorySelectModel: '',    //推送历史双向绑定
+        pushHistorySelectModel: '',    //推送历史 ExecPlayListCode 的双向绑定
         pushProgressSelectModel: '',    //推送进度双向绑定
+        pushHistorySelectLoading:true,
         pushProgressSelectLoading: true,
         pusHistoryListLoading: true,
         pusProgressListLoading: true,
@@ -123,7 +129,8 @@
       ,
       handleClose() {
         this.$emit('closeSSAlert');
-        this.pushHistorySelectModel = '';
+        this.pusHistoryListLoading = this.pusProgressListLoading =this.pushProgressSelectLoading= this.pushHistorySelectLoading=true;
+        this.pushHistorySelectModel = this.pushProgressSelectModel = '';
       }
       ,
       handlePlayItemsSizeChange(size) {
@@ -148,12 +155,22 @@
         return playType = row.PlayType == 1 ? '全屏' : '其他'
       }
       ,
-      pushStatusFormatter(row, column, cellValue, index) {
-        // console.log(row, column, cellValue, index);
-        let playType = '';
-        return playType = row.MediaUpdateStatus == 1 ? '已推送' : '未推送'
-      }
-      ,
+      
+      getPushStatus(index, row) {
+        console.log(index, row);
+        let pushStatus;
+        // return pushStatus= row.MediaUpdateStatus==='1'?'success':'info';
+        if ( row.MediaUpdateStatus === '1' ) {
+          this.pushStatus = '已推送';
+          return pushStatus = 'success';
+          
+        } else {
+          this.pushStatus = '未推送';
+          return pushStatus = 'info';
+          
+        }
+      },
+      
       /*获取推送历史下拉数据*/
       getHistorySelectOption() {
         const that = this;
@@ -170,9 +187,11 @@
               that.myPushHistorySelectList.push({label: res[ i ].TempNumber, value: res[ i ].ExecPlayListCode})
             }
             that.pushHistorySelectModel = that.myPushHistorySelectList[ 0 ].value;
+            
             console.log(that.myPushHistorySelectList);
             that.changePushHistoryList();
           }
+          this.pushHistorySelectLoading=false;
           that.pusHistoryListLoading = false;
         })
         // }
@@ -184,7 +203,7 @@
         const that = this;
         // that.playItemsList=[];
         that.$axios.post('/api/PlayManage/ExecElookPlayListByItem', {
-          ExecPlayListCode: val || that.myPushHistorySelectList[ 0 ].value
+          ExecPlayListCode: val || that.pushHistorySelectModel
         })
           .then(data => {
             // console.log(data);
@@ -204,7 +223,7 @@
         that.$axios.post('/api/PlayManage/ExecElookPlayMediaItemList', {
           PageIndex: 1,
           PageSize: 1000,
-          ExecPlayListCode: val || that.myPushHistorySelectList[ 0 ].value
+          ExecPlayListCode: val || that.pushHistorySelectModel
         }).then(data => {
           // console.log(data);
           if ( data.data.state == 1 ) {
@@ -214,9 +233,10 @@
             }
           } else {
             that.pushProgressSelectList = [];
+            that.pushProgressList = [];
           }
           that.pushProgressSelectModel = that.pushProgressSelectList.length ? that.pushProgressSelectList[ 0 ].value : '';
-          that.changePushProgressList();
+          that.changePushProgressList(that.pushProgressSelectModel);
           that.pushProgressSelectLoading = false;
           that.pusProgressListLoading = false;
           
@@ -230,7 +250,7 @@
         that.$axios.post('/api/PlayManage/ExecElookPlayMediaItem', {
           PageIndex: 1,
           PageSize: 1000,
-          ExecPlayListCode: that.myExecPlayListCode,
+          ExecPlayListCode: that.pushHistorySelectModel,
           TempNumber: that.pushProgressSelectModel || val,
         })
           .then(data => {

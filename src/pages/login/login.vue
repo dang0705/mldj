@@ -88,6 +88,7 @@
           return
         } else if ( this.yanzhengCode !== this.checkCode ) {
           this.$message.error('验证码错误');
+          this.createCode();
           return
         }
         /*md5加密*/
@@ -99,7 +100,7 @@
           console.log(data);
           const res = data.data.Content.UserInfo;
           if ( data.data.state == 1 ) {
-            this.$router.push('/activityManagement');
+            this.$router.push('/EmployeeMenu');
             storage.setItem('userName', this.loginData.userName);
             storage.setItem('password', this.loginData.password);
             storage.setItem('isHoldLogin', this.loginData.holdLogin);
@@ -132,6 +133,7 @@
       }
     },
     created() {
+      
       this.createCode();
       if ( storage.getItem('isHoldLogin') === 'true' ) {
         this.loginData.userName = storage.getItem('userName');

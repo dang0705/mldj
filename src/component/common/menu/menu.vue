@@ -67,6 +67,7 @@
             }
           }
           that.$store.commit('updateMenuList',that.firstLevelNavigationArr);
+          console.log(that.firstLevelNavigationArr);
   
         })
     },

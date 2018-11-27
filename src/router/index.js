@@ -27,7 +27,7 @@ export default new Router({
           name: 'activityManagement',
           component: resolve => require([ '@/pages/home/businessManagement/activityManagement/activityManagement' ], resolve)
         },
-        {
+       /* {
           path: '/InventoryManagement',
           name: 'InventoryManagement',
           component: resolve => require([ '@/pages/home/businessManagement/InventoryManagement/InventoryManagement' ], resolve)
@@ -41,7 +41,7 @@ export default new Router({
           path: '/operationsManagement',
           name: 'operationsManagement',
           component: resolve => require([ '@/pages/home/businessManagement/operationsManagement/operationsManagement' ], resolve)
-        },
+        },*/
         {
           path: '/BrandManagement',
           name: 'BrandManagement',
@@ -93,6 +93,12 @@ export default new Router({
           component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)
         },
         {
+          path: '/EmployeeMenu',
+          name: 'EmployeeMenu',
+          component: resolve => require([ '@/pages/home/systemManagement/EmployeeMenu/EmployeeMenu'], resolve)
+        },
+
+        {
           path: '/CompanyManagement',
           name: 'CompanyManagement',
           component: resolve => require([ '@/pages/home/systemManagement/CompanyManagement/CompanyManagement'], resolve)
@@ -101,6 +107,11 @@ export default new Router({
           path: '/RoleManagement',
           name: 'RoleManagement',
           component: resolve => require([ '@/pages/home/systemManagement/RoleManagement/RoleManagement'], resolve)
+        },
+        {
+          path: '/OrganizationManagement',
+          name: 'OrganizationManagement',
+          component: resolve => require([ '@/pages/home/systemManagement/OrganizationManagement/OrganizationManagement'], resolve)
         },
         {
           path: '/SourceManagement',
@@ -122,13 +133,7 @@ export default new Router({
           path: '/personnelManagementPage',
           name: 'personnelManagementPage',
           component: resolve => require([ '@/pages/home/personnelManagement/personnelManagementPage/personnelManagementPage' ], resolve)
-        },
-        {
-          path: '/roleManagement',
-          name: 'roleManagement',
-          component: resolve => require([ '@/pages/home/personnelManagement/roleManagement/roleManagement' ], resolve)
         }
-
       ]
     }
 

@@ -1,42 +1,13 @@
 <template>
   <div id="contentListWrapper">
     <div class="filterComponents">
+      
       <el-input
         autofocus
         class="input activeName"
         v-model="keyWord"
         autocomplete="on"
-        placeholder="用户姓名"
-        @keyup.enter.native="filter"
-      >
-        <i
-          class="el-icon-search el-input__icon"
-          slot="suffix"
-          @click="filter"
-        >
-        </i>
-      </el-input>
-      <el-input
-        autofocus
-        class="input activeName"
-        v-model="email"
-        autocomplete="on"
-        placeholder="邮箱"
-        @keyup.enter.native="filter"
-      >
-        <i
-          class="el-icon-search el-input__icon"
-          slot="suffix"
-          @click="filter"
-        >
-        </i>
-      </el-input>
-      <el-input
-        autofocus
-        class="input activeName"
-        v-model="mobileNumber"
-        autocomplete="on"
-        placeholder="手机号码"
+        placeholder="名称"
         @keyup.enter.native="filter"
       >
         <i
@@ -84,32 +55,32 @@
       </el-table-column>
       
       <el-table-column
-        label="用户账号/手机号"
-        prop="Phone"
+        label="组织名称"
+        prop="OrganizationName"
         width="390"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
       <el-table-column
-        label="姓名"
-        prop="EmployeeName"
+        label="组织简称"
+        prop="OrganizationAbb"
         width="230"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
       <el-table-column
-        label="邮箱"
-        prop="Email"
+        label="组织负责人"
+        prop="LeaderName"
         width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
       <el-table-column
-        label="角色"
-        prop="RoleName"
+        label="上级组织"
+        prop="ParentOrgName"
         width="200"
         :show-overflow-tooltip="true"
         align="center"
@@ -155,8 +126,6 @@
     data() {
       return {
         list: [],
-        email: '',
-        mobileNumber: '',
         dataLoading: true,
         keySelect: [
           {value: -1, label: '全部'},
@@ -181,8 +150,8 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          Phone: '',
-          EmployeeName: '',
+          OrganizationName: '',
+          OrganizationAbb: '',
           LeaderName: '',
           ParentOrgName: '',
           serviceTime: [],
@@ -224,40 +193,33 @@
       },
       getApkList(filter) {
         let that = this;
-        that.$axios.post('/api/Account/GetEmployeeList', {
+        axios.post('/api/Organization/GetOrganizationList', {
           PageIndex: 1,
           PageSize: 1000,
-          EmployeeName: that.keyWord,
-          Email: that.email,
-          Phone: that.mobileNumber,
           Validity: that.Validity,
+          OrganizationName: this.keyWord
         })
           .then(data => {
+            console.log(data);
             that.list = data.data.Content.DataList;
             that.dataLoading = false
             // that.$store.state.isCompanyUpdateData = false;
           })
       }
       ,
-      closeAlert(n) {
+      closeAlert() {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
-        if ( !n ) {
-          this.getApkList();
-        }
+        this.getApkList();
       }
       ,
       getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         this.isAlertShow = true;
-        this.sendDialogData.Phone = this.list[ realIndex ].Phone;
-        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
-        this.sendDialogData.Email = this.list[ realIndex ].Email;
+        this.sendDialogData.OrganizationName = this.list[ realIndex ].OrganizationName;
+        this.sendDialogData.OrganizationAbb = this.list[ realIndex ].OrganizationAbb;
         this.sendDialogData.ParentOrgName = this.list[ realIndex ].ParentOrgName;
         this.sendDialogData.ParentOrgID = this.list[ realIndex ].ParentID;
-        this.sendDialogData.roleID = 0;
-        this.sendDialogData.OrganizationID = 0;
-        this.sendDialogData.IsOrgLeader = 0;
         console.log(this.sendDialogData.serviceTime);
         // this.sendDialogData.EndTime = this.list[ realIndex ].EndTime;
         this.sendDialogData.ID = row.ID;
@@ -310,5 +272,5 @@
   
   .activeName
     filter()
-    width: 250px
+    width: 600px
 </style>

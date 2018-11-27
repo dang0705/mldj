@@ -43,7 +43,6 @@
 </template>
 
 <script>
-  const storage = window.localStorage;
   import dataPicker from '@/component/common/dateSelect/dateSelect'
   
   export default {
@@ -54,20 +53,22 @@
     props: {
       isAddAndEditPlayListShow: {type: Boolean},
       dialogType: {type: String},
-      editData: {type: Object}
+      editData: {type: Object},
+      
     },
     data() {
       return {
         isAlertShow: false,
         alertTitle: '编辑播放列表',
         formData: {
-          OperationType: 'up_date',
+          OperationType: '',
+          PlayListName: '',
           PlayListStartDate: '',
           PlayListEndDate: '',
-          PlayListName: '',
           PlayListType: 0,
           PlayListDefault: 0,
-          EmployeeCode: storage.getItem('userName')
+          // ID: 0,
+          EmployeeCode: ''
         },
         selectedDate: [],
         playListRules: {}
@@ -88,6 +89,7 @@
       ,
       confirmUpload() {
         const that = this;
+        that.formData.OperationType = that.dialogType;
         that.$axios.post('/api/PlayManage/EmployeePlayListOperation', that.formData)
           .then(data => {
             console.log(data);
@@ -111,12 +113,18 @@
         this.formData.OperationType = this.dialogType;
         if ( this.isAddAndEditPlayListShow ) {
           if ( this.formData.OperationType === 'up_date' ) {
-            this.formData.PlayListName = this.editData.PlayListName;
+            this.formData = this.editData;
+            console.log(this.formData);
             this.selectedDate = [ this.editData.PlayListStartDate, this.editData.PlayListEndDate ]
+            /* this.formData.PlayListName = this.editData.PlayListName;
+			 this.selectedDate = [ this.editData.PlayListStartDate, this.editData.PlayListEndDate ];*/
+  
           } else {
             this.selectedDate = [];
             this.formData.PlayListName = ''
           }
+        }else {
+        
         }
         console.log(this.formData.OperationType);
       }

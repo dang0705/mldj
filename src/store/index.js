@@ -7,6 +7,8 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     menuList: [],
+    organizationList: [],
+    getAllLabelList:[],
     menuIndex: '',
     activeCity: [],
     withDrawCity: [],
@@ -41,28 +43,12 @@ export default new Vuex.Store({
       state.menuIndex = menuIndex
     }
     ,
-    /*  /!*更改活动地点*!/
-	  changeActiveCity(state, activeCity) {
-		state.activeCity = activeCity;
-	  }
-	  ,
-	  /!*更改撤场地点*!/
-	  changeWithDrawlCity(state, withDrawCity) {
-		state.withDrawCity = withDrawCity;
-	  }
-	  ,
-	  /!*活动管理弹框开始结束日期选择*!/
-	  startAndEndDateSelect(state, date) {
-		state.startDate = date[ 0 ];
-		state.endDate = date[ 1 ];
-	  }
-	  ,
-	  /!*活动管理弹框进场撤场日期选择*!/
-	  advanceAndWithDrawlDateSelect(state, date) {
-		state.advanceDate = date[ 0 ];
-		state.withDrawlDate = date[ 1 ];
-	  }
-	  ,*/
+    sendOrganizationList(state, organizationList) {
+      state.organizationList = organizationList
+    },
+    getAllLabelList(state,getAllLabelList){
+      state.getAllLabelList=getAllLabelList
+    },
     clearUpload(state) {
       state.clearUpload = true;
     }
