@@ -27,12 +27,6 @@
               @header-click="add"
               @selection-change="handleSelectionChange"
     >
-      <!--    <el-table-column
-			type="selection"
-			width="40"
-			class="selection"
-			prop='ID'
-		  ></el-table-column>-->
       
       <el-table-column
         width="100"
@@ -62,13 +56,6 @@
         width="980"
       >
       </el-table-column>
- <!--     <el-table-column
-        prop="EmployeeName"
-        label="设备所属人"
-        align="center"
-        width="140"
-      >
-      </el-table-column>-->
       
       <el-table-column
         label="增加+"
@@ -97,7 +84,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import citySelect from '@/component/common/citySelect/citySelect'
   
   import alertDialog from '../dialog/dialog'
@@ -165,7 +151,7 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadDeviceLabelList')
+        that.$axios.post('/Home/OnloadDeviceLabelList')
           .then(data => {
             console.log(data);
             const res = data.data.Content;
@@ -199,14 +185,14 @@
         let that = this;
         console.log(index, row);
         // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        axios.post('/api/Home/DeviceLabelSave', {
+        that.$axios.post('/Home/DeviceLabelSave', {
           DogType: 'd_elete',
           EmployeeCode: row.EmployeeCode,
           Validity: row.Validity,
           ID: row.ID
         })
           .then(data => {
-            axios.post('/api/Home/OnloadDeviceLabelList', {
+            axios.post('/Home/OnloadDeviceLabelList', {
               DeviceName: this.keyWord
             })
               .then(res => {
@@ -227,7 +213,7 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadDeviceLabelList', {
+        that.$axios.post('/Home/OnloadDeviceLabelList', {
           DeviceName: this.keyWord
         })
           .then(data => {
@@ -236,7 +222,7 @@
           })
       },
       cityFilter(city) {
-        axios.post('/api/Home/OnloadDeviceLabelList', {
+        this.$axios.post('/Home/OnloadDeviceLabelList', {
           CityCode: city[ 1 ]
         })
           .then(data => {

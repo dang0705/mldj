@@ -23,7 +23,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   
   let Msg = '';
   export default {
@@ -143,16 +142,16 @@
         var params = '';
         params += '&RoleName=' + that.formData.RoleName;
         if ( that.formData.DogType === 'a_dd' ) {
-          that.postUrl = '/api/OrganizationalRole/AddRole'
+          that.postUrl = '/OrganizationalRole/AddRole'
         } else {
-          that.postUrl = '/api/OrganizationalRole/UpdRole';
+          that.postUrl = '/OrganizationalRole/UpdRole';
           params += '&ID=' + that.formData.ID;
         }
         
         
         console.log(that.formData.serviceTime);
         
-        axios.post(that.postUrl, params)
+        that.$axios.post(that.postUrl, params)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {

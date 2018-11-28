@@ -1,13 +1,14 @@
 <template>
   <div class="menu">
-    <div id="logoWrapper" style="width: 80px;height: 0;padding-bottom: 80px;position: absolute;left: 5%;top: 0; z-index: 10">
-      <img src="../../../assets/img/logo.png" alt="" width="100%" >
+    <div id="logoWrapper"
+         style="width: 80px;height: 0;padding-bottom: 80px;position: absolute;left: 5%;top: 0; z-index: 10">
+      <img src="../../../assets/img/logo.png" alt="" width="100%">
     </div>
     <ul id="firstLevelNavigation">
       <li
         v-for="(item,i) of firstLevelNavigationArr"
         :key="i"
-        :class="{ active: isActive ===i}"
+        :class="{ active: firstLevelNavigationIndex ===i}"
         @click="showSecondNavigation(i)"
       >
         {{item.navName}}
@@ -29,7 +30,7 @@
 </template>
 
 <script>
-  import axios from 'axios'
+  const storage = window.localStorage;
   
   export default {
     name: 'head-Menu',
@@ -42,42 +43,43 @@
         firstLevelNavigationIndex: 0,
       }
     },
-    // props:{
-    //   active:{
-    //     type:String,
-    //     required:true,
-    //     default:'personnelManagement'
-    //   }
-    // },
+    
     mounted() {
       var that = this;
-      axios.post('/api/Menu/GetRoleMenListByTree')
+      that.$axios.post('/Menu/GetRoleMenListByTree')
         .then(data => {
-          this.firstLevelNavigationArr=[];
+          this.firstLevelNavigationArr = [];
           if ( data.data.state !== 1 ) {
             that.$router.push('/login');
             return
           }
           const myData = data.data.Content;
           for ( var i = 0; i < myData.length; i++ ) {
-            that.firstLevelNavigationArr.push({navName: myData[ i ].MenuName, subNav: [],subIndex:myData[i].MenuCode});
+            that.firstLevelNavigationArr.push({
+              navName: myData[ i ].MenuName,
+              subNav: [],
+              subIndex: myData[ i ].MenuCode
+            });
             for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
               var MenuList = myData[ i ].MenuList[ j ];
               that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
             }
           }
-          that.$store.commit('updateMenuList',that.firstLevelNavigationArr);
-          console.log(that.firstLevelNavigationArr);
-  
+          storage.setItem('menu', JSON.stringify(that.firstLevelNavigationArr));
+          if ( storage.getItem('menuSelected') ) {
+            that.firstLevelNavigationIndex = parseInt(storage.getItem('menuSelected'))
+          } else {
+            that.firstLevelNavigationIndex = 0
+          }
+          
         })
     },
     
     methods: {
       showSecondNavigation(i) {
         this.firstLevelNavigationIndex = i;
+        storage.setItem('menuSelected', i);
         this.isActive = i;
-        this.$store.commit('changeMenu', i)
-        // console.log(this.firstLevelNavigationIndex);
       },
       secondNavigation(i) {
         this.isSubActive = i;

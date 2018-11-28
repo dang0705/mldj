@@ -172,7 +172,7 @@
       switchChange(index, row) {
         let that = this;
         console.log(index, row);
-        that.$axios.post('/api/Organization/UpdateValidity', {
+        that.$axios.post('/Organization/UpdateValidity', {
           Validity: row.Validity,
           ID: row.ID
         })
@@ -193,7 +193,7 @@
       },
       getApkList(filter) {
         let that = this;
-        axios.post('/api/Organization/GetOrganizationList', {
+        axios.post('/Organization/GetOrganizationList', {
           PageIndex: 1,
           PageSize: 1000,
           Validity: that.Validity,

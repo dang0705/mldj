@@ -220,7 +220,7 @@
         let that = this;
         
         that.tableLoading = true;
-        that.$axios.post('/api/PlayManage/EmployeePlayListList', that.defaultAndSearchInfo)
+        that.$axios.post('/PlayManage/EmployeePlayListList', that.defaultAndSearchInfo)
           .then(data => {
             that.tableLoading = false;
             if ( data.data.state == 1 ) {
@@ -240,7 +240,7 @@
       switchChange(i, row) {
         // console.log(row);
         const that = this;
-        that.$axios.post('/api/PlayManage/EmployeePlayListUpdateStatus', {
+        that.$axios.post('/PlayManage/EmployeePlayListUpdateStatus', {
           ID: row.ID,
           Validity: row.Validity,
           EmployeeCode: that.sendToDialog.EmployeeCode
@@ -269,7 +269,7 @@
       ,
       closePlayerAlert(n) {
         this.isPlayerDialogShow = false;
-        if ( n ) {
+        if ( !n ) {
           this.getList()
         }
       }

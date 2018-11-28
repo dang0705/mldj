@@ -11,43 +11,38 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
-      >
-        <el-form-item prop="ChannelCode">
-          <el-input v-model="formData.ChannelCode" clearable placeholder="渠道编号" minlength="1"
-                    maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="ChannelName">
-          <el-input v-model="formData.ChannelName" clearable placeholder="渠道名称" minlength="1"
-                    maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="ChannelDec">
-          <el-input type="textarea" v-model="formData.ChannelDec" placeholder="渠道描述" maxlength="250"></el-input>
-        </el-form-item>
-        <!--  <div id="imgWrapper">
-			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
-		  </div>-->
-      </el-form>
+        label-width="120px"
       
-      <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" :isDisplay="isDisplay"></upload>
-      <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
+      >
+        <el-form-item prop="ChannelCode" label="渠道编号：">
+          <el-input v-model="formData.ChannelCode" clearable minlength="1"
+                    maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item prop="ChannelName" label="渠道名称：">
+          <el-input v-model="formData.ChannelName" clearable minlength="1"
+                    maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item prop="ChannelDec" label="渠道描述：">
+          <el-input type="textarea" v-model="formData.ChannelDec" clearable maxlength="250"></el-input>
+        </el-form-item>
+      
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import upload from '@/component/common/upload/uploadList'
-  import axios from 'axios'
-  let Msg='';
-
+  
+  let Msg = '';
+  
   export default {
     // inject:['reload'],
     name: "channelManagement_dialog",
-    components: {
-      upload
-    },
+    
     props: {
       isAlertShow: {
         type: Boolean
@@ -102,19 +97,6 @@
             }
           ]
         }
-        ,
-        editString: ''
-      }
-    },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
       }
     },
     watch: {
@@ -125,44 +107,35 @@
             this.formData.ChannelName = this.editData.ChannelName;
             this.formData.ChannelDec = this.editData.ChannelDec;
             this.formData.ID = this.editData.ID;
-            this.alertTitle = '编辑渠道'
-            Msg='编辑成功';
+            this.alertTitle = '编辑渠道';
+            Msg = '编辑成功';
           }
           else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
-            this.alertTitle = '新增渠道'
-            Msg='增加成功';
+            this.alertTitle = '新增渠道';
+            Msg = '增加成功';
           }
           this.formData.DogType = this.editOrAdd;
-  
         }
       }
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
-        // this.formData.ImgBase='';
-        // this.editFormData.ImgBase=''
-        // this.$refs.uploadList.resetFields();
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+          
+        }
       },
       closed() {
         this.$store.commit('clearUpload');
-        this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.file = hasFile;
-      },
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.ChannelCode === '' ) {
           that.$message.error('供应商编号不能为空');
@@ -173,22 +146,16 @@
           return
         }
         
-        axios.post('/api/Home/ChannelSave', this.formData)
+        that.$axios.post('/Home/ChannelSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$store.commit('ChannelUpdateData');
-              that.$refs[ 'upload' ].resetFields();
+              that.handleClose(obj);
             }
             else {
               that.$message.error(res.msg);
             }
-            // that.reload()
-            // that.isClose=false
           })
           .catch(e => {
             console.log(e);

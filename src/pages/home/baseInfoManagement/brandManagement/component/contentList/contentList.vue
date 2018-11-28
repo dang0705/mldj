@@ -7,22 +7,23 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getBrandList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getBrandList"
         >
         </i>
       </el-input>
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              v-loading="listLoading"
     >
       <el-table-column label="操作"
                        width="100"
@@ -76,17 +77,15 @@
       <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-  
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
@@ -95,20 +94,20 @@
 </template>
 
 <script>
-  import axios from 'axios'
-  // import filter from '@/component/common/filter/filter'
+  import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        listLoading: true,
+        isListChange: false,
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -119,7 +118,7 @@
         dialogType: 'up_date',
         noLogo: 'static/img/noData.jpg',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -130,14 +129,29 @@
           ID: '',
           ImgBase: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
-      this.getBrandList()
+      this.getBrandList();
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        console.log(val);
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -152,18 +166,20 @@
       },
       getBrandList() {
         let that = this;
-        that.list = [];
-        axios.post('/api/Home/OnloadBrandList')
+        that.listLoading = true;
+        that.$axios.post('/Home/OnloadBrandList', {
+          BrandName: that.keyWord
+        })
           .then(data => {
-            const res = data.data.Content;
-            if ( !res || !res.length||res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = res ? res : [];
-            that.$store.state.isBrandUpdateData = false;
+            that.listLoading = false;
+            that.isListChange = true;
+            that.defaultPaginationData()
+  
           })
       }
-      
       ,
       closeAlert() {
         this.dialogType = 'up_date';
@@ -172,7 +188,7 @@
       , getData(index, row) {
         // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
         this.sendDialogData.BrandCode = this.list[ realIndex ].BrandCode;
@@ -184,58 +200,25 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该品牌, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/BrandSave', {
+            that.$axios.post('/Home/BrandSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
-              .then(data => {
-                axios.post('/api/Home/OnloadBrandList', {
-                  BrandName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isBrandUpdateData = false;
-                  })
+              .then(() => {
+                that.getBrandList()
               })
           })
           .catch(() => {
           
           })
         
-      }
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      , filter() {
-        let that = this;
-        axios.post('/api/Home/OnloadBrandList', {
-          BrandName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isBrandUpdateData = false;
-          })
-      }
-      
-    },
-    watch: {
-      '$store.state.isBrandUpdateData': function () {
-        if ( this.$store.state.isBrandUpdateData === true ) {
-          this.getBrandList()
-        }
       }
     }
   }

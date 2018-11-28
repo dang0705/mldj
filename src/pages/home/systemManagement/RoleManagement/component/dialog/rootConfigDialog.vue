@@ -81,7 +81,7 @@
         that.treeLoading = true;
         that.echoSelectedList = [];
         that.postNavList = [];
-        that.$axios.post('/api/RoleMenu/GetRoleMenuList', {
+        that.$axios.post('/RoleMenu/GetRoleMenuList', {
           rolecode: that.configId
         })
           .then(data => {
@@ -123,7 +123,7 @@
         if ( that.postNavList.length === 1 ) {
           that.$message.error('您还未对 ' + that.roleName + ' 配置任何权限')
         } else {
-          that.$axios.post('/api/RoleMenu/BindRoleMenu', {
+          that.$axios.post('/RoleMenu/BindRoleMenu', {
             roleCode: that.configId,
             roleMenuList: that.postNavList
           })
@@ -140,8 +140,11 @@
       }
     },
     mounted() {
-      this.menuList = this.$store.state.menuList;
-      console.log(this.menuList);
+      const storage = window.localStorage;
+      console.log(JSON.parse(storage.getItem('menu')));
+      if ( storage.getItem('menu') ) {
+        this.menuList = JSON.parse(storage.getItem('menu'))
+      }
     }
   }
 </script>

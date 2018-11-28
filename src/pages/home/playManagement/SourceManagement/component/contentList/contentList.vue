@@ -122,7 +122,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
   
   const storage = window.localStorage;
@@ -188,7 +187,7 @@
       updateList() {
         const that = this,
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
-        that.$axios.post('/api/PlayManage/EmployeeFileAllList', url)
+        that.$axios.post('/PlayManage/EmployeeFileAllList', url)
           .then(data => {
             if ( data.data.Content ) {
               const res = data.data.Content.Rows;
@@ -240,12 +239,12 @@
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/ApkSave', {
+            that.$axios.post('/Home/ApkSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
+                that.$axios.post('/Home/OnloadApkList', {
                   ApkName: this.keyWord
                 })
                   .then(res => {

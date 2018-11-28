@@ -127,17 +127,7 @@
         editString: ''
       }
     },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
-      }
-    },
+   
     watch: {
       'isAlertShow': function () {
         this.alertShow = this.isAlertShow;
@@ -168,7 +158,7 @@
       
       getParentOrgNameList() {
         const that = this;
-        that.$axios.post('/api/Organization/GetOrganizationList', {
+        that.$axios.post('/Organization/GetOrganizationList', {
           pageindex: 0,
           validity: 1
         }).then(data => {
@@ -232,7 +222,7 @@
         if ( url === 'UpdOrganization' ) {
           params += '&ID=' + that.formData.ID;
         }
-        that.$axios.post('/api/Organization/' + url, params)
+        that.$axios.post('/Organization/' + url, params)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {

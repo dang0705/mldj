@@ -47,7 +47,6 @@
 
 <script>
   import upload from '@/component/common/upload/uploadList'
-  import axios from 'axios'
   let Msg='';
   export default {
     // inject:['reload'],
@@ -193,7 +192,7 @@
           return
         }
   
-        axios.post('/api/Home/BrandSave', this.formData)
+        that.$axios.post('/Home/BrandSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {

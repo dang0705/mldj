@@ -17,9 +17,9 @@
         </i>
       </el-input>
     </div>
-    
+  
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
@@ -57,15 +57,13 @@
       </el-table-column>
     </el-table>
     <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      v-if="list.length"
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
@@ -74,14 +72,14 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
-  
+  import pagination from '@/component/common/pagination/pagination'
+
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
@@ -99,7 +97,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -116,6 +114,20 @@
       this.getApkList()
     },
     methods: {
+      defaultPaginationData(val) {
+        console.log(val);
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -131,7 +143,7 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadApkList')
+        that.$axios.post('/Home/OnloadApkList')
           .then(data => {
             const res = data.data.Content;
             if ( !res || !res.length||res.length ) {
@@ -151,7 +163,7 @@
       getData(index, row) {
         // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
         this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
@@ -161,19 +173,19 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/ApkSave', {
+            that.$axios.post('/Home/ApkSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadApkList', {
+                that.$axios.post('/Home/OnloadApkList', {
                   ApkName: this.keyWord
                 })
                   .then(res => {
@@ -188,18 +200,10 @@
         
       }
       ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
+
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadApkList', {
+        that.$axios.post('/Home/OnloadApkList', {
           ApkName: this.keyWord
         })
           .then(data => {

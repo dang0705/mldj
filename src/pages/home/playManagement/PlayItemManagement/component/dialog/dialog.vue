@@ -260,7 +260,7 @@
           params+='&'+i+'='+this.formData[i];
         }
         console.log(params);
-        that.$axios.post('/api/PlayManage/EmployeePlayItemOperation', params)
+        that.$axios.post('/PlayManage/EmployeePlayItemOperation', params)
           .then(data => {
             // console.log(data);
             let res = data.data;

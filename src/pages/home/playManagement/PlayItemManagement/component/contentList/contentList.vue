@@ -138,7 +138,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
   // import sourcelistDialog from '../dialog/sourceListDialog/sourceListDialog'
   
@@ -227,7 +226,7 @@
             '&RoleId=' + storage.getItem('RoleID') +
             '&FileType=' + that.searchData.FileType;
         // that.list = [];
-        axios.post('/api/PlayManage/EmployeePlayItemList', params)
+        that.$axios.post('/PlayManage/EmployeePlayItemList', params)
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {
@@ -277,7 +276,7 @@
       switchChange(i, row) {
         console.log(i, row);
         let that=this;
-        that.$axios.post('/api/PlayManage/EmployeePlayUpdateStatus', {
+        that.$axios.post('/PlayManage/EmployeePlayUpdateStatus', {
           EmployeeCode:that.sendDialogData.EmployeeCode,
           ID: row.ID,
           Validity:row.Validity
@@ -288,14 +287,6 @@
           })
         // this.getList()
       }
-      
-    },
-    watch: {
-      '$store.state.isApkUpdateData': function () {
-        if ( this.$store.state.isApkUpdateData === true ) {
-          this.getApkList()
-        }
-      },
       
     }
   }

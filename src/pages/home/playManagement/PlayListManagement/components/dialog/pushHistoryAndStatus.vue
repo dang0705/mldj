@@ -176,7 +176,7 @@
         const that = this;
         that.pusHistoryListLoading = true;
         that.myPushHistorySelectList = [];
-        that.$axios.post('/api/PlayManage/ExecElookPlayItemList', {
+        that.$axios.post('/PlayManage/ExecElookPlayItemList', {
           ID: that.playListID
         }).then(data => {
           console.log(data);
@@ -202,7 +202,7 @@
         console.log(val);
         const that = this;
         // that.playItemsList=[];
-        that.$axios.post('/api/PlayManage/ExecElookPlayListByItem', {
+        that.$axios.post('/PlayManage/ExecElookPlayListByItem', {
           ExecPlayListCode: val || that.pushHistorySelectModel
         })
           .then(data => {
@@ -220,7 +220,7 @@
       getProgressSelectOption(val) {
         const that = this;
         that.pushProgressSelectList = [];
-        that.$axios.post('/api/PlayManage/ExecElookPlayMediaItemList', {
+        that.$axios.post('/PlayManage/ExecElookPlayMediaItemList', {
           PageIndex: 1,
           PageSize: 1000,
           ExecPlayListCode: val || that.pushHistorySelectModel
@@ -247,7 +247,7 @@
       changePushProgressList(val) {
         // console.log(val);
         const that = this;
-        that.$axios.post('/api/PlayManage/ExecElookPlayMediaItem', {
+        that.$axios.post('/PlayManage/ExecElookPlayMediaItem', {
           PageIndex: 1,
           PageSize: 1000,
           ExecPlayListCode: that.pushHistorySelectModel,

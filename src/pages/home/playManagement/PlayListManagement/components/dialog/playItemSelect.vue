@@ -49,7 +49,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   
   
   let Msg = '';
@@ -108,26 +107,7 @@
         if ( that.isSSDialogShow ) {
           that.getSelectedList()
           that.handleScreenClick();
-          /*          if ( that.editOrAdd === 'up_date' ) {
-					  that.width = '1220px';
-					  that.isAdd = false;
-					  that.formData.LabelName = that.editData.LabelName;
-					  that.formData.EmployeeCode = storage.getItem('userName');
-					  that.formData.EmployeeName = that.editData.EmployeeName;
-					  that.alertTitle = '编辑标签';
-					  Msg = '编辑成功';
-					  that.formData.DogType = that.editOrAdd;
-					}
-					else {
-					  that.width = '30%';
-					  this.isAdd = true;
-					  for ( var i in  this.formData ) {
-						this.formData[ i ] = ''
-					  }
-					  this.alertTitle = '新增标签';
-					  // this.provinceTotalArr = '省 / 市';
-					  Msg = '增加成功'
-					}*/
+
         } else {
           that.keyWord = '';
           that.selected = [];
@@ -237,7 +217,7 @@
       },
       getSelectedList() {
         const that = this;
-        that.$axios.post('/api/PlayManage/ExecElookPlayListById', {
+        that.$axios.post('/PlayManage/ExecElookPlayListById', {
           ID: that.playListId
         })
           .then(data => {
@@ -259,7 +239,7 @@
       },
       confirmUpload() {
         const that = this;
-        that.$axios.post('/api/PlayManage/ExecElookPlayListItemAdd', {
+        that.$axios.post('/PlayManage/ExecElookPlayListItemAdd', {
           PlayListItemListString: JSON.stringify(that.playItems)
         })
           .then(data => {
@@ -274,7 +254,7 @@
       },
       addOrEdit(data) {
         let that = this;
-        axios.post('/api/Home/DeviceLabelSave', data)
+        that.$axios.post('/Home/DeviceLabelSave', data)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
@@ -298,7 +278,7 @@
         that.screenClicked = true;
         that.selectList = [];
         // if ( !that.selectList.length ) {
-        that.$axios.post('/api/PlayManage/EmployeePlayItemList', {
+        that.$axios.post('/PlayManage/EmployeePlayItemList', {
           PageSize: 10000,
           PageIndex: 1,
           PlayItemName: '',

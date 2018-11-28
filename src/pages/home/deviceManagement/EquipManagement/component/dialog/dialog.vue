@@ -60,7 +60,6 @@
 
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
-  import axios from 'axios'
   let Msg='';
   const storage = window.localStorage;
   export default {
@@ -205,7 +204,7 @@
           that.$message.error('设备所属人不能为空');
           return
         }
-        axios.post('/api/Home/EmployeeDeviceSave', this.formData)
+        that.$axios.post('/Home/EmployeeDeviceSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
@@ -233,7 +232,7 @@
         const CompanyID = storage.getItem('CompanyID'),
           that = this,
           RoleId = storage.getItem('RoleId');
-        axios.post('/api/HOME/OnloadEmployeeList', {
+        that.$axios.post('/HOME/OnloadEmployeeList', {
           CompanyID: CompanyID,
           RoleId: RoleId
         })

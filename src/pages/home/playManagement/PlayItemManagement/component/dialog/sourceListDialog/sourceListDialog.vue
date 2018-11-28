@@ -170,7 +170,7 @@
             '&RoleId=' + storage.getItem('RoleID') +
             '&EmployeeCode=' + that.sourceInfo.EmployeeCode;
         
-        that.$axios.post('/api/PlayManage/EmployeeFileAllList', params)
+        that.$axios.post('/PlayManage/EmployeeFileAllList', params)
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {

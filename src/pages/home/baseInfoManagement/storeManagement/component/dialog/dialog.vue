@@ -11,23 +11,27 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
       >
-        <el-form-item prop="StoreCode">
-          <el-input v-model="formData.StoreCode" clearable placeholder="门店编号" minlength="1"
+        <el-form-item prop="StoreCode"
+                      label="门店编号："
+        >
+          <el-input v-model="formData.StoreCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="StoreName">
-          <el-input v-model="formData.StoreName" clearable placeholder="门店名称" minlength="1"
+        <el-form-item prop="StoreName"
+                      label="门店名称："
+        >
+          <el-input v-model="formData.StoreName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="AddInfo">
+        <el-form-item prop="AddInfo" label="门店地址：">
           <el-input
             v-model="formData.AddInfo"
-            placeholder="门店地址"
             minlength="1"
             maxlength="30"></el-input>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="所在省市：">
           <city-select
             v-if="isAlertShow"
             @provincesAndCities="provincesAndCities"
@@ -35,24 +39,26 @@
           ></city-select>
         </el-form-item>
         
-        <el-form-item prop="ChannelCode">
-          <el-input v-model="formData.ChannelCode" clearable placeholder="渠道编号" minlength="1"
+        <el-form-item prop="ChannelCode" label="渠道编号：">
+          <el-input v-model="formData.ChannelCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="ContactPhone">
-          <el-input v-model="formData.ContactPhone" placeholder="联系方式"></el-input>
+        <el-form-item prop="ContactPhone" label="联系方式：">
+          <el-input v-model="formData.ContactPhone"></el-input>
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+    </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
-  import axios from 'axios'
   
-  let Msg='';
+  let Msg = '';
   export default {
     name: "storeManagement_dialog",
     components: {
@@ -121,20 +127,10 @@
         editString: ''
       }
     },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
-      }
-    },
+    
     watch: {
       'isAlertShow': function () {
-        if ( this.isAlertShow === true ) {
+        if ( this.isAlertShow ) {
           if ( this.editOrAdd === 'up_date' ) {
             this.formData.StoreCode = this.editData.StoreCode;
             this.formData.StoreName = this.editData.StoreName;
@@ -148,14 +144,14 @@
             this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑门店';
             this.provinceTotalArr = this.formData.ProvinceName + ' / ' + this.formData.CityName;
-            Msg='编辑成功';
+            Msg = '编辑成功';
           } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
             this.alertTitle = '新增门店';
             this.provinceTotalArr = '省 / 市';
-            Msg='增加成功';
+            Msg = '增加成功';
           }
           this.formData.DogType = this.editOrAdd;
         } else {
@@ -166,8 +162,12 @@
       }
     },
     methods: {
-      handleClose() {
-        this.$emit('closeAlert');
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
         this.editString = '';
         
       },
@@ -177,7 +177,7 @@
         this.isClose = true;
       },
       
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.StoreCode === '' ) {
           that.$message.error('门店编号不能为空');
@@ -187,15 +187,12 @@
           that.$message.error('门店名称不能为空');
           return
         }
-        axios.post('/api/Home/StoreSave', this.formData)
+        that.$axios.post('/Home/StoreSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$store.commit('StoreUpdateData');
-              that.$refs[ 'upload' ].resetFields();
+              that.handleClose(obj);
             }
             else {
               that.$message.error(res.msg);
@@ -206,9 +203,10 @@
           })
       },
       provincesAndCities(code) {
-        this.formData.ProvinceCode = code[ 0 ];
-        this.formData.CityCode = code[ 1 ]
-        
+        if ( code.length ) {
+          this.formData.ProvinceCode = code[ 0 ];
+          this.formData.CityCode = code[ 1 ]
+        }
       }
     },
     

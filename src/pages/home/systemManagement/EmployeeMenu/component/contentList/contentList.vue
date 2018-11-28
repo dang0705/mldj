@@ -7,12 +7,12 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="用户姓名"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -22,12 +22,12 @@
         v-model="email"
         autocomplete="on"
         placeholder="邮箱"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -37,12 +37,12 @@
         v-model="mobileNumber"
         autocomplete="on"
         placeholder="手机号码"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -59,7 +59,7 @@
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               :row-style="rowStyle"
@@ -86,7 +86,7 @@
       <el-table-column
         label="用户账号/手机号"
         prop="Phone"
-        width="390"
+        width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
@@ -94,7 +94,7 @@
       <el-table-column
         label="姓名"
         prop="EmployeeName"
-        width="230"
+        width="220"
         :show-overflow-tooltip="true"
         align="center"
       >
@@ -102,7 +102,7 @@
       <el-table-column
         label="邮箱"
         prop="Email"
-        width="200"
+        width="400"
         :show-overflow-tooltip="true"
         align="center"
       >
@@ -122,17 +122,14 @@
       </el-table-column>
     
     </el-table>
-    
-    
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
@@ -143,18 +140,19 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
+  import pagination from '@/component/common/pagination/pagination'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
+        isListChange: false,
         email: '',
         mobileNumber: '',
         dataLoading: true,
@@ -177,7 +175,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -191,11 +189,27 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
-      change(data) {
-        this.getApkList()
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
+      change() {
+        this.getList()
       },
       formatTime(row, column, cellValue, index) {
         return cellValue.split(' ')[ 0 ] + ' - ' + row.EndTime.split(' ')[ 0 ]
@@ -203,7 +217,7 @@
       switchChange(index, row) {
         let that = this;
         console.log(index, row);
-        that.$axios.post('/api/Organization/UpdateValidity', {
+        that.$axios.post('/Account/UpdateValidity', {
           Validity: row.Validity,
           ID: row.ID
         })
@@ -222,9 +236,9 @@
           console.log(this.dialogType);
         }
       },
-      getApkList(filter) {
+      getList() {
         let that = this;
-        that.$axios.post('/api/Account/GetEmployeeList', {
+        that.$axios.post('/Account/GetEmployeeList', {
           PageIndex: 1,
           PageSize: 1000,
           EmployeeName: that.keyWord,
@@ -234,8 +248,8 @@
         })
           .then(data => {
             that.list = data.data.Content.DataList;
-            that.dataLoading = false
-            // that.$store.state.isCompanyUpdateData = false;
+            that.dataLoading = false;
+            that.isListChange = true;
           })
       }
       ,
@@ -243,12 +257,12 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getApkList();
+          this.getList();
         }
       }
       ,
       getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.Phone = this.list[ realIndex ].Phone;
         this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
@@ -258,24 +272,8 @@
         this.sendDialogData.roleID = 0;
         this.sendDialogData.OrganizationID = 0;
         this.sendDialogData.IsOrgLeader = 0;
-        console.log(this.sendDialogData.serviceTime);
-        // this.sendDialogData.EndTime = this.list[ realIndex ].EndTime;
         this.sendDialogData.ID = row.ID;
       }
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        this.getApkList('filter')
-      }
-      
     }
   }
 </script>
@@ -309,6 +307,6 @@
     width: 100%
   
   .activeName
-    filter()
+    getList()
     width: 250px
 </style>

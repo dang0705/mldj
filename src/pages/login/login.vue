@@ -33,7 +33,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import md5 from 'md5'
   
   let storage = window.localStorage;
@@ -92,7 +91,8 @@
           return
         }
         /*md5加密*/
-        axios.post('/api/Account/Login', {
+        const that = this;
+        that.$axios.post('/Account/Login', {
           UserName: this.loginData.userName,
           UserPwd: md5(this.loginData.password),
           ValidateCode: '59898989'
@@ -100,15 +100,15 @@
           console.log(data);
           const res = data.data.Content.UserInfo;
           if ( data.data.state == 1 ) {
-            this.$router.push('/EmployeeMenu');
-            storage.setItem('userName', this.loginData.userName);
-            storage.setItem('password', this.loginData.password);
-            storage.setItem('isHoldLogin', this.loginData.holdLogin);
+            that.$router.push('/EmployeeMenu');
+            storage.setItem('userName', that.loginData.userName);
+            storage.setItem('password', that.loginData.password);
+            storage.setItem('isHoldLogin', that.loginData.holdLogin);
             storage.setItem('RoleID', res.RoleID);
             storage.setItem('CompanyID', res.CompanyID)
           } else {
-            this.$message.error('用户名或密码错误');
-            this.createCode();
+            that.$message.error('用户名或密码错误');
+            that.createCode();
           }
         });
         // this.$router.push('/activityManagement')

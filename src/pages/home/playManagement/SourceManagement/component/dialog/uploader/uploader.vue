@@ -91,7 +91,7 @@
         videoDuration: '',
         checkFileParams: '',
         EmployeeCode: storage.getItem('userName'),
-        uploadUrl: 'api/Handler/UploadFileHandler.ashx',
+        uploadUrl: '/Handler/UploadFileHandler.ashx',
         isShow: false,
         uploadTitle: '',
         uploadType: '',

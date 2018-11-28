@@ -7,23 +7,24 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              v-loading="listLoading"
     >
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
@@ -64,17 +65,15 @@
         align="center">
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-  
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
@@ -83,19 +82,20 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
+  import pagination from '@/component/common/pagination/pagination'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        listLoading: true,
+        isListChange: false,
         dialogType: 'up_date',
         headerStyle: {
           height: '100%',
@@ -108,7 +108,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -123,9 +123,25 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -138,30 +154,32 @@
           console.log(this.dialogType);
         }
       },
-      getApkList() {
+      getList() {
         let that = this;
-        that.list = [];
-        axios.post('/api/Home/OnloadWarehouseList')
+        that.$axios.post('/Home/OnloadWarehouseList', {
+          WarehouseName: this.keyWord
+        })
           .then(data => {
-            const res = data.data.Content;
-            if ( !res || !res.length||res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = res ? res : [];
-            that.$store.state.isWarehouseUpdateData = false;
+            that.listLoading = false;
+            that.isListChange = true;
+            this.defaultPaginationData()
           })
       }
       
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
-        this.isAlertShow = false
+        this.isAlertShow = false;
+        if ( !n ) {
+          this.getList()
+        }
       }
-      , getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
+      ,
+      getData(index, row) {
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.WarehouseCode = this.list[ realIndex ].WarehouseCode;
         this.sendDialogData.WarehouseName = this.list[ realIndex ].WarehouseName;
@@ -169,7 +187,8 @@
         this.sendDialogData.WarehouseDec = this.list[ realIndex ].WarehouseDec;
         this.sendDialogData.ID = row.ID;
       }
-      , deleteItem(index, row) {
+      ,
+      deleteItem(index, row) {
         let that = this;
         this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -177,19 +196,12 @@
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/WarehouseSave', {
+            that.$axios.post('/Home/WarehouseSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
-              .then(data => {
-                axios.post('/api/Home/OnloadWarehouseList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isWarehouseUpdateData = false;
-                    that.$store.state.isApkUpdateData = false;
-                  })
+              .then(() => {
+                that.getList()
               })
           })
           .catch(() => {
@@ -197,35 +209,6 @@
           })
         
       }
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        let that = this;
-        axios.post('/api/Home/OnloadWarehouseList', {
-          WarehouseName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isWarehouseUpdateData = false;
-          })
-      }
-      
-    },
-    watch: {
-      '$store.state.isWarehouseUpdateData': function () {
-        if ( this.$store.state.isWarehouseUpdateData === true ) {
-          this.getApkList()
-        }
-      },
-      
     }
   }
 </script>
@@ -259,6 +242,6 @@
     width: 100%
   
   .activeName
-    filter()
+    getList()
     width: 600px
 </style>

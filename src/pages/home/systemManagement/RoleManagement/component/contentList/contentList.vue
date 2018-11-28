@@ -96,7 +96,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
   import rootDialog from '../dialog/rootConfigDialog'
   
@@ -154,7 +153,7 @@
       switchChange(index, row) {
         let that = this;
         console.log(index, row);
-        axios.post('/api/OrganizationalRole/UpdateValidity', {
+        that.$axios.post('/OrganizationalRole/UpdateValidity', {
           Validity: row.Validity,
           ID: row.ID
         })
@@ -181,7 +180,7 @@
         let that = this;
         // that.list = [];
         that.tableLoading = true;
-        axios.post('/api/OrganizationalRole/GetRoleList', {
+        that.$axios.post('/OrganizationalRole/GetRoleList', {
           PageIndex: 1,
           PageSize: 1000,
           Validity: that.Validity,

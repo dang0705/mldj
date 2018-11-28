@@ -11,40 +11,37 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
+      
       >
-        <el-form-item prop="WarehouseCode">
-          <el-input v-model="formData.WarehouseCode" clearable placeholder="仓库编号" minlength="1"
+        <el-form-item prop="WarehouseCode" label="仓库编号">
+          <el-input v-model="formData.WarehouseCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="WarehouseName">
-          <el-input v-model="formData.WarehouseName" clearable placeholder="仓库名称" minlength="1"
+        <el-form-item prop="WarehouseName" label="仓库名称">
+          <el-input v-model="formData.WarehouseName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="WarehouseAdd">
-          <el-input v-model="formData.WarehouseAdd" clearable placeholder="仓库地址" minlength="1"
+        <el-form-item prop="WarehouseAdd" label="仓库地址">
+          <el-input v-model="formData.WarehouseAdd" clearable minlength="1"
                     maxlength="30"></el-input>
         </el-form-item>
-        <el-form-item prop="WarehouseDec">
-          <el-input type="textarea" v-model="formData.WarehouseDec" placeholder="仓库描述"></el-input>
+        <el-form-item prop="WarehouseDec" label="仓库描述">
+          <el-input type="textarea" v-model="formData.WarehouseDec"></el-input>
         </el-form-item>
       </el-form>
-      <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" :isDisplay="isDisplay"></upload>
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+    </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import upload from '@/component/common/upload/uploadList'
-  import axios from 'axios'
-  let Msg='';
+  let Msg = '';
   export default {
-    // inject:['reload'],
-    name: "SupplierManagement_dialog",
-    components: {
-      upload
-    },
+    name: "warehouseManagement_dialog",
     props: {
       isAlertShow: {
         type: Boolean
@@ -59,9 +56,6 @@
     data() {
       return {
         alertTitle: '',
-        isDisplay: true,
-        uploadType: '.apk',
-        file: false,
         formData: {
           WarehouseCode: '',
           WarehouseName: '',
@@ -113,7 +107,6 @@
           ]
         }
         ,
-        editString: ''
       }
     },
     computed: {
@@ -138,13 +131,13 @@
             this.formData.ID = this.editData.ID;
             console.log(this.formData.DogType);
             this.alertTitle = '编辑仓库';
-            Msg='编辑成功';
+            Msg = '编辑成功';
           } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
             this.alertTitle = '新增仓库';
-            Msg='增加成功';
+            Msg = '增加成功';
           }
           this.formData.DogType = this.editOrAdd;
         }
@@ -153,16 +146,12 @@
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
-        // this.formData.ImgBase='';
-        // this.editFormData.ImgBase=''
-        // this.$refs.uploadList.resetFields();
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
       },
       closed() {
         this.$store.commit('clearUpload');
@@ -173,7 +162,7 @@
         console.log(hasFile);
         this.file = hasFile;
       },
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.WarehouseCode === '' ) {
           that.$message.error('仓库编号不能为空');
@@ -188,14 +177,13 @@
           return
         }
         
-        axios.post('/api/Home/WarehouseSave', this.formData)
+        that.$axios.post('/Home/WarehouseSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
+              that.handleClose(obj)
               that.$store.commit('WarehouseUpdateData');
               that.$refs[ 'upload' ].resetFields();
             }

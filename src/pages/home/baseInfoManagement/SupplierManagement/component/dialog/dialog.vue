@@ -11,50 +11,42 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="150px"
       >
-        <el-form-item prop="SupplierContactCode">
-          <el-input v-model="formData.SupplierContactCode" clearable placeholder="供应商编号" minlength="1"
+        <el-form-item prop="SupplierContactCode" label="供应商编号：">
+          <el-input v-model="formData.SupplierContactCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="SupplierName">
-          <el-input v-model="formData.SupplierName" clearable placeholder="供应商名称" minlength="1"
+        <el-form-item prop="SupplierName" label="供应商名称：">
+          <el-input v-model="formData.SupplierName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="SupplierContactPhone">
-          <el-input v-model="formData.SupplierContactPhone" clearable placeholder="供应商联系人电话" minlength="1"
+        <el-form-item prop="SupplierContactPhone" label="供应商联系人电话：">
+          <el-input v-model="formData.SupplierContactPhone" clearable minlength="1"
+                    maxlength="11"></el-input>
+        </el-form-item>
+        <el-form-item prop="SupplierContactName" label="供应商联系人姓名：">
+          <el-input v-model="formData.SupplierContactName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="SupplierContactName">
-          <el-input v-model="formData.SupplierContactName" clearable placeholder="供应商联系人姓名" minlength="1"
-                    maxlength="10"></el-input>
+        <el-form-item prop="SupplierDec" label="供应商描述：">
+          <el-input type="textarea" clearable v-model="formData.SupplierDec" maxlength="100"></el-input>
         </el-form-item>
-        <el-form-item prop="SupplierDec">
-          <el-input type="textarea" v-model="formData.SupplierDec" placeholder="供应商描述"></el-input>
-        </el-form-item>
-        <!--  <div id="imgWrapper">
-			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
-		  </div>-->
       </el-form>
       
-      <!--上传图片插件-->
-      <upload :isClose="isClose" @closeDialog="handleClose" :isDisplay="isDisplay"></upload>
-      <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
+      
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+    </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  import upload from '@/component/common/upload/uploadList'
-  import axios from 'axios'
-  let Msg='';
+  let Msg = '';
   export default {
-    // inject:['reload'],
     name: "SupplierManagement_dialog",
-    components: {
-      upload
-    },
     props: {
       isAlertShow: {
         type: Boolean
@@ -68,11 +60,8 @@
     },
     data() {
       return {
-        // upLoadTitle: '上传APK',
         alertTitle: '',
         isDisplay: true,
-        uploadType: '.apk',
-        file: false,
         formData: {
           SupplierContactCode: '',
           SupplierName: '',
@@ -83,7 +72,6 @@
         }
         ,
         editFormData: {},
-        
         uploadRules: {
           SupplierContactCode: [
             {
@@ -119,8 +107,8 @@
             },
             {
               min: 1,
-              max: 20,
-              message: '长度请在1~20个字符',
+              max: 11,
+              message: '长度请在1~11个字符',
               trigger: 'blur'
             }
           ],
@@ -132,25 +120,13 @@
             },
             {
               min: 1,
-              max: 20,
+              max: 10,
               message: '长度请在1~20个字符',
               trigger: 'blur'
             }
           ],
         }
         ,
-        editString: ''
-      }
-    },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
       }
     },
     watch: {
@@ -166,14 +142,14 @@
             this.formData.SupplierDec = this.editData.SupplierDec;
             this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑供应商'
-            Msg='编辑成功'
+            Msg = '编辑成功'
           } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
             this.formData.DogType = this.editOrAdd;
             this.alertTitle = '新增供应商';
-            Msg='增加成功'
+            Msg = '增加成功'
           }
         }
         
@@ -182,16 +158,12 @@
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
-        // this.formData.ImgBase='';
-        // this.editFormData.ImgBase=''
-        // this.$refs.uploadList.resetFields();
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
       },
       closed() {
         this.$store.commit('clearUpload');
@@ -202,7 +174,7 @@
         console.log(hasFile);
         this.file = hasFile;
       },
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.SupplierContactCode === '' ) {
           that.$message.error('供应商编号不能为空');
@@ -216,28 +188,28 @@
           that.$message.error('供应商联系人电话不能为空');
           return
         }
+        else if ( !/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8])|(19[7]))\d{8}$/.test(that.formData.SupplierContactPhone) ) {
+          that.$message.error('手机格式不正确不能为空');
+          return
+        }
         else if ( that.formData.SupplierContactName === '' ) {
           that.$message.error('供应商联系人姓名不能为空');
           return
         }
         
         
-        axios.post('/api/Home/SupplierContactSave', this.formData)
+        that.$axios.post('/Home/SupplierContactSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
+              that.handleClose(obj);
               that.$store.commit('SupplierUpdateData');
               that.$refs[ 'upload' ].resetFields();
             }
             else {
               that.$message.error(res.msg);
             }
-            // that.reload()
-            // that.isClose=false
           })
           .catch(e => {
             console.log(e);

@@ -11,49 +11,44 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
       >
-        <el-form-item prop="CompanyName">
-          <el-input v-model="formData.CompanyName" clearable placeholder="公司名称" minlength="1"
+        <el-form-item prop="CompanyName" label="公司名称">
+          <el-input v-model="formData.CompanyName" clearable minlength="1"
                     maxlength="20"></el-input>
         </el-form-item>
-        <el-form-item prop="AccountName">
-          <el-input v-model="formData.AccountName" clearable placeholder="开户人" minlength="1"
+        <el-form-item prop="AccountName" label="开户人">
+          <el-input v-model="formData.AccountName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="BankName">
-          <el-input v-model="formData.BankName" clearable placeholder="开户银行" maxlength="20"></el-input>
+        <el-form-item prop="BankName" label="开户银行">
+          <el-input v-model="formData.BankName" clearable maxlength="20"></el-input>
         </el-form-item>
-        <el-form-item prop="BankCard">
-          <el-input v-model="formData.BankCard" clearable placeholder="银行卡号" maxlength="20"></el-input>
+        <el-form-item prop="BankCard" label="银行卡号">
+          <el-input v-model="formData.BankCard" clearable maxlength="20"></el-input>
         </el-form-item>
-        <el-form-item prop="BeginTimeAndEndTime">
+        <el-form-item prop="BeginTimeAndEndTime" label="续费起止时间">
           <date-select
             :isAlertShow="alertShow"
             :selectedDate="formData.serviceTime"
             @getDate="getDate"
           ></date-select>
         </el-form-item>
-        <!--  <div id="imgWrapper">
-			<img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200" >
-		  </div>-->
       </el-form>
-      
-      <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-  // import upload from '@/component/common/upload/uploadList'
   import dateSelect from '@/component/common/dateSelect/dateSelect'
-  import axios from 'axios'
   
   let Msg = '';
   
   export default {
-    // inject:['reload'],
     name: "companyManagement_dialog",
     components: {
       dateSelect
@@ -74,8 +69,6 @@
         alertTitle: '',
         alertShow: false,
         isDisplay: true,
-        uploadType: '.apk',
-        file: false,
         formData: {
           CompanyName: '',
           AccountName: '',
@@ -89,7 +82,6 @@
         }
         ,
         editFormData: {},
-        
         uploadRules: {
           CompanyName: [
             {
@@ -147,22 +139,18 @@
             }
           ]
           ,
+          BeginTimeAndEndTime:[
+            {
+              required: true,
+              message: '续费起止时间为必选项',
+              trigger: 'blur'
+            }
+          ]
         }
-        ,
-        editString: ''
-      }
-    },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
         
-        }
       }
     },
+    
     watch: {
       'isAlertShow': function () {
         this.alertShow = this.isAlertShow;
@@ -178,9 +166,6 @@
             Msg = '编辑成功';
           }
           else {
-            for ( var i in  this.formData ) {
-              this.formData[ i ] = ''
-            }
             this.alertTitle = '新增公司';
             Msg = '增加成功';
           }
@@ -191,35 +176,27 @@
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
       getDate(val) {
         console.log(val);
         if ( val ) {
           this.formData.serviceTime = val;
         }
       },
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
         this.formData.serviceTime = [];
-        // this.formData.ImgBase='';
-        // this.editFormData.ImgBase=''
-        // this.$refs.uploadList.resetFields();
+        
       },
       closed() {
         this.$store.commit('clearUpload');
         this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.file = hasFile;
-      },
-      
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.CompanyName === '' ) {
           that.$message.error('公司名称不能为空');
@@ -243,14 +220,14 @@
         }
         
         if ( that.formData.DogType === 'a_dd' ) {
-          that.postData('AddCompany')
+          that.postData('AddCompany', obj)
         } else {
-          that.postData('UpdComany')
+          that.postData('UpdComany', obj)
         }
         
       }
       ,
-      postData(url) {
+      postData(url, obj) {
         const that = this;
         var params = '';
         params += '&CompanyName=' + that.formData.CompanyName;
@@ -266,20 +243,17 @@
         if ( url === 'UpdComany' ) {
           params += '&ID=' + that.formData.ID;
         }
-        axios.post('/api/Company/' + url, params)
+        that.$axios.post('/Company/' + url, params)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
+              that.handleClose(obj);
               that.$refs[ 'upload' ].resetFields();
             }
             else {
               that.$message.error(res.msg);
             }
-            // that.reload()
-            // that.isClose=false
           })
           .catch(e => {
             console.log(e);

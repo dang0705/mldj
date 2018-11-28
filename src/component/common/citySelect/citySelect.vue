@@ -13,12 +13,15 @@
 </template>
 
 <script>
-  import axios from 'axios'
   
   export default {
     name: "citySelect",
     props: {
-      getEditCities: String
+      getEditCities: String,
+      forSearch: {
+        type: Boolean,
+        default: false,
+      }
     },
     data() {
       return {
@@ -33,11 +36,15 @@
       };
     },
     methods: {
+      
       change(val) {
+        console.log(val);
         let province = val[ 0 ];
         let city = val[ 1 ];
-        let that = this;
-        for ( var i = 0; i < that.selectedProvincesArr.length; i++ ) {
+        let that = this,
+          start = this.forSearch ? 1 : 0;
+        
+        for ( var i = start; i < that.selectedProvincesArr.length; i++ ) {
           if ( province === that.selectedProvincesArr[ i ].label ) {
             for ( var j = 0; j < that.selectedProvincesArr[ i ].cities.length; j++ ) {
               if ( city === that.selectedProvincesArr[ i ].cities[ j ].label ) {
@@ -48,20 +55,25 @@
           }
         }
         console.log(that.provinceAndCityCode);
-        this.$emit('provincesAndCities', that.provinceAndCityCode);
-        
+        if ( val.length > 1 ) {
+          this.$emit('provincesAndCities', that.provinceAndCityCode);
+        } else {
+          this.$emit('provincesAndCities', []);
+          
+        }
       },
       handleItemChange(val) {
         let province = val[ 0 ],
           that = this,
+          start = this.forSearch ? 1 : 0,
           length = that.selectedProvincesArr.length;
-        for ( var i = 0; i < length; i++ ) {
+        for ( var i = start; i < length; i++ ) {
           if ( province === that.selectedProvincesArr[ i ].label ) {
             that.provinceAndCityCode[ 0 ] = that.selectedProvincesArr[ i ].ProvinceCode;
             if ( that.selectedProvincesArr[ i ].cities.length ) {
               break;
             }
-            axios.post('/api/Home/CityList', {ProvinceCode: that.selectedProvincesArr[ i ].ProvinceCode})
+            that.$axios.post('/Home/CityList', {ProvinceCode: that.selectedProvincesArr[ i ].ProvinceCode})
               .then(data => {
                 that.selectedProvincesArr[ i ].cities = [];
                 const res = data.data.Content,
@@ -81,12 +93,12 @@
         let that = this;
         that.placeholder = that.getEditCities;
         if ( !that.selectedProvincesArr.length ) {
-          axios.post('/api/Home/ProvinceList')
+          that.$axios.post('/Home/ProvinceList')
             .then(data => {
               // console.log(data);
               const provincesAndCitiesArr = data.data.Content,
                 length = provincesAndCitiesArr.length;
-      
+              
               if ( provincesAndCitiesArr ) {
                 for ( var i = 0; i < length; i++ ) {
                   that.selectedProvincesArr.push({
@@ -96,9 +108,15 @@
                   })
                 }
               }
+              if ( this.forSearch ) {
+                that.selectedProvincesArr.unshift({
+                  label: '所有省市',
+                  ProvinceCode: ''
+                })
+              }
             });
         }
-
+        
       }
     }
     ,
@@ -111,9 +129,10 @@
   @import '~@/assets/styles/mixin.styl'
   .citySelectWrapper >>> .el-input__inner
     inputNoBorder()
-  .citySelectWrapper>>>.el-cascader__label
+  
+  .citySelectWrapper >>> .el-cascader__label
     line-height 40px
-    
+  
   .citySelectWrapper >>> .el-input__inner::-webkit-input-placeholder
     color: #000;
   
@@ -121,5 +140,5 @@
     .el-cascader
       line-height normal
       width 100%
-    
+
 </style>

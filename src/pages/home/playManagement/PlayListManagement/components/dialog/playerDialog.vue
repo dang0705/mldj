@@ -76,7 +76,7 @@
     methods: {
       getAllDeviceList() {
         const that = this;
-        return that.$axios.post('/api/Equip/EmployeeDeviceListList', {
+        return that.$axios.post('/Equip/EmployeeDeviceListList', {
           PageIndex: 1,
           PageSize: 1000,
           DeviceName: '',
@@ -85,7 +85,7 @@
       },
       getAllLabelList() {
         const that = this;
-        return that.$axios.post('/api/Equip/EmployeeDeviceLableList', {
+        return that.$axios.post('/Equip/EmployeeDeviceLableList', {
           PageIndex: 1,
           PageSize: 1000,
           DeviceName: '',
@@ -136,7 +136,7 @@
         that.allLabeledDeviceIdList = [];
         let res, length = that.allLabelIdList.length, requestCount = 0;
         for ( var v = 0; v < that.allLabelIdList.length; v++ ) {
-          that.$axios.post('/api/Equip/EmployeeDeviceMappingByLabelId', {
+          that.$axios.post('/Equip/EmployeeDeviceMappingByLabelId', {
             ID: that.allLabelIdList[ v ]
           })
             .then(data => {
@@ -190,10 +190,10 @@
         if ( this.loadDateSuccess ) {
           this.toData = [];
           this.toData = this.allDeviceList = this.allLabelList = this.allLabelIdList = this.allLabeledDeviceIdList = [];
-          if ( obj.target.innerText === '取 消' ) {
-            this.$emit('closePlayerAlert');
-          } else {
+          if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
             this.$emit('closePlayerAlert', 'n');
+          } else {
+            this.$emit('closePlayerAlert');
             
           }
         }
@@ -251,7 +251,7 @@
         console.log(that.deviceIdStr, that.deviceNameStr);
       }
       ,
-      check() {
+      check(obj) {
         const that = this;
         console.log(that.deviceIdStr);
         if ( !that.deviceIdStr ) {
@@ -268,7 +268,7 @@
           }
           console.log(MediaList);
           
-          that.$axios.post('/api/PlayManage/CheckElookPlayListByMediaId', {
+          that.$axios.post('/PlayManage/CheckElookPlayListByMediaId', {
             MediaIdListString: that.deviceIdStr
           })
             .then(data => {
@@ -287,13 +287,13 @@
                     center: true
                   })
                     .then(() => {
-                      this.$axios.post('/api/PlayManage/ExecElookPlayListMediaAdd', {
+                      this.$axios.post('/PlayManage/ExecElookPlayListMediaAdd', {
                         PlayListMediaListString: JSON.stringify(ObjList)
                       })
                         .then(data => {
                           if ( data.data.state == 1 ) {
                             that.$message.success('推送成功');
-                            that.handleClose()
+                            that.handleClose(obj)
                             // that.$emit('closePlayerAlert');
                           }
                         })
@@ -302,13 +302,13 @@
                       that.$message.info('您已取消推送设备：' + deviceNameStr.substring(0, deviceNameStr.length - 1))
                     })
                 } else {
-                  this.$axios.post('/api/PlayManage/ExecElookPlayListMediaAdd', {
+                  this.$axios.post('/PlayManage/ExecElookPlayListMediaAdd', {
                     PlayListMediaListString: JSON.stringify(ObjList)
                   })
                     .then(data => {
                       if ( data.data.state == 1 ) {
                         that.$message.success('推送成功');
-                        that.handleClose()
+                        that.handleClose(obj)
                         // that.$emit('closePlayerAlert');
                       }
                     })

@@ -11,7 +11,7 @@ import home from '@/pages/home/home'
 Vue.use(Router);
 
 export default new Router({
-  mode: 'history',
+  base:'/HomeWeb',
   routes: [
     {
       path: '*/',
@@ -22,26 +22,7 @@ export default new Router({
       path: '/home',
       component: home,
       children: [
-        {
-          path: '/activityManagement',
-          name: 'activityManagement',
-          component: resolve => require([ '@/pages/home/businessManagement/activityManagement/activityManagement' ], resolve)
-        },
-       /* {
-          path: '/InventoryManagement',
-          name: 'InventoryManagement',
-          component: resolve => require([ '@/pages/home/businessManagement/InventoryManagement/InventoryManagement' ], resolve)
-        },
-        {
-          path: '/orderManagement',
-          name: 'orderManagement',
-          component: resolve => require([ '@/pages/home/businessManagement/orderManagement/orderManagement' ], resolve)
-        },
-        {
-          path: '/operationsManagement',
-          name: 'operationsManagement',
-          component: resolve => require([ '@/pages/home/businessManagement/operationsManagement/operationsManagement' ], resolve)
-        },*/
+
         {
           path: '/BrandManagement',
           name: 'BrandManagement',
@@ -62,11 +43,7 @@ export default new Router({
           name: 'channelManagement',
           component: resolve => require([ '@/pages/home/baseInfoManagement/channelManagement/channelManagement' ], resolve)
         },
-        {
-          path: '/productManagement',
-          name: 'productManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/productManagement/productManagement' ], resolve)
-        },
+
         {
           path: '/warehouseManagement',
           name: 'warehouseManagement',
@@ -87,11 +64,7 @@ export default new Router({
           name: 'LabelManagement',
           component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement'], resolve)
         },
-        {
-          path: '/deviceVersionManagement',
-          name: 'deviceVersionManagement',
-          component: resolve => require([ '@/pages/home/deviceManagement/deviceVersionManagement/deviceVersionManagement' ], resolve)
-        },
+
         {
           path: '/EmployeeMenu',
           name: 'EmployeeMenu',
@@ -127,13 +100,9 @@ export default new Router({
           path: '/PlayListManagement',
           name: 'PlayListManagement',
           component: resolve => require([ '@/pages/home/playManagement/PlayListManagement/PlayListManagement'], resolve)
-        },
-
-        {
-          path: '/personnelManagementPage',
-          name: 'personnelManagementPage',
-          component: resolve => require([ '@/pages/home/personnelManagement/personnelManagementPage/personnelManagementPage' ], resolve)
         }
+
+
       ]
     }
 

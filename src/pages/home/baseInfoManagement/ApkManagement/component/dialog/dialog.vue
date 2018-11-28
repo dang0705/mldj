@@ -42,7 +42,6 @@
 
 <script>
   import upload from '@/component/common/upload/uploadList'
-  import axios from 'axios'
   
   export default {
     // inject:['reload'],
@@ -168,7 +167,7 @@
         }
         
         
-        axios.post('/api/Home/ApkSave', this.formData)
+        that.$axios.post('/Home/ApkSave', this.formData)
           .then(data => {
             // console.log(data);
             let res = data.data;

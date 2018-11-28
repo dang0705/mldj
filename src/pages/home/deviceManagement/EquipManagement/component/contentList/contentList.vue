@@ -111,7 +111,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import citySelect from '@/component/common/citySelect/citySelect'
   
   import alertDialog from '../dialog/dialog'
@@ -180,7 +179,7 @@
       getApkList() {
         let that = this;
         that.list = [];
-        axios.post('/api/Home/OnloadEmployeeDeviceList',{
+        that.$axios.post('/Home/OnloadEmployeeDeviceList',{
         })
           .then(data => {
             const res = data.data.Content;
@@ -224,14 +223,14 @@
         let that = this;
         console.log(index, row);
         // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        axios.post('/api/Home/EmployeeDeviceSave', {
+        that.$axios.post('/Home/EmployeeDeviceSave', {
           DogType: 'd_elete',
           EmployeeCode: row.EmployeeCode,
           Validity: row.Validity,
           ID: row.ID
         })
           .then(data => {
-            axios.post('/api/Home/OnloadEmployeeDeviceList', {
+            that.$axios.post('/Home/OnloadEmployeeDeviceList', {
               DeviceName: this.keyWord
             })
               .then(res => {
@@ -252,7 +251,7 @@
       ,
       filter() {
         let that = this;
-        axios.post('/api/Home/OnloadEmployeeDeviceList', {
+        that.$axios.post('/Home/OnloadEmployeeDeviceList', {
           DeviceName: this.keyWord
         })
           .then(data => {
@@ -261,7 +260,7 @@
           })
       },
       cityFilter(city) {
-        axios.post('/api/Home/OnloadEmployeeDeviceList', {
+        that.$axios.post('/Home/OnloadEmployeeDeviceList', {
           CityCode: city[ 1 ]
         })
           .then(data => {

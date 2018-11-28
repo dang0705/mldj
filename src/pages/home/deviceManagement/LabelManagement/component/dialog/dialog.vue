@@ -62,7 +62,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
   
   
   let Msg = '';
@@ -180,7 +179,7 @@
       
       generateData() {
         const that = this;
-        axios.post('api/HOME/OnloadEmployeeDeviceList')
+        that.$axios.post('/HOME/OnloadEmployeeDeviceList')
           .then(data => {
             console.log(data);
             let res = data.data.Content, length = res.length;
@@ -243,7 +242,7 @@
         const that = this;
         that.selected = [];
         that.formData.ID = that.editData.ID;
-        axios.post('api/HOME/EmployeeDeviceMappingByLabelId', {
+        that.$axios.post('/HOME/EmployeeDeviceMappingByLabelId', {
           ID: that.formData.ID
         })
           .then(data => {
@@ -296,7 +295,7 @@
       },
       addOrEdit(data) {
         let that = this;
-        axios.post('/api/Home/DeviceLabelSave', data)
+        that.$axios.post('/Home/DeviceLabelSave', data)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
@@ -318,7 +317,7 @@
         const CompanyID = storage.getItem('CompanyID'),
           that = this,
           RoleId = storage.getItem('RoleId');
-        axios.post('/api/HOME/OnloadEmployeeList', {
+        that.$axios.post('/HOME/OnloadEmployeeList', {
           CompanyID: CompanyID,
           RoleId: RoleId
         })

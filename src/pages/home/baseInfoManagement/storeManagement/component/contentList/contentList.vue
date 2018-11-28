@@ -7,26 +7,29 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
-      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"></citySelect>
+      <citySelect class="citySelect" :isInAlert="!isAlertShow" :forSearch="true"
+                  @provincesAndCities="cityFilter"
+      ></citySelect>
     </div>
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              v-loading="listLoading"
     
     >
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -87,17 +90,15 @@
       >
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-  
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
@@ -110,20 +111,22 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import citySelect from '@/component/common/citySelect/citySelect'
+  import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      citySelect
+      citySelect,
+      pagination
     },
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        listLoading: true,
+        isListChange: false,
         dialogType: 'up_date',
         headerStyle: {
           height: '100%',
@@ -136,7 +139,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -153,10 +156,27 @@
         }
       }
     },
+    
     mounted() {
       this.getList();
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -169,30 +189,35 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(cityCode) {
         let that = this;
-        that.list = [];
-        axios.post('/api/Home/OnloadStorelList')
+        that.listLoading = true;
+        that.$axios.post('/Home/OnloadStorelList', {
+          StoreName: that.keyWord,
+          CityCode: cityCode && cityCode.length ? cityCode[ 1 ] : ''
+        })
           .then(data => {
-            const res = data.data.Content;
-            if ( !res || !res.length||res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = res ? res : [];
-            that.$store.state.isStoreUpdateData = false;
+            that.listLoading = false;
+            that.isListChange = true;
+            this.defaultPaginationData()
           })
       }
       ,
-     
-      closeAlert() {
+      
+      closeAlert(n) {
         this.dialogType = 'up_date';
-        this.isAlertShow = false
+        this.isAlertShow = false;
+        if ( !n ) {
+          this.getList()
+        }
       }
       ,
       getData(index, row) {
         // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.StoreCode = this.list[ realIndex ].StoreCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
@@ -213,18 +238,12 @@
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/StoreSave', {
+            that.$axios.post('/Home/StoreSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(data => {
-                axios.post('/api/Home/OnloadStorelList', {
-                  StoreName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isStoreUpdateData = false;
-                  })
+               that.getList()
               })
           })
           .catch(() => {
@@ -233,52 +252,9 @@
         
       }
       ,
-      handleSizeChange(size) {
-        this.pagesize = size;
-        console.log(this.pagesize)
-        //每页下拉显示数据
-      },
-      handleCurrentChange(currentPage) {
-        this.currentPage = currentPage;
-        console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        let that = this;
-        axios.post('/api/Home/OnloadStorelList', {
-          StoreName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isStoreUpdateData = false;
-          })
-      },
       cityFilter(city) {
-        const that = this;
-        let timer = null;
-        axios.post('/api/Home/OnloadStorelList', {
-          CityCode: city[ 1 ] || ''
-        })
-          .then(data => {
-            const res = data.data.Content;
-            if ( res.length ) {
-              that.list = data.data.Content;
-              clearTimeout(timer)
-            } else {
-              timer = that.$message.error('当前选择城市无数据');
-              setTimeout(that.getList, 1000)
-            }
-            console.log(data);
-          })
+        this.getList(city)
       }
-      
-    },
-    watch: {
-      '$store.state.isStoreUpdateData': function () {
-        if ( this.$store.state.isStoreUpdateData === true ) {
-          this.getList()
-        }
-      },
       
     }
   }

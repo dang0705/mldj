@@ -7,23 +7,24 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              v-loading="listLoading"
     >
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
@@ -71,17 +72,16 @@
       >
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
     
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
@@ -90,19 +90,20 @@
 </template>
 
 <script>
-  import axios from 'axios'
+  import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        listLoading: true,
+        isListChange: false,
         dialogType: 'up_date',
         headerStyle: {
           height: '100%',
@@ -115,7 +116,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -131,9 +132,25 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       addBtn({row, column, rowIndex, columnIndex}) {
         if ( columnIndex === row.length - 1 ) {
           return 'addBtn'
@@ -146,32 +163,36 @@
           console.log(this.dialogType);
         }
       },
-      getApkList() {
+      getList() {
         let that = this;
-        that.list = [];
-        axios.post('/api/Home/OnloadSupplierContactList')
+        that.$axios.post('/Home/OnloadSupplierContactList', {
+          SupplierName: this.keyWord
+        })
           .then(data => {
-            const res = data.data.Content;
-            if ( !res || !res.length || res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = res ? res : [];
-            that.$store.state.isSupplierUpdateData = false;
+            that.listLoading = false;
+            that.isListChange = true;
+            this.defaultPaginationData()
           })
       }
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
+        if ( !n ) {
+          this.getList()
+        }
         this.isAlertShow = false
       }
       , getData(index, row) {
         // console.log(index, row);
         // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
         this.sendDialogData.SupplierContactCode = this.list[ realIndex ].SupplierContactCode;
-        this.sendDialogData.SupplierName = this.list[ realIndex ].SupplierContactPhone;
+        this.sendDialogData.SupplierName = this.list[ realIndex ].SupplierName;
         this.sendDialogData.SupplierContactPhone = this.list[ realIndex ].SupplierContactPhone;
         this.sendDialogData.SupplierContactName = this.list[ realIndex ].SupplierContactName;
         this.sendDialogData.SupplierDec = this.list[ realIndex ].SupplierDec;
@@ -179,25 +200,19 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该供应商, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            axios.post('/api/Home/SupplierContactSave', {
+            that.$axios.post('/Home/SupplierContactSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
-              .then(data => {
-                axios.post('/api/Home/OnloadSupplierContactList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isSupplierUpdateData = false;
-                  })
+              .then(() => {
+                that.getList()
               })
           })
           .catch(() => {
@@ -205,32 +220,13 @@
           })
         
       }
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        let that = this;
-        axios.post('/api/Home/OnloadSupplierContactList', {
-          SupplierName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isSupplierUpdateData = false;
-          })
-      }
+      
       
     },
     watch: {
       '$store.state.isSupplierUpdateData': function () {
         if ( this.$store.state.isSupplierUpdateData === true ) {
-          this.getApkList()
+          this.getList()
         }
       },
       

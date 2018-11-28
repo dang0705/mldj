@@ -90,7 +90,7 @@
       confirmUpload() {
         const that = this;
         that.formData.OperationType = that.dialogType;
-        that.$axios.post('/api/PlayManage/EmployeePlayListOperation', that.formData)
+        that.$axios.post('/PlayManage/EmployeePlayListOperation', that.formData)
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {

@@ -9,7 +9,7 @@
 <script>
   import contentList from './component/contentList/contentList'
 	export default {
-		name: "StoreManagement",
+		name: "storeManagement",
     components: {
       contentList
     }
