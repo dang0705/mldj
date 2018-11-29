@@ -7,27 +7,28 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
-      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"></citySelect>
+      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"
+                  :forSearch="true"></citySelect>
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              max-height="900"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
-              @selection-change="handleSelectionChange"
+              v-loading="dataLoading"
     >
-      
       <el-table-column
         width="100"
         label="操作"
@@ -53,65 +54,65 @@
         prop="LabelName"
         label="标签名称"
         align="center"
-        width="980"
+        width="1000"
       >
       </el-table-column>
       
       <el-table-column
         label="增加+"
         align="center"
-        width="140"
       >
       
       </el-table-column>
     
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
-    
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :editData="sendDialogData"></alert-dialog>
   
   </div>
 </template>
 
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
-  
+  import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
+  
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      citySelect
-      // filter
+      citySelect,
+      pagination
     },
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        dataLoading: true,
+        isListChange: false,
         dialogType: 'up_date',
         switchData: '',
         headerStyle: {
           height: '100%',
-          textAlign: 'center',
-          fontSize: '20px',
           color: '#000',
+          background: '#ccc'
         },
         rowStyle: {
           height: '40px',
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -126,157 +127,88 @@
       }
     },
     mounted() {
-      if ( !this.list.length ) {
-        this.getApkList()
-      }
+      this.getList()
     },
     methods: {
-      
-      addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
         }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
+      addBtn({row, column, rowIndex, columnIndex}) {
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
           this.isAlertShow = true;
           this.dialogType = 'a_dd';
-          console.log(this.dialogType);
         }
       },
-      handleSelectionChange(val) {
-        console.log(val);
-      },
-      
-      getApkList() {
+      getList(city) {
         let that = this;
         that.list = [];
-        that.$axios.post('/Home/OnloadDeviceLabelList')
+        that.$axios.post('/Home/OnloadDeviceLabelList', {
+          DeviceName: this.keyWord,
+          CityCode: city ? city[ 1 ] : ''
+        })
           .then(data => {
-            console.log(data);
-            const res = data.data.Content;
-            if ( !res || !res.length || res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = res ? data.data.Content : [];
-            that.$store.state.isDeviceLabelUpdateData = false;
+            that.dataLoading = false;
+            that.isListChange = true;
           })
       }
       
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
-        this.isAlertShow = false
+        this.isAlertShow = false;
+        if ( !n ) {
+          this.getList();
+        }
       }
       , getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
         this.sendDialogData.LabelName = this.list[ realIndex ].LabelName;
         this.sendDialogData.Address = this.list[ realIndex ].Address;
-        // this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
-        // this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
-        // this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
-        // this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
         this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
       }
       , switchChange(index, row) {
+        console.log(row);
         let that = this;
-        console.log(index, row);
-        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
         that.$axios.post('/Home/DeviceLabelSave', {
           DogType: 'd_elete',
-          EmployeeCode: row.EmployeeCode,
+          EmployeeCode: window.localStorage.getItem('userName'),
+          LabelName: row.LabelName,
           Validity: row.Validity,
           ID: row.ID
         })
-          .then(data => {
-            axios.post('/Home/OnloadDeviceLabelList', {
-              DeviceName: this.keyWord
-            })
-              .then(res => {
-                that.list = res.data.Content;
-                that.$store.state.isDeviceLabelUpdateData = false;
-              })
+          .then(() => {
+            that.getList();
           })
       }
       ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        let that = this;
-        that.$axios.post('/Home/OnloadDeviceLabelList', {
-          DeviceName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isDeviceLabelUpdateData = false;
-          })
-      },
       cityFilter(city) {
-        this.$axios.post('/Home/OnloadDeviceLabelList', {
-          CityCode: city[ 1 ]
-        })
-          .then(data => {
-            console.log(data);
-          })
+        this.getList(city);
       }
-      
-    },
-    watch: {
-      '$store.state.isDeviceLabelUpdateData': function () {
-        if ( this.$store.state.isDeviceLabelUpdateData === true ) {
-          this.getApkList()
-        }
-      },
-      
     }
   }
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
-  
-  #contentListWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
-  
-  /*  #contentListWrapper >>> .el-table__header-wrapper
-	  display none*/
-  
-  #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
-    width: 100% !important
-  
-  #contentListWrapper >>> .el-table__row
-    td
-      text-align center
-  
-  #contentListWrapper
-    listStyle()
-    .el-icon-search
-      filterIcon()
-    li
-      height $eachListHeight
-      background white
-      border-bottom 3px solid #ccc
-  
-  .el-table__body-wrapper
-    width: 100%
-  
-  .filterComponents
-    .input, .citySelect
-      width: 40%
-      margin-right: 20px
-      display inline-block
 </style>

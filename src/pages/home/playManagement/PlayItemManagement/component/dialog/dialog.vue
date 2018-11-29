@@ -5,7 +5,7 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
@@ -18,7 +18,9 @@
           label-width="120px"
           align="left"
         >
-          <el-button type="primary" size="large" @click="selectSource" class="selectSource" >{{formData.FileName}}</el-button>
+          <p v-show="formData.FileId" class="fileName">{{formData.FileName}}</p>
+          <el-button type="primary" size="large" @click="selectSource" class="selectSource">上传素材
+          </el-button>
         </el-form-item>
         <el-form-item
           prop="PlayItemName"
@@ -76,7 +78,7 @@
       </el-form>
       
       <div slot="footer" class="dialog-footer">
-        <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
     </el-dialog>
@@ -115,7 +117,6 @@
         hasRedirectUrl: false,
         sourceListShow: false,
         alertTitle: '',
-        upLoadTitle: '上传APK',
         uploadType: '',
         formData: {
           FileName: '上传素材',
@@ -130,10 +131,7 @@
           sourceType: ''
         }
         ,
-        editFormData: {
-        
-        },
-        
+        editFormData: {},
         uploadRules: {
           FileName: [
             {
@@ -167,27 +165,7 @@
               message: '长度请在1~5个字符',
               trigger: 'blur'
             }
-          ],
-          Navigation: [
-            {
-              required: true,
-              message: '跳转路径为必填项',
-              trigger: 'blur'
-            }
           ]
-        }
-        ,
-        editString: ''
-      }
-    },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
         }
       }
     },
@@ -195,7 +173,7 @@
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-           this.formData=this.editData;
+            this.formData = this.editData;
             // this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑播放项'
           } else {
@@ -212,7 +190,6 @@
     
     methods: {
       selectedSource(val) {
-        // console.log(val);
         this.formData.FileName = val.FileName;
         this.formData.FileId = val.FileId;
         this.formData.FileType = val.FileType;
@@ -232,22 +209,24 @@
         this.sourceListShow = true;
       },
       
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
       },
-      closed() {
-        this.$store.commit('clearUpload');
+  /*    closed() {
         this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
-      },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.formData.UpBusinessLicense = hasFile;
-      },
-      confirmUpload() {
+      },*/
+
+      confirmUpload(obj) {
         let that = this;
-        if ( that.formData.PlayItemName === '' ) {
+        if ( that.formData.FileId === '' ) {
+          that.$message.error('播放素材不能为空');
+          return
+        }
+        else if ( that.formData.PlayItemName === '' ) {
           that.$message.error('播放项名称不能为空');
           return
         } else if ( that.formData.Duration === '' ) {
@@ -255,9 +234,9 @@
           return
         }
         
-        let params='';
+        let params = '';
         for ( var i in this.formData ) {
-          params+='&'+i+'='+this.formData[i];
+          params += '&' + i + '=' + this.formData[ i ];
         }
         console.log(params);
         that.$axios.post('/PlayManage/EmployeePlayItemOperation', params)
@@ -266,11 +245,8 @@
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success("上传成功");
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+              that.handleClose(obj)
+            } else {
               that.$message.error(res.msg)
             }
             // that.reload()
@@ -291,39 +267,7 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
-  .dialogWrapper >>> .el-dialog
-    width 450px
-    max-width 800px
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
-  .selectSource{
+  .fileName {
     max-width: 100%;
     textOverFlow()
   }

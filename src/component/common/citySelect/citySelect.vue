@@ -4,7 +4,7 @@
       :options="selectedProvincesArr"
       @active-item-change="handleItemChange"
       :props="props"
-      :placeholder="placeholder||'省份 / 市'"
+      :placeholder="placeholder||'选择省市'"
       expand-trigger="hover"
       clearable
       @change='change'
@@ -36,7 +36,6 @@
       };
     },
     methods: {
-      
       change(val) {
         console.log(val);
         let province = val[ 0 ];

@@ -1,15 +1,13 @@
 <template>
   <div id="player">
     <el-dialog
-      title="标签/设备推送"
+      :title="alertTitle"
       :visible.sync="isAlertShow"
       :before-close="handleClose"
       :close-on-click-modal="false"
       width="70%"
       align="center"
     >
-      <!-- <el-radio v-model="isShowAddress" :label="true">显示地址</el-radio>
-	   <el-radio v-model="isShowAddress" :label="false">隐藏地址</el-radio>-->
       <tree-transfer
         ref="tree"
         placeholder="输入设备名称进行过滤"
@@ -26,7 +24,6 @@
         filter
         openAll
         :renderContent="renderFunc"
-      
       >
       </tree-transfer>
       <i v-show="!loadDateSuccess" class="el-icon-loading" style="font-size: 4rem;text-align: center"></i>
@@ -46,9 +43,12 @@
     props: {
       isPlayerDialogShow: {
         type: Boolean
-      }
-      , playListId: {
+      },
+      playListId: {
         default: 0
+      },
+      playListName: {
+        type: String,
       }
     },
     components: {
@@ -57,6 +57,7 @@
     data() {
       return {
         isShowAddress: false,
+        alertTitle: '',
         title: [ '所有标签/设备', '已推送标签/设备' ],
         isAlertShow: false,
         allDeviceList: [],
@@ -103,7 +104,6 @@
             .then(that.$axios.spread((allDeviceList, allLabelList) => {
               // console.log(allDeviceList, allLabelList);
               that.allDeviceList = allDeviceList.data.Content.Rows;
-              
               allLabelList = allLabelList.data.Content.Rows;
               const length = allLabelList.length;
               for ( var j = 0; j < length; j++ ) {
@@ -421,8 +421,9 @@
         this.toData = [];
         if ( this.isAlertShow && !this.allLabeledDeviceIdList.length ) {
           console.log(this.playListId);
-          this.getAllDvcAndLblList();
           
+          this.getAllDvcAndLblList();
+          this.alertTitle = this.playListName+' - '+'设备推送'
         }
       }
     }
@@ -441,15 +442,18 @@
       margin-bottom: 10px
       border-bottom 1px solid #eee
       text-align left
+      
       li
         overflow hidden;
         display inline-block
         height 18px;
         line-height: 20px
         textOverFlow()
+    
     .deviceName
       width: 30%
       margin-right: 5%
+    
     .deviceAddress
       width: 65%
       color #409eff

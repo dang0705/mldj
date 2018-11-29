@@ -5,7 +5,7 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
@@ -27,10 +27,10 @@
         </el-form-item>
       
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      </span>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -131,10 +131,7 @@
           
         }
       },
-      closed() {
-        this.$store.commit('clearUpload');
-        this.isClose = true;
-      },
+    
       confirmUpload(obj) {
         let that = this;
         if ( that.formData.ChannelCode === '' ) {
@@ -166,35 +163,4 @@
 </script>
 
 <style scoped lang="stylus">
-  .dialogWrapper >>> .el-dialog
-    width 300px
-    max-width 800px
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
 </style>

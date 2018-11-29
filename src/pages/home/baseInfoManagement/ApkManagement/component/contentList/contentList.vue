@@ -7,12 +7,12 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -24,9 +24,10 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
-    
+              v-loading="dataLoading"
+
     >
-      <el-table-column label="操作" width="100">
+      <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -56,13 +57,13 @@
       <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
     <pagination
       :tableList="list"
+      :isListChange="isListChange"
       @currentPage="getCurrentPage"
       @pageSize="getPageSize"
       @defaultPaginationData="defaultPaginationData"
-      v-if="list.length"
+      @listChanged="listChanged"
     ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
@@ -85,7 +86,8 @@
       return {
         list: [],
         dialogType: 'up_date',
-        isListEmpty:true,
+        dataLoading: true,
+        isListChange: false,
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -111,9 +113,12 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
       defaultPaginationData(val) {
         console.log(val);
         if ( val && val.length ) {
@@ -129,9 +134,7 @@
       }
       ,
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
@@ -140,17 +143,18 @@
           console.log(this.dialogType);
         }
       },
-      getApkList() {
+      getList() {
         let that = this;
         that.list = [];
-        that.$axios.post('/Home/OnloadApkList')
+        that.$axios.post('/Home/OnloadApkList',{
+          ApkName: this.keyWord
+        })
           .then(data => {
-            const res = data.data.Content;
-            if ( !res || !res.length||res.length ) {
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
             }
-            that.list = data.data.Content||[];
-            that.$store.state.isApkUpdateData = false;
+            that.dataLoading = false;
+            that.isListChange = true;
           })
       }
       
@@ -199,24 +203,13 @@
           })
         
       }
-      ,
 
-      filter() {
-        let that = this;
-        that.$axios.post('/Home/OnloadApkList', {
-          ApkName: this.keyWord
-        })
-          .then(data => {
-            that.list = data.data.Content;
-            that.$store.state.isApkUpdateData = false;
-          })
-      }
       
     },
     watch: {
       '$store.state.isApkUpdateData': function () {
         if ( this.$store.state.isApkUpdateData === true ) {
-          this.getApkList()
+          this.getList()
         }
       },
       
@@ -226,33 +219,4 @@
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
-  #contentListWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
-  
- 
-  
-  #contentListWrapper >>> .el-table__row
-    td
-      text-align center
-  
-  #contentListWrapper
-    listStyle()
-    .el-icon-search
-      filterIcon()
-    li
-      height $eachListHeight
-      background white
-      border-bottom 3px solid #ccc
-  
-  .el-table__body-wrapper
-    width: 100%
-  
-  .activeName
-    filter()
-    width: 600px
 </style>

@@ -133,7 +133,7 @@
       }
     },
     created() {
-      
+      storage.removeItem('menuSelected');
       this.createCode();
       if ( storage.getItem('isHoldLogin') === 'true' ) {
         this.loginData.userName = storage.getItem('userName');

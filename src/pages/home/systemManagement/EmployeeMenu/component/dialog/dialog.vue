@@ -5,7 +5,7 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
@@ -232,7 +232,6 @@
           if ( data.data.state == 1 ) {
             that.parentOrgNameList = data.data.Content.DataList;
           }
-          console.log(that.parentOrgNameList);
           that.roleLoading = false
         })
       },
@@ -244,16 +243,8 @@
         } else {
           this.$emit('closeAlert');
         }
-        this.$refs[ 'upload' ].resetFields();
       },
-      closed() {
-      },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.file = hasFile;
-      },
-      
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( !that.formData.Phone ) {
           that.$message.error('手机号码不能为空');
@@ -281,14 +272,14 @@
         }
         
         if ( that.formData.DogType === 'a_dd' ) {
-          that.postData('AddUser')
+          that.postData('AddUser',obj)
         } else {
-          that.postData('UpdUser')
+          that.postData('UpdUser',obj)
         }
         
       }
       ,
-      postData(url) {
+      postData(url,obj) {
         const that = this;
         var params = '';
         params += '&Phone=' + that.formData.Phone;
@@ -306,14 +297,11 @@
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.$emit('closeAlert');
-              that.$refs[ 'upload' ].resetFields();
+              that.handleClose(obj);
             }
             else {
               that.$message.error(res.msg);
             }
-            // that.reload()
-            // that.isClose=false
           })
           .catch(e => {
             console.log(e);
@@ -323,45 +311,12 @@
     ,
     mounted() {
       this.getRoleNameList();
-      // this.OrganizationIDList = this.$store.state.organizationList;
-      // console.log(this.OrganizationIDList);
     }
   }
 </script>
 
 <style scoped lang="stylus">
-  .dialogWrapper >>> .el-dialog
-    width 300px
-    max-width 800px
-    text-align center
-  
   .dialogWrapper >>> .el-select
     width: 100%
   
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
 </style>

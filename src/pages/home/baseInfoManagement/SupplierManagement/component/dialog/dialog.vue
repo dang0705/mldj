@@ -6,6 +6,7 @@
       :close-on-click-modal='false'
       :before-close="handleClose"
       @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
@@ -152,8 +153,6 @@
             Msg = '增加成功'
           }
         }
-        
-        
       }
     },
     
@@ -204,8 +203,6 @@
             if ( res.state == 1 ) {
               that.$message.success(Msg);
               that.handleClose(obj);
-              that.$store.commit('SupplierUpdateData');
-              that.$refs[ 'upload' ].resetFields();
             }
             else {
               that.$message.error(res.msg);
@@ -220,35 +217,5 @@
 </script>
 
 <style scoped lang="stylus">
-  .dialogWrapper >>> .el-dialog
-    width 300px
-    max-width 800px
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+
 </style>

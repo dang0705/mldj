@@ -7,12 +7,12 @@
         v-model="fileName"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -26,11 +26,12 @@
       </el-select>
     </div>
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
+              v-loading="dataLoading"
     
     >
       <el-table-column label="下载" width="100"
@@ -99,21 +100,19 @@
       <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
     <alert-dialog
       :isAlertShow.sync="isAlertShow"
       @closeAlert="closeAlert"
-      @updateList="updateList"
+      @getList="getList"
       :editOrAdd="dialogType"
       :id="id"
       :editData="sendDialogData"></alert-dialog>
@@ -123,6 +122,7 @@
 
 <script>
   import alertDialog from '../dialog/dialog'
+  import pagination from '@/component/common/pagination/pagination'
   
   const storage = window.localStorage;
   
@@ -130,12 +130,14 @@
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
         imgWidth: '',
+        dataLoading: true,
+        isListChange: false,
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
@@ -156,7 +158,7 @@
         fileName: '',
         fileType: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -165,16 +167,30 @@
           ApkDec: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
-      this.updateList()
+      this.getList()
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       change() {
-        this.updateList()
+        this.getList()
       },
       formatter(row, index) {
         // console.log(row, index);
@@ -184,28 +200,20 @@
       sourcePreview(i, row) {
         console.log(row);
       },
-      updateList() {
+      getList() {
         const that = this,
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
         that.$axios.post('/PlayManage/EmployeeFileAllList', url)
           .then(data => {
-            if ( data.data.Content ) {
-              const res = data.data.Content.Rows;
-              if ( !res || !res.length || res.length ) {
-                that.isListEmpty = false
-              }
-              that.list = res ? res : [];
-            } else {
-              that.list = [];
-              that.isListEmpty = false
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content.Rows;
             }
-            console.log(that.list);
+            that.dataLoading = false;
+            that.isListChange = true;
           })
       },
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
@@ -214,16 +222,16 @@
           console.log(this.dialogType);
         }
       },
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
-        this.isAlertShow = false
+        this.isAlertShow = false;
+        if ( !n ) {
+          this.getList();
+        }
       }
       ,
       getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
-        console.log(realIndex);
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
         this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
@@ -232,7 +240,7 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -259,19 +267,6 @@
         
       }
       ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        this.updateList()
-      }
-      ,
       afterEnterPopover(val) {
         const img = new Image(),
           that = this;
@@ -287,40 +282,16 @@
           }
         }
       }
-    
+      
       
     }
   }
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
   .download
     display inline-block
     text-decoration none
     color #000
     font-size: 1.2rem
-  
-  #contentListWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
-  
-  #contentListWrapper
-    listStyle()
-    .el-icon-search
-      filterIcon()
-    li
-      height $eachListHeight
-      background white
-      border-bottom 3px solid #ccc
-  
-  .el-table__body-wrapper
-    width: 100%
-  
-  .activeName
-    filter()
-    width: 600px
 </style>

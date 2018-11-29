@@ -72,9 +72,7 @@
             :disabled="playItemSettingsDisabledFormatter(scope.$index,scope.row)"
             v-text="playItemSettingsTxtFormatter(scope.$index,scope.row)"
             @click="screenSettings(scope.$index,scope.row)"
-          >
-            屏幕播放项设置
-          </el-button>
+          ></el-button>
         </template>
       </el-table-column>
       <el-table-column label="推送操作" align="center" width="180"
@@ -84,7 +82,7 @@
                      :disabled="pushDisabledFormatter(scope.$index,scope.row)"
                      type="primary"
                      round size="small"
-                     @click="pushDeviceSelect(scope.$index,scope.row)">推送设备选择
+                     @click="pushDeviceSelect(scope.$index,scope.row)">
           </el-button>
         </template>
       </el-table-column>
@@ -95,7 +93,7 @@
           <el-button type="info" round size="small"
                      v-text="pushBtnTxtFormatter(scope.$index,scope.row)"
                      :disabled="pushDisabledFormatter(scope.$index,scope.row)"
-                     @click="pushHistoryAlertShow(scope.$index,scope.row)">查看推送历史
+                     @click="pushHistoryAlertShow(scope.$index,scope.row)">
           </el-button>
         </template>
       
@@ -103,43 +101,47 @@
       <el-table-column label="增加+" align="center">
       </el-table-column>
     </el-table>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length"
-    >
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
     <add-and-edit-playList
       :isAddAndEditPlayListShow.sync="isAddAndEditPlayListShow"
       :dialogType="dialogType"
       :editData="sendToDialog"
       @closePlayListAlert="closePlayListAlert"
-    
     >
     
     </add-and-edit-playList>
     
-    <player-dialog
-      :isPlayerDialogShow.sync="isPlayerDialogShow"
-      @closePlayerAlert="closePlayerAlert"
-      :playListId="playListId"
-    >
-    </player-dialog>
+    <!--播放项设置弹框-->
     <screen-settings
       :isSSDialogShow.sync="isSSDialogShow"
       @closeSSAlert="closeSSAlert"
       :playListId="playListId"
+      :playListName="playListName"
     >
     </screen-settings>
+    <!--推送弹框-->
+    <player-dialog
+      :isPlayerDialogShow.sync="isPlayerDialogShow"
+      @closePlayerAlert="closePlayerAlert"
+      :playListId="playListId"
+      :playListName="playListName"
+    >
+    </player-dialog>
+    <!--历史弹框-->
     <push-history-and-status
       :isPushHistoryAndStatusShow.sync="isPushHistoryAndStatusShow"
       :playListID="playListID"
       @closeSSAlert="closePHASAlert"
+      :playListName="playListName"
+    
     >
     
     </push-history-and-status>
@@ -152,6 +154,7 @@
   import playerDialog from '../dialog/playerDialog'
   import pushHistoryAndStatus from '../dialog/pushHistoryAndStatus'
   import screenSettings from '../dialog/playItemSelect'
+  import pagination from '@/component/common/pagination/pagination'
   
   const storage = window.localStorage;
   
@@ -162,7 +165,8 @@
       addAndEditPlayList,
       playerDialog,
       pushHistoryAndStatus,
-      screenSettings
+      screenSettings,
+      pagination
     },
     data() {
       return {
@@ -171,7 +175,9 @@
         thisSelectIndex: 0,
         historyOptionLoading: true,
         tableLoading: true,
+        isListChange: false,
         playListId: '',
+        playListName: '',
         isAddAndEditPlayListShow: false,    //显示隐藏新增修改播放列表弹框
         isPlayerDialogShow: false,          //显示隐藏推送操作弹框
         isPushHistoryAndStatusShow: false,  //显示隐藏推送历史弹框
@@ -216,25 +222,34 @@
     }
     ,
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       getList() {
         let that = this;
         
         that.tableLoading = true;
         that.$axios.post('/PlayManage/EmployeePlayListList', that.defaultAndSearchInfo)
           .then(data => {
-            that.tableLoading = false;
             if ( data.data.state == 1 ) {
               that.list = data.data.Content.Rows
             }
+            that.tableLoading = false;
+            that.isListChange = true;
           })
-      }
-      ,
-      handleSizeChange(size) {
-        this.pageSize = size
-      }
-      ,
-      handleCurrentChange(currentPage) {
-        this.currentPage = currentPage
       }
       ,
       switchChange(i, row) {
@@ -250,9 +265,7 @@
       }
       ,
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column) {
         if ( column.label === '增加+' ) {
@@ -261,9 +274,11 @@
         }
       }
       ,
-      closePlayListAlert() {
+      closePlayListAlert(n) {
         this.isAddAndEditPlayListShow = false;
-        this.getList()
+        if ( !n ) {
+          this.getList()
+        }
         
       }
       ,
@@ -274,9 +289,11 @@
         }
       }
       ,
-      closeSSAlert() {
+      closeSSAlert(n) {
         this.isSSDialogShow = false;
-        this.getList();
+        if ( !n ) {
+          this.getList()
+        }
       },
       closePHASAlert() {
         this.isPushHistoryAndStatusShow = false;
@@ -306,26 +323,19 @@
         
         if ( row.ItemCount == 0 && playDate >= now && row.Validity ) {
           return '无播放项';
-        }
-        else if ( playDate < now && row.Validity && row.ItemCount > 0 ) {
+        } else if ( playDate < now && row.Validity && row.ItemCount > 0 ) {
           return '已过期'
-        }
-        else if ( !row.Validity && row.ItemCount > 0 && playDate >= now ) {
+        } else if ( !row.Validity && row.ItemCount > 0 && playDate >= now ) {
           return '已停用'
-        }
-        else if ( row.ItemCount == 0 && playDate < now && !row.Validity ) {
+        } else if ( row.ItemCount == 0 && playDate < now && !row.Validity ) {
           return '已停用/已过期/无播放项'
-        }
-        else if ( row.ItemCount == 0 && playDate < now ) {
+        } else if ( row.ItemCount == 0 && playDate < now ) {
           return '已过期/无播放项'
-        }
-        else if ( !row.Validity && playDate < now ) {
+        } else if ( !row.Validity && playDate < now ) {
           return '已停用/已过期'
-        }
-        else if ( row.ItemCount == 0 && playDate >= now && !row.Validity ) {
+        } else if ( row.ItemCount == 0 && playDate >= now && !row.Validity ) {
           return '已停用/无播放项'
-        }
-        else {
+        } else {
           return '推送设备选择';
         }
       }
@@ -386,38 +396,21 @@
       }
       ,
       pushDeviceSelect(i, row) {
-        // console.log(i, row);
-        let date = new Date(),
-          year = date.getFullYear(),
-          month = date.getMonth() + 1,
-          day = date.getDate(),
-          dateStr = year + '-' + month + '-' + day,
-          now = new Date(dateStr).getTime();
-        if ( new Date(row.PlayListEndDate).getTime() < now ) {
-          this.$message.error('时效已过，无法推送')
-        } else {
-          this.isPlayerDialogShow = true;
-          this.playListId = row.ID;
-        }
+        this.isPlayerDialogShow = true;
+        this.playListId = row.ID;
+        this.playListName = row.PlayListName
       },
       screenSettings(i, row) {
-        let date = new Date(),
-          year = date.getFullYear(),
-          month = date.getMonth() + 1,
-          day = date.getDate(),
-          dateStr = year + '-' + month + '-' + day,
-          now = new Date(dateStr).getTime();
-        if ( new Date(row.PlayListEndDate).getTime() < now ) {
-          this.$message.error('时效已过，无法设置屏幕')
-        } else {
-          this.isSSDialogShow = true;
-          this.playListId = row.ID;
-        }
+        this.isSSDialogShow = true;
+        this.playListId = row.ID;
+        this.playListName = row.PlayListName
       }
       ,
       pushHistoryAlertShow(index, row) {
+        console.log(row);
         this.isPushHistoryAndStatusShow = true;
         this.playListID = row.ID;
+        this.playListName = row.PlayListName
       }
     }
     ,
@@ -430,7 +423,5 @@
 </script>
 
 <style scoped lang="stylus">
-  .activeName
-    filter()
-    width: 300px
+
 </style>

@@ -26,7 +26,6 @@
           :label="item.label"
           :value="item.value"
         >
-        
         </el-option>
       </el-select>
       
@@ -46,19 +45,16 @@
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
-    
+              v-loading="dataLoading"
     >
       <el-table-column label="操作" width="100" align="center">
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <!-- <el-button type="danger" icon="el-icon-delete" circle size="small"
-					  @click="deleteItem(scope.$index,scope.row)">
-		   </el-button>-->
           <el-switch
             v-model="scope.row.Validity"
             :active-value="1"
@@ -90,13 +86,6 @@
         width="345"
         :show-overflow-tooltip="true">
       </el-table-column>
-      <!-- <el-table-column
-		 label="跳转路径"
-		 prop="ApkDec"
-		 align="center"
-		 width="180"
-		 :show-overflow-tooltip="true">
-	   </el-table-column>-->
       <el-table-column
         label="创建人"
         prop="EmployeeName"
@@ -114,48 +103,40 @@
       <el-table-column label="增加+">
       </el-table-column>
     </el-table>
-    <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
-    
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
                   :editOrAdd="dialogType"
                   :id="id"
                   :editData="sendDialogData"></alert-dialog>
-    <!--<sourcelist-dialog-->
-    <!--:isSourceListShow.sync="isSourceListShow"-->
-    <!--@getIsSourceListShow="getIsSourceListShow"-->
-    <!--&gt;</sourcelist-dialog>-->
   </div>
 </template>
 
 <script>
   import alertDialog from '../dialog/dialog'
-  // import sourcelistDialog from '../dialog/sourceListDialog/sourceListDialog'
-  
+  import pagination from '@/component/common/pagination/pagination'
   const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // sourcelistDialog
-      // filter
+      pagination
     },
     data() {
       return {
+        dataLoading:true,
         isSourceListShow: false,
+        isListChange: false,
         FileType: '',
         list: [],
         dialogType: 'up_date',
-        isListEmpty: true,
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
@@ -178,7 +159,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         searchData: {
@@ -199,17 +180,30 @@
           sourceType: '',
           Validity: 1
         }
-        // isUpdateDate:false
       }
     },
     mounted() {
       this.getList()
     },
     methods: {
-      addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
         }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
+      addBtn({row, column, rowIndex, columnIndex}) {
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
@@ -217,7 +211,8 @@
           this.dialogType = 'a_dd';
           console.log(this.dialogType);
         }
-      },
+      }
+      ,
       getList() {
         let that = this,
           params = '&PageSize=1000&PageIndex=1&PlayItemName=' + that.searchData.PlayItemName +
@@ -230,29 +225,23 @@
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {
-              const res = data.data.Content.Rows;
-              if ( !res || !res.length || res.length ) {
-                that.isListEmpty = false
-              }
-              that.list = res || [];
-            } else {
-              that.list = [];
-              that.isListEmpty = false
+              that.list = data.data.Content.Rows;
             }
+            that.dataLoading = false;
+            that.isListChange = true;
           })
       }
-      
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
-        this.getList()
+        if ( !n ) {
+          this.getList()
+        }
       }
       ,
       getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(realIndex);
         this.isAlertShow = true;
         this.sendDialogData.FileName = this.list[ realIndex ].FileName;
@@ -262,15 +251,6 @@
         this.sendDialogData.TimeLong = this.list[ realIndex ].TimeLong;
         this.sendDialogData.FileId = this.list[ realIndex ].FileId;
         this.sendDialogData.ID = row.ID;
-      }
-      
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
       }
       ,
       switchChange(i, row) {
@@ -285,7 +265,6 @@
           .then(data => {
             console.log(data);
           })
-        // this.getList()
       }
       
     }
@@ -293,32 +272,5 @@
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
-  
-  #contentListWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
-  
-  #contentListWrapper >>> .el-table__row
-    td
-      text-align center
-  
-  #contentListWrapper
-    listStyle()
-    .el-icon-search
-      filterIcon()
-    li
-      height $eachListHeight
-      background white
-      border-bottom 3px solid #ccc
-  
-  .el-table__body-wrapper
-    width: 100%
-  
-  .activeName
-    filter()
-    width: 600px
+
 </style>

@@ -5,7 +5,6 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
     >
       <el-form
         ref="upload"
@@ -13,16 +12,16 @@
         :rules="uploadRules"
       >
         <el-form-item prop="OrganizationName" label="组织名称：" label-width="120px">
-          <el-input v-model="formData.OrganizationName" clearable  minlength="1"
+          <el-input v-model="formData.OrganizationName" clearable minlength="1"
                     maxlength="20"></el-input>
         </el-form-item>
         <el-form-item prop="OrganizationAbb" label="组织简称：" label-width="120px">
-          <el-input v-model="formData.OrganizationAbb" clearable  minlength="1"
+          <el-input v-model="formData.OrganizationAbb" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
         
         <el-form-item prop="ParentOrgName" label="上级组织：" label-width="120px">
-          <el-select v-model="formData.ParentOrgID"  v-loading="selectLoading" >
+          <el-select v-model="formData.ParentOrgID" v-loading="selectLoading">
             <el-option
               v-for="(item,i) in parentOrgNameList"
               :key="i"
@@ -31,11 +30,9 @@
             ></el-option>
           </el-select>
         </el-form-item>
-
       </el-form>
-      
       <div slot="footer" class="dialog-footer">
-        <el-button  @click="handleClose">取 消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
     </el-dialog>
@@ -45,9 +42,7 @@
 <script>
   let Msg = '';
   export default {
-    // inject:['reload'],
     name: "organizationManagement_dialog",
-    
     props: {
       isAlertShow: {
         type: Boolean
@@ -72,7 +67,7 @@
           OrganizationName: '',
           OrganizationAbb: '',
           ParentOrgName: '',
-          ParentOrgID:'',
+          ParentOrgID: '',
           ID: '',
           DogType: "a_dd"
         }
@@ -123,11 +118,10 @@
           ]
           ,
         }
-        ,
-        editString: ''
+        
       }
     },
-   
+    
     watch: {
       'isAlertShow': function () {
         this.alertShow = this.isAlertShow;
@@ -140,8 +134,7 @@
             this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑组织';
             Msg = '编辑成功';
-          }
-          else {
+          } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
@@ -165,54 +158,41 @@
           console.log(data);
           if ( data.data.state == 1 ) {
             that.parentOrgNameList = data.data.Content.DataList;
-            that.$store.commit('sendOrganizationList',that.parentOrgNameList);
+            that.$store.commit('sendOrganizationList', that.parentOrgNameList);
           }
           console.log(that.parentOrgNameList);
           that.selectLoading = false
         })
       },
-     
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
+        }
         this.formData.serviceTime = [];
-      },
-      closed() {
-        this.$store.commit('clearUpload');
-        this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
-      },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.file = hasFile;
-      },
-      
-      confirmUpload() {
+      }
+      ,
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.OrganizationName === '' ) {
           that.$message.error('组织名称不能为空');
           return
-        }
-        else if ( that.formData.OrganizationAbb === '' ) {
+        } else if ( that.formData.OrganizationAbb === '' ) {
           that.$message.error('组织简称不能为空');
           return
-        }
-       
-        else if ( that.formData.ParentOrgID === '' ) {
+        } else if ( that.formData.ParentOrgID === '' ) {
           that.$message.error('上级组织不能为空');
           return
         }
-       
-        
         if ( that.formData.DogType === 'a_dd' ) {
-          that.postData('AddOrganization')
+          that.postData('AddOrganization', obj)
         } else {
-          that.postData('UpdOrganization')
+          that.postData('UpdOrganization', obj)
         }
-        
       }
       ,
-      postData(url) {
+      postData(url, obj) {
         const that = this;
         var params = '';
         params += '&OrganizationName=' + that.formData.OrganizationName;
@@ -227,10 +207,8 @@
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.$emit('closeAlert');
-              that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+              that.handleClose(obj);
+            } else {
               that.$message.error(res.msg);
             }
             // that.reload()
@@ -253,7 +231,8 @@
     width 300px
     max-width 800px
     text-align center
-  .dialogWrapper>>>.el-select
+  
+  .dialogWrapper >>> .el-select
     width: 100%
   
   .dialogWrapper >>> .avatar-uploader .el-upload {

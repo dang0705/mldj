@@ -1,19 +1,18 @@
 <template>
   <div id="contentListWrapper">
     <div class="filterComponents">
-      
       <el-input
         autofocus
         class="input activeName"
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -30,7 +29,7 @@
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               :row-style="rowStyle"
@@ -86,24 +85,20 @@
         align="center"
       >
       </el-table-column>
-      
       <el-table-column label="增加+"
                        align="center"
       >
       </el-table-column>
     
     </el-table>
-    
-    
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
@@ -114,19 +109,20 @@
 </template>
 
 <script>
-  import axios from 'axios'
   import alertDialog from '../dialog/dialog'
+  import pagination from '@/component/common/pagination/pagination'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      // filter
+      pagination
     },
     data() {
       return {
         list: [],
         dataLoading: true,
+        isListChange: false,
         keySelect: [
           {value: -1, label: '全部'},
           {value: 1, label: '有效'},
@@ -146,7 +142,7 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
         sendDialogData: {
@@ -160,11 +156,27 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
-      change(data) {
-        this.getApkList()
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
+      change() {
+        this.getList()
       },
       formatTime(row, column, cellValue, index) {
         return cellValue.split(' ')[ 0 ] + ' - ' + row.EndTime.split(' ')[ 0 ]
@@ -179,9 +191,7 @@
         
       },
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         console.log(column);
@@ -191,9 +201,9 @@
           console.log(this.dialogType);
         }
       },
-      getApkList(filter) {
+      getList() {
         let that = this;
-        axios.post('/Organization/GetOrganizationList', {
+        that.$axios.post('/Organization/GetOrganizationList', {
           PageIndex: 1,
           PageSize: 1000,
           Validity: that.Validity,
@@ -201,43 +211,33 @@
         })
           .then(data => {
             console.log(data);
-            that.list = data.data.Content.DataList;
-            that.dataLoading = false
-            // that.$store.state.isCompanyUpdateData = false;
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content.DataList;
+            }
+            that.dataLoading = false;
+            that.isListChange = true;
+            
           })
       }
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
-        this.getApkList();
+        if ( !n ) {
+          this.getList();
+        }
       }
       ,
       getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.OrganizationName = this.list[ realIndex ].OrganizationName;
         this.sendDialogData.OrganizationAbb = this.list[ realIndex ].OrganizationAbb;
         this.sendDialogData.ParentOrgName = this.list[ realIndex ].ParentOrgName;
         this.sendDialogData.ParentOrgID = this.list[ realIndex ].ParentID;
         console.log(this.sendDialogData.serviceTime);
-        // this.sendDialogData.EndTime = this.list[ realIndex ].EndTime;
         this.sendDialogData.ID = row.ID;
       }
-      ,
-      handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      filter() {
-        this.getApkList('filter')
-      }
-      
     }
   }
 </script>
@@ -246,10 +246,6 @@
   @import '~@/assets/styles/mixin.styl'
   #contentListWrapper >>> .el-input__inner
     inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
     width: 100% !important
@@ -260,8 +256,10 @@
   
   #contentListWrapper
     listStyle()
+    
     .el-icon-search
       filterIcon()
+    
     li
       height $eachListHeight
       background white
@@ -271,6 +269,6 @@
     width: 100%
   
   .activeName
-    filter()
+    getList()
     width: 600px
 </style>

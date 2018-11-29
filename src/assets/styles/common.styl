@@ -1,0 +1,92 @@
+$color = #ff005c
+#app
+  height: 100%
+
+//列表搜索区
+#app >>> .filterComponents
+  width 1280px
+  padding 30px 0 10px
+
+  > div
+    margin 0 1% 0
+
+  .el-icon-search
+    font-size 30px
+    cursor pointer
+    vertical-align sub
+    color $color
+
+  .input, .citySelect
+    width: 20%
+    margin-right: 20px
+    display inline-block
+
+
+//*******列表正文区*********
+#app >>> #contentListWrapper
+  width: 1200px
+  padding 0 40px
+  margin 0 auto
+  background #fff
+
+
+//******el-table样式覆盖******
+#app >>> .el-table
+  border-top 1px solid $color
+  border-bottom 1px solid $color !important
+
+  .el-table__header
+    background red
+
+  .el-table__body-wrapper, #app >>> .el-table__body
+    width: 100% !important
+
+  .tableHeader
+    background #e6e6e6
+    font-size 16px
+
+  .addBtn
+    height: 100%
+    cursor pointer
+    background $color
+    color #fff
+    text-align center
+    font-size 16px
+
+
+//*****弹出框样式覆盖*****
+#app >>> .el-dialog
+  width: 450px
+
+  .el-dialog__header
+    background $color
+
+    .el-dialog__title, .el-dialog__headerbtn .el-dialog__close
+      color #fff
+
+  .el-select
+    width: 100%
+
+//*****表单样式覆盖*****
+#app >>> .el-form-item__label
+  text-align left
+
+//*****输入框,下拉箭头,分页等独立控件样式覆盖
+#app >>> .el-select .el-input .el-select__caret,
+#app >>> .el-cascader .el-icon-arrow-down
+  color $color
+
+#app >>> .el-input__inner
+  inputNoBorder()
+
+#app >>> .el-textarea__inner
+  inputNoBorder()
+
+/*分页居右  */
+#app >>> .el-pagination
+  padding 20px 0
+
+/*表格无内填充  */
+#app >>> .el-table td
+  padding: 0
+

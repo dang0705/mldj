@@ -6,14 +6,16 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
+        v-show="editOrAdd==='a_dd'"
       >
-        <el-form-item prop="LabelName">
+        <el-form-item prop="LabelName" label="标签名称" >
           <el-input
             v-model="formData.LabelName"
             clearable
@@ -21,8 +23,7 @@
             minlength="1"
             maxlength="10"></el-input>
         </el-form-item>
-        
-        <el-form-item prop="EmployeeCode">
+        <el-form-item prop="EmployeeName" label="设备所属人" >
           <el-select
             v-model="formData.EmployeeCode"
             filterable
@@ -40,7 +41,7 @@
       </el-form>
       <el-transfer
         style="text-align: left; display: inline-block"
-        v-if="editOrAdd==='up_date'"
+        v-show="formData.DogType==='up_date'"
         v-model="selected"
         filterable
         filter-placeholder="请输入设备名称"
@@ -52,11 +53,14 @@
         hasChecked: '${checked}/${total}'
         }"
         @change="handleChange"
-        :data="selectList">
-        <!--<el-button class="transfer-footer" slot="left-footer" size="small">操作</el-button>
-        <el-button class="transfer-footer" slot="right-footer" size="small">操作</el-button>-->
+        :data="selectList"
+        v-loading="dataLoading"
+      >
       </el-transfer>
-      <el-button type="primary" @click="confirmUpload" class="confirmUpdate">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -75,7 +79,7 @@
       },
       editOrAdd: {
         type: String,
-        default: 'add'
+        default: 'a_dd'
       },
       editData: {
         type: Object
@@ -83,8 +87,9 @@
     },
     data() {
       return {
+        dataLoading:true,
         selectList: [],
-        width: '30%',
+        width: '450px',
         list: [],
         selected: [],
         keyWord: '',
@@ -132,21 +137,12 @@
       }
       
     },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
-      }
-    },
+
     watch: {
       'isAlertShow': function () {
         const that = this;
         if ( that.isAlertShow ) {
+          console.log(this.editOrAdd);
           if ( that.editOrAdd === 'up_date' ) {
             that.getSelectList();
             that.width = '1220px';
@@ -154,12 +150,11 @@
             that.formData.LabelName = that.editData.LabelName;
             that.formData.EmployeeCode = storage.getItem('userName');
             that.formData.EmployeeName = that.editData.EmployeeName;
-            that.alertTitle = '编辑标签';
+            that.alertTitle =that.formData.LabelName+' - '+ '编辑标签';
             Msg = '编辑成功';
             that.formData.DogType = that.editOrAdd;
-          }
-          else {
-            that.width = '30%';
+          } else {
+            that.width = '450px';
             this.isAdd = true;
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
@@ -241,6 +236,7 @@
       getSelectList() {
         const that = this;
         that.selected = [];
+        that.dataLoading=true;
         that.formData.ID = that.editData.ID;
         that.$axios.post('/HOME/EmployeeDeviceMappingByLabelId', {
           ID: that.formData.ID
@@ -250,20 +246,20 @@
             for ( var i = 0; i < length; i++ ) {
               that.selected.push(res[ i ].ID)
             }
+            that.dataLoading=false;
             console.log(that.selected);
           })
       }
       
       ,
-      handleClose() {
-        this.$emit('closeAlert');
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert','n')
+        }else {
+          this.$emit('closeAlert')
+        }
       },
-      closed() {
-        this.$store.commit('clearUpload');
-        this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
-      },
-      confirmUpload() {
+      confirmUpload(obj) {
         const that = this;
         let selectedIdStr = '';
         for ( var i = 0; i < that.selected.length; i++ ) {
@@ -284,28 +280,24 @@
             LabelMappingList: selectedIdStr,
             EmployeeCode: storage.getItem('userName'),
             ID: that.formData.ID
-          })
+          },obj)
         } else {
           that.addOrEdit({
             DogType: that.editOrAdd,
             LabelName: that.formData.LabelName,
             EmployeeCode: storage.getItem('userName'),
-          })
+          },obj)
         }
       },
-      addOrEdit(data) {
+      addOrEdit(data,obj) {
         let that = this;
         that.$axios.post('/Home/DeviceLabelSave', data)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$store.commit('DeviceLabelUpdateData');
-              that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+              that.handleClose(obj);
+            } else {
               that.$message.error(res.msg);
             }
           })
@@ -322,7 +314,6 @@
           RoleId: RoleId
         })
           .then(data => {
-            // console.log(data);
             const res = data.data.Content,
               length = res.length;
             for ( var i = 0; i < length; i++ ) {
@@ -332,9 +323,6 @@
               })
             }
           });
-      },
-      rightChange(val) {
-        console.log(val);
       }
     },
     
@@ -358,7 +346,6 @@
   
   .dialogWrapper >>> .el-transfer-panel
     width: 400px
-    vertical-align top
     height: 450px
   
   .dialogWrapper >>> .el-checkbox__label
@@ -372,54 +359,9 @@
       line-height 30px
       overflow hidden
       textOverFlow()
-    
     .deviceName
       width: 40%
     .deviceAddress
       width: 60%
-  
-  .confirmUpdate
-    width: 20%
-    margin-top: 1%
-  
-  .dialogWrapper >>> .el-form
-    .el-form-item
-      display inline-block
-      margin 0 40px 40px
-  
-  .dialogWrapper >>> .el-dialog__body
-    overflow hidden
-  
-  .dialogWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  .dialogWrapper >>> .el-dialog
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+
 </style>

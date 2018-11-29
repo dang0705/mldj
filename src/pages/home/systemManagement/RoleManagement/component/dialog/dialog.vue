@@ -17,7 +17,10 @@
                     maxlength="20"></el-input>
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -44,7 +47,6 @@
         alertTitle: '',
         alertShow: false,
         isDisplay: true,
-        file: false,
         formData: {
           RoleName: '',
           AccountName: '',
@@ -53,7 +55,6 @@
         ,
         postUrl: '',
         editFormData: {},
-        
         uploadRules: {
           RoleName: [
             {
@@ -69,11 +70,9 @@
             }
           ]
         }
-        ,
-        editString: ''
       }
     },
-
+    
     watch: {
       'isAlertShow': function () {
         this.alertShow = this.isAlertShow;
@@ -84,11 +83,7 @@
             this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑角色';
             Msg = '编辑成功';
-          }
-          else {
-            for ( var i in  this.formData ) {
-              this.formData[ i ] = ''
-            }
+          } else {
             this.alertTitle = '新增角色';
             Msg = '增加成功';
           }
@@ -98,46 +93,27 @@
     },
     
     methods: {
-      /*confirm() {
-        this.$emit('closeAlert');
-        this.addOrEdit='';
-      },*/
-      getDate(val) {
-        console.log(val);
-        if ( val ) {
-          this.formData.serviceTime = val;
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert', 'n');
+        } else {
+          this.$emit('closeAlert');
         }
-      },
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
         this.formData.serviceTime = [];
-        // this.formData.ImgBase='';
-        // this.editFormData.ImgBase=''
-        // this.$refs.uploadList.resetFields();
       },
       closed() {
-        this.$store.commit('clearUpload');
         this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
       },
-      hasFile(hasFile) {
-        console.log(hasFile);
-        this.file = hasFile;
-      },
-      
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.RoleName === '' ) {
           that.$message.error('公司名称不能为空');
           return
         }
-        that.postData()
-        
-        
+        that.postData(obj)
       }
       ,
-      postData() {
+      postData(obj) {
         const that = this;
         var params = '';
         params += '&RoleName=' + that.formData.RoleName;
@@ -147,19 +123,14 @@
           that.postUrl = '/OrganizationalRole/UpdRole';
           params += '&ID=' + that.formData.ID;
         }
-        
-        
-        console.log(that.formData.serviceTime);
-        
         that.$axios.post(that.postUrl, params)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
-              that.$emit('closeAlert');
+              that.handleClose(obj);
               that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+            } else {
               that.$message.error(res.msg);
             }
           })
@@ -167,9 +138,6 @@
             console.log(e);
           })
       }
-    }
-    ,
-    mounted() {
     }
   }
 </script>

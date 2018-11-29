@@ -5,29 +5,29 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
+      align="center"
     >
       <el-form
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
       >
-        <el-form-item prop="DeviceName">
+        <el-form-item prop="DeviceName" label="设备名称：">
           <el-input
             v-model="formData.DeviceName"
             clearable
-            placeholder="设备名称"
+            placeholder=""
             minlength="1"
             maxlength="10"></el-input>
         </el-form-item>
         
-        <el-form-item prop="EmployeeName">
+        <el-form-item prop="EmployeeName" label="设备所有人：">
           <el-select
             v-model="formData.EmployeeName"
             filterable
             clearable
             autocomplete
-            placeholder="请选择"
             @change="onChange"
           >
             <el-option
@@ -38,29 +38,32 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item>
+        <el-form-item label="设备所在省市：">
           <city-select
             v-if="isAlertShow"
             @provincesAndCities="provincesAndCities"
             :getEditCities="provinceTotalArr"
           ></city-select>
         </el-form-item>
-        <el-form-item prop="Address">
+        <el-form-item prop="Address" label="设备所在地址：">
           <el-input
             v-model="formData.Address"
-            placeholder="门店地址"
             minlength="1"
             maxlength="30"></el-input>
         </el-form-item>
       </el-form>
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
-  let Msg='';
+  
+  let Msg = '';
   const storage = window.localStorage;
   export default {
     name: "EquipManagement_dialog",
@@ -97,7 +100,6 @@
         }
         ,
         editFormData: {},
-        
         uploadRules: {
           DeviceName: [
             {
@@ -127,8 +129,7 @@
           ]
           
         }
-        ,
-        editString: ''
+       
       }
     },
     computed: {
@@ -145,7 +146,7 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
-          if ( this.editOrAdd==='up_date' ) {
+          if ( this.editOrAdd === 'up_date' ) {
             this.formData.DeviceName = this.editData.DeviceName;
             this.formData.ProvinceCode = this.editData.ProvinceCode;
             this.formData.ProvinceName = this.editData.ProvinceName;
@@ -166,14 +167,14 @@
                 break;
               }
             }
-            Msg='编辑成功'
+            Msg = '编辑成功'
           } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
             this.alertTitle = '新增设备';
-            this.provinceTotalArr='省 / 市';
-            Msg='增加成功'
+            this.provinceTotalArr = '省 / 市';
+            Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
         } else {
@@ -184,17 +185,15 @@
       }
     },
     methods: {
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert','n')
+        } else {
+          this.$emit('closeAlert')
+        }
         
       },
-      closed() {
-        this.$store.commit('clearUpload');
-        this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
-      },
-      confirmUpload() {
+      confirmUpload(obj) {
         const that = this;
         if ( that.formData.DeviceName === '' ) {
           that.$message.error('设备名称不能为空');
@@ -208,14 +207,9 @@
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              
               that.$message.success(Msg);
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$store.commit('EmployeeDeviceUpdateData');
-              that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+              that.handleClose(obj)
+            } else {
               that.$message.error(res.msg);
             }
           })
@@ -260,42 +254,6 @@
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
   .dialogWrapper >>> .el-select
     width: 100%
-  
-  .dialogWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  .dialogWrapper >>> .el-dialog
-    width 300px
-    max-width 800px
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
 </style>

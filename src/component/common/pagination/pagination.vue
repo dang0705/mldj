@@ -4,7 +4,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="currentPage"
-      :page-sizes="[5, 15, 20, 40]"
+      :page-sizes="[5,10, 15, 20]"
       :page-size.sync="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">

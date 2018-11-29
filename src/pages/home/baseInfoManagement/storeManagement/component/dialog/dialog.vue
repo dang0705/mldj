@@ -47,10 +47,10 @@
           <el-input v-model="formData.ContactPhone"></el-input>
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
-    </span>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -182,8 +182,7 @@
         if ( that.formData.StoreCode === '' ) {
           that.$message.error('门店编号不能为空');
           return
-        }
-        else if ( that.formData.StoreName === '' ) {
+        } else if ( that.formData.StoreName === '' ) {
           that.$message.error('门店名称不能为空');
           return
         }
@@ -193,8 +192,7 @@
             if ( res.state == 1 ) {
               that.$message.success(Msg);
               that.handleClose(obj);
-            }
-            else {
+            } else {
               that.$message.error(res.msg);
             }
           })

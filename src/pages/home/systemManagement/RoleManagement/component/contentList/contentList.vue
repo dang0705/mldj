@@ -7,12 +7,12 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="角色名称"
-        @keyup.enter.native="filter"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="filter"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -29,7 +29,7 @@
     </div>
     
     <el-table width="100%"
-              :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
+              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               :row-style="rowStyle"
@@ -69,16 +69,14 @@
       </el-table-column>
     
     </el-table>
-    
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page.sync="currentPage"
-      :page-sizes="[5, 10, 20, 40]"
-      :page-size="pagesize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="list.length">
-    </el-pagination>
+    <pagination
+      :tableList="list"
+      :isListChange="isListChange"
+      @currentPage="getCurrentPage"
+      @pageSize="getPageSize"
+      @defaultPaginationData="defaultPaginationData"
+      @listChanged="listChanged"
+    ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
@@ -98,19 +96,21 @@
 <script>
   import alertDialog from '../dialog/dialog'
   import rootDialog from '../dialog/rootConfigDialog'
+  import pagination from '@/component/common/pagination/pagination'
   
   export default {
     name: "contentList",
     components: {
       alertDialog,
-      rootDialog
-      // filter
+      rootDialog,
+      pagination
     },
     data() {
       return {
         list: [],
         tableLoading: true,
-        roleName:'',
+        isListChange: false,
+        roleName: '',
         dialogType: '',
         keySelect: [
           {value: -1, label: '全部'},
@@ -129,10 +129,10 @@
         },
         keyWord: '',
         currentPage: 1, //初始页
-        pagesize: 5,    //    每页的数据
+        pageSize: 5,    //    每页的数据
         isAlertShow: false,
         isRootAlertShow: false,
-        configId:0,
+        configId: 0,
         id: '',
         sendDialogData: {
           RoleName: '',
@@ -141,11 +141,27 @@
       }
     },
     mounted() {
-      this.getApkList()
+      this.getList()
     },
     methods: {
+      listChanged() {
+        this.isListChange = false
+      },
+      defaultPaginationData(val) {
+        if ( val && val.length ) {
+          this.currentPage = val[ 0 ];
+          this.pageSize = val[ 1 ]
+        }
+      },
+      getCurrentPage(currentPage) {
+        this.currentPage = currentPage
+      },
+      getPageSize(pageSize) {
+        this.pageSize = pageSize
+      }
+      ,
       change(data) {
-        this.getApkList()
+        this.getList()
       },
       formatTime(row, column, cellValue, index) {
         return cellValue.split(' ')[ 0 ] + ' - ' + row.EndTime.split(' ')[ 0 ]
@@ -157,16 +173,9 @@
           Validity: row.Validity,
           ID: row.ID
         })
-          .then(data => {
-          })
-          .catch(e => {
-            console.log(e);
-          })
       },
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         console.log(column);
@@ -176,7 +185,7 @@
           console.log(this.dialogType);
         }
       },
-      getApkList(filter) {
+      getList(getList) {
         let that = this;
         // that.list = [];
         that.tableLoading = true;
@@ -184,19 +193,23 @@
           PageIndex: 1,
           PageSize: 1000,
           Validity: that.Validity,
-          RoleName: filter ? this.keyWord : ''
+          RoleName: getList ? this.keyWord : ''
         })
           .then(data => {
             console.log(data);
-            const res = data.data.Content.DataList;
-            that.list = res ? res : [];
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content.DataList;
+            }
             that.tableLoading = false;
+            that.isListChange = true;
           })
       }
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.isAlertShow = false;
-        this.getApkList();
+        if ( !n ) {
+          this.getList();
+        }
       }
       ,
       closeRootAlert() {
@@ -205,12 +218,12 @@
       ,
       rootConfig(row) {
         console.log(row);
-        this.configId=row.ID;
-        this.roleName=row.RoleName;
+        this.configId = row.ID;
+        this.roleName = row.RoleName;
         this.isRootAlertShow = true;
       },
       getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pagesize) : index;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.dialogType = 'up_date';
         this.sendDialogData.RoleName = this.list[ realIndex ].RoleName;
@@ -218,17 +231,14 @@
       }
       ,
       handleSizeChange: function (size) {
-        this.pagesize = size;
-        console.log(this.pagesize)  //每页下拉显示数据
+        this.pageSize = size;
+        console.log(this.pageSize)  //每页下拉显示数据
       },
       handleCurrentChange: function (currentPage) {
         this.currentPage = currentPage;
         // console.log(this.currentPage)  //点击第几页
       }
-      ,
-      filter() {
-        this.getApkList('filter')
-      }
+      
       
     }
   }
@@ -243,7 +253,6 @@
     margin-left 0
   
   #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
     margin-bottom: 40px
   
   #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
@@ -255,8 +264,10 @@
   
   #contentListWrapper
     listStyle()
+    
     .el-icon-search
       filterIcon()
+    
     li
       height $eachListHeight
       background white
@@ -266,6 +277,6 @@
     width: 100%
   
   .activeName
-    filter()
+    getList()
     width: 600px
 </style>

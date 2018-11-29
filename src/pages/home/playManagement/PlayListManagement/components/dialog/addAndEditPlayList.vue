@@ -5,6 +5,7 @@
       :title="alertTitle"
       :before-close="handleClose"
       :close-on-click-modal="false"
+      align="center"
     >
       <el-form
         ref="playList"
@@ -35,7 +36,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button @click="handleClose">取消</el-button>
+        <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
     </el-dialog>
@@ -77,8 +78,12 @@
     }
     ,
     methods: {
-      handleClose() {
-        this.$emit('closePlayListAlert');
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closePlayListAlert', 'n');
+        } else {
+          this.$emit('closePlayListAlert');
+        }
         this.formData.serviceTime = [];
       }
       ,
@@ -87,7 +92,7 @@
         this.formData.PlayListEndDate = val[ 1 ]
       }
       ,
-      confirmUpload() {
+      confirmUpload(obj) {
         const that = this;
         that.formData.OperationType = that.dialogType;
         that.$axios.post('/PlayManage/EmployeePlayListOperation', that.formData)
@@ -99,7 +104,7 @@
               } else {
                 that.$message.success('新增播放列表成功')
               }
-              that.$emit('closePlayListAlert')
+              that.handleClose(obj)
               
             } else {
               that.$message.error(data.data.msg)
@@ -116,17 +121,12 @@
             this.formData = this.editData;
             console.log(this.formData);
             this.selectedDate = [ this.editData.PlayListStartDate, this.editData.PlayListEndDate ]
-            /* this.formData.PlayListName = this.editData.PlayListName;
-			 this.selectedDate = [ this.editData.PlayListStartDate, this.editData.PlayListEndDate ];*/
-  
           } else {
             this.selectedDate = [];
+            this.formData.EmployeeCode=this.editData.EmployeeCode;
             this.formData.PlayListName = ''
           }
-        }else {
-        
         }
-        console.log(this.formData.OperationType);
       }
     }
   }

@@ -6,6 +6,7 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
+      align="center"
     >
       <div id="screen" @click="handleScreenClick"></div>
       <el-transfer
@@ -69,6 +70,9 @@
       },
       playListId: {
         default: 0
+      },
+      playListName: {
+        type: String,
       }
     },
     data() {
@@ -105,9 +109,10 @@
       'isSSDialogShow': function () {
         const that = this;
         if ( that.isSSDialogShow ) {
-          that.getSelectedList()
+          console.log(that.playListName);
+          that.getSelectedList();
           that.handleScreenClick();
-
+          that.alertTitle=that.playListName+' - '+'播放项设置'
         } else {
           that.keyWord = '';
           that.selected = [];
@@ -120,11 +125,11 @@
         console.log(option);
         let fileType;
         if ( option.FileType === 0 ) {
-          fileType='图片'
-        }else if(option.FileType === 1){
-          fileType='视频'
-        }else {
-          fileType='游戏'
+          fileType = '图片'
+        } else if ( option.FileType === 1 ) {
+          fileType = '视频'
+        } else {
+          fileType = '游戏'
         }
         if ( option.disabled ) {
           return h(
@@ -232,12 +237,14 @@
           })
       },
       
-      handleClose() {
-        this.$emit('closeSSAlert');
-        /*        this.screenClicked=false;
-				this.isScreenShow=true;*/
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeSSAlert', 'n')
+        } else {
+          this.$emit('closeSSAlert')
+        }
       },
-      confirmUpload() {
+      confirmUpload(obj) {
         const that = this;
         that.$axios.post('/PlayManage/ExecElookPlayListItemAdd', {
           PlayListItemListString: JSON.stringify(that.playItems)
@@ -246,7 +253,7 @@
             console.log(data);
             if ( data.data.state == 1 ) {
               that.$message.success('屏幕设置成功！');
-              that.handleClose();
+              that.handleClose(obj);
             } else {
               that.$message.error(data.data.msg)
             }
@@ -263,8 +270,7 @@
               that.$emit('closeAlert');
               that.$store.commit('DeviceLabelUpdateData');
               that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+            } else {
               that.$message.error(res.msg);
             }
           })
@@ -277,7 +283,6 @@
         const that = this;
         that.screenClicked = true;
         that.selectList = [];
-        // if ( !that.selectList.length ) {
         that.$axios.post('/PlayManage/EmployeePlayItemList', {
           PageSize: 10000,
           PageIndex: 1,
@@ -331,20 +336,12 @@
           this.isTitleCreated = true;
         }
       }
-    },
-    
-    mounted() {
-      // console.log(storage.getItem('RoleId'));
-    },
-    
+    }
   }
 </script>
 
 <style scoped lang="stylus">
   @import '~@/assets/styles/mixin.styl'
-  
-  .dialogWrapper >>> .el-transfer-panel__body
-    height auto
   
   .dialogWrapper >>> .el-transfer-panel__list.is-filterable, .dialogWrapper >>> .el-transfer-panel__list
     height: 350px
@@ -352,7 +349,7 @@
   
   .dialogWrapper >>> .el-transfer-panel
     width: 600px
-    vertical-align top
+    /*vertical-align top*/
     height: 450px
   
   .dialogWrapper >>> .el-checkbox__label
@@ -365,55 +362,14 @@
       line-height 30px
       overflow hidden
       textOverFlow()
-    
     .playItemName
       width: 35%
     .timeLong
       width: 18%
     .fileType
-      width :17%
+      width: 17%
     .DateCreated
       width 30%
-  
-  .confirmUpdate
-    width: 20%
-    margin-top: 1%
-  
-  .dialogWrapper >>> .el-form
-    .el-form-item
-      display inline-block
-      margin 0 40px 40px
-  
-  .dialogWrapper >>> .el-dialog
-    text-align left !important
-  
-  .dialogWrapper >>> .el-dialog__body
-    overflow hidden
-  
-  .dialogWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  .dialogWrapper >>> .el-dialog
-    text-align center
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
   
   #screen {
     margin 0 100px 0 0

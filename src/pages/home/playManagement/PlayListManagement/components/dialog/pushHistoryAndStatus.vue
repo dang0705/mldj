@@ -3,11 +3,14 @@
     <el-dialog
       :visible.sync=" isAlertShow"
       :before-close="handleClose"
+      :title="alertTitle"
+      align="center"
     >
       <!--推送历史列表-->
       <div class="tableWrapper">
         <el-tag type="info">推送历史列表</el-tag>
-        <el-select v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史" v-loading="pushHistorySelectLoading">
+        <el-select v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史"
+                   v-loading="pushHistorySelectLoading">
           <el-option
             v-for="(item,i) in myPushHistorySelectList"
             :key="i"
@@ -22,7 +25,6 @@
           :row-style="rowStyle"
           height="250"
           v-loading="pusHistoryListLoading"
-        
         >
           <el-table-column label="播放项名称" align="center" width="200" prop="PlayItemName"></el-table-column>
           <el-table-column label="播放类型" align="center" prop="PlayType" :formatter="playTypeFormatter"></el-table-column>
@@ -95,10 +97,14 @@
       playListID: {
         type: Number,
         default: 0
+      },
+      playListName: {
+        type: String
       }
     },
     data() {
       return {
+        alertTitle: '',
         pushStatus: '',
         isAlertShow: false,
         myExecPlayListCode: '',
@@ -107,7 +113,7 @@
         pushList: [],
         pushHistorySelectModel: '',    //推送历史 ExecPlayListCode 的双向绑定
         pushProgressSelectModel: '',    //推送进度双向绑定
-        pushHistorySelectLoading:true,
+        pushHistorySelectLoading: true,
         pushProgressSelectLoading: true,
         pusHistoryListLoading: true,
         pusProgressListLoading: true,
@@ -129,7 +135,7 @@
       ,
       handleClose() {
         this.$emit('closeSSAlert');
-        this.pusHistoryListLoading = this.pusProgressListLoading =this.pushProgressSelectLoading= this.pushHistorySelectLoading=true;
+        this.pusHistoryListLoading = this.pusProgressListLoading = this.pushProgressSelectLoading = this.pushHistorySelectLoading = true;
         this.pushHistorySelectModel = this.pushProgressSelectModel = '';
       }
       ,
@@ -191,7 +197,7 @@
             console.log(that.myPushHistorySelectList);
             that.changePushHistoryList();
           }
-          this.pushHistorySelectLoading=false;
+          this.pushHistorySelectLoading = false;
           that.pusHistoryListLoading = false;
         })
         // }
@@ -199,7 +205,6 @@
       ,
       /*切换推送历史table*/
       changePushHistoryList(val) {
-        console.log(val);
         const that = this;
         // that.playItemsList=[];
         that.$axios.post('/PlayManage/ExecElookPlayListByItem', {
@@ -269,14 +274,10 @@
       'isPushHistoryAndStatusShow': function () {
         this.isAlertShow = this.isPushHistoryAndStatusShow;
         if ( this.isPushHistoryAndStatusShow ) {
-          // this.getProgressSelectOption();
-          this.getHistorySelectOption()
+          this.alertTitle = this.playListName +' - '+ '推送历史及状态';
+          this.getHistorySelectOption();
           this.pusHistoryListLoading = false;
-          
-          /* console.log('this.pushHistorySelectModel', this.pushHistorySelectModel);
-		   console.log('this.historyListSelected', this.historyListSelected);*/
         }
-        // console.log(this.myPushHistoryList);
       }
     }
   }
@@ -284,12 +285,12 @@
 
 <style scoped lang="stylus">
   #pushHistoryAndStatusWrapper >>> .el-dialog
-    width: 80% !important
+    width: 50% !important
     text-align center
   
   .tableWrapper
     display inline-block
     margin 0 5% 0
-    width: 30%
+    width: 35%
 
 </style>

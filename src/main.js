@@ -8,24 +8,25 @@ import './assets/styles/reset.css'
 import fastClick from 'fastclick'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import uploadFiles from 'vue-simple-uploader'
+import myFunctions from './assets/js/common'
 import axios from 'axios'
+
 Vue.prototype.$axios = axios;
+Vue.prototype.$myFunctions = myFunctions;
 
 Vue.use(ElementUI);
-Vue.use(uploadFiles);
 Vue.config.productionTip = false;
 fastClick.attach(document.body);
 /* eslint-disable no-new */
 
 new Vue({
   el: '#app',
-  data:{
-    Bus:new Vue()
+  data: {
+    Bus: new Vue()
   },
   router,
   store,
   components: {App},
   template: '<App/>',
-  render:h=>h(App)
+  render: h => h(App)
 })

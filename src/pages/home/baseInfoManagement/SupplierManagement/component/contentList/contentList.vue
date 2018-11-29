@@ -127,8 +127,6 @@
           SupplierDec: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
@@ -152,9 +150,7 @@
       }
       ,
       addBtn({row, column, rowIndex, columnIndex}) {
-        if ( columnIndex === row.length - 1 ) {
-          return 'addBtn'
-        }
+        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
@@ -220,49 +216,9 @@
           })
         
       }
-      
-      
-    },
-    watch: {
-      '$store.state.isSupplierUpdateData': function () {
-        if ( this.$store.state.isSupplierUpdateData === true ) {
-          this.getList()
-        }
-      },
-      
     }
   }
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
-  #contentListWrapper >>> .el-input__inner
-    inputNoBorder()
-  
-  #contentListWrapper >>> .el-table
-    box-shadow 0 5px 8px rgba(0, 0, 0, .2)
-    margin-bottom: 40px
-  
-  #contentListWrapper >>> .el-table__body-wrapper, #contentListWrapper >>> .el-table__body
-    width: 100% !important
-  
-  #contentListWrapper >>> .el-table__row
-    td
-      text-align center
-  
-  #contentListWrapper
-    listStyle()
-    .el-icon-search
-      filterIcon()
-    li
-      height $eachListHeight
-      background white
-      border-bottom 3px solid #ccc
-  
-  .el-table__body-wrapper
-    width: 100%
-  
-  .activeName
-    filter()
-    width: 600px
 </style>

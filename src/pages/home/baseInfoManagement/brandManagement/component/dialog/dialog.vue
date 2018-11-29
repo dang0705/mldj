@@ -7,47 +7,53 @@
       :before-close="handleClose"
       @closed="closed"
     >
+      <div id="imgWrapper">
+        <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200">
+      </div>
       <el-form
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
       >
-        <el-form-item prop="BrandCode">
-          <el-input v-model="formData.BrandCode" clearable placeholder="品牌编号" minlength="1" maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="BrandName"
-        >
-          <el-input v-model="formData.BrandName" clearable placeholder="品牌名称" minlength="1" maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-input v-model="formData.BrandShowText" clearable placeholder="品牌简介" minlength="1"
-                    maxlength="15"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-input type="textarea" v-model="formData.BrandComments" placeholder="品牌描述" maxlength="250"></el-input>
-        </el-form-item>
-        <div id="imgWrapper">
-          <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200">
-        </div>
-        <!--上传图片插件-->
         <el-form-item>
           <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url"
                   :getUpLoadTitle="upLoadTitle"
-                  :getUploadType="uploadType"></upload>
+                  :getUploadType="uploadType">
+            
+          </upload>
         </el-form-item>
+        <el-form-item prop="BrandCode" label="品牌编号：">
+          <el-input v-model="formData.BrandCode" clearable minlength="1" maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item prop="BrandName" label="品牌名称：">
+          <el-input v-model="formData.BrandName" clearable minlength="1" maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item label="品牌简介：">
+          <el-input v-model="formData.BrandShowText" clearable minlength="1"
+                    maxlength="15"></el-input>
+        </el-form-item>
+        <el-form-item label="品牌描述：">
+          <el-input type="textarea" v-model="formData.BrandComments" maxlength="250"></el-input>
+        </el-form-item>
+       
+        <!--上传图片插件-->
+        
       </el-form>
+ 
       
-      
-      <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
-      <!--</div>-->
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
   import upload from '@/component/common/upload/uploadList'
-  let Msg='';
+  
+  let Msg = '';
   export default {
     // inject:['reload'],
     name: "brandManagement_dialog",
@@ -127,7 +133,7 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
-          if ( this.editOrAdd==='up_date' ) {
+          if ( this.editOrAdd === 'up_date' ) {
             this.formData.BrandCode = this.editData.BrandCode;
             this.formData.BrandName = this.editData.BrandName;
             this.formData.BrandComments = this.editData.BrandComments;
@@ -135,14 +141,13 @@
             this.formData.ID = this.editData.ID;
             this.editFormData.ImgBase = this.editData.ImgBase;
             this.alertTitle = '编辑品牌'
-            Msg='编辑成功'
-          }
-          else {
+            Msg = '编辑成功'
+          } else {
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
             this.alertTitle = '新增品牌';
-            Msg='增加成功'
+            Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
         }
@@ -181,7 +186,7 @@
         return (isJPG || isPNG) && isLt2M;
         
       },
-
+      
       confirmUpload() {
         let that = this;
         if ( that.formData.BrandCode === '' ) {
@@ -191,7 +196,7 @@
           that.$message.error('品牌名称不能为空');
           return
         }
-  
+        
         that.$axios.post('/Home/BrandSave', this.formData)
           .then(data => {
             let res = data.data;
@@ -223,10 +228,7 @@
 </script>
 
 <style scoped lang="stylus">
-  .dialogWrapper >>> .el-dialog
-    width 300px
-    max-width 800px
-    text-align center
+  
   
   .dialogWrapper >>> .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
@@ -236,10 +238,7 @@
     overflow: hidden;
   }
   
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
+
   .dialogWrapper >>> .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;

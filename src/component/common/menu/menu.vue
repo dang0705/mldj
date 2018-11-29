@@ -1,32 +1,34 @@
 <template>
-  <div class="menu">
-    <div id="logoWrapper"
-         style="width: 80px;height: 0;padding-bottom: 80px;position: absolute;left: 5%;top: 0; z-index: 10">
-      <img src="../../../assets/img/logo.png" alt="" width="100%">
+  <div id="menuWrapper">
+    <div id="logoWrapper">
+      <img src="../../../assets/img/logo.png" alt="" width="100%" style="display: block">
     </div>
-    <ul id="firstLevelNavigation">
-      <li
-        v-for="(item,i) of firstLevelNavigationArr"
-        :key="i"
-        :class="{ active: firstLevelNavigationIndex ===i}"
-        @click="showSecondNavigation(i)"
-      >
-        {{item.navName}}
-      </li>
-    </ul>
-    
-    <ul id="secondLevelNavigation">
-      <router-link
-        tag="li"
-        v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
-        class="secondNavigation"
-        :to="eachSub.subIndex"
-        :key="index"
-      >
-        {{eachSub.navName}}
-      </router-link>
-    </ul>
+    <div id="menu">
+      <ul id="firstLevelNavigation">
+        <li
+          v-for="(item,i) of firstLevelNavigationArr"
+          :key="i"
+          :class="{ active: firstLevelNavigationIndex ===i}"
+          @click="showSecondNavigation(i)"
+        >
+          {{item.navName}}
+        </li>
+      </ul>
+      
+      <ul id="secondLevelNavigation">
+        <router-link
+          tag="li"
+          v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
+          class="secondNavigation"
+          :to="eachSub.subIndex"
+          :key="index"
+        >
+          {{eachSub.navName}}
+        </router-link>
+      </ul>
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -45,9 +47,11 @@
     },
     
     mounted() {
+      console.log(this.firstLevelNavigationIndex);
       var that = this;
       that.$axios.post('/Menu/GetRoleMenListByTree')
         .then(data => {
+          console.log(data);
           this.firstLevelNavigationArr = [];
           if ( data.data.state !== 1 ) {
             that.$router.push('/login');
@@ -80,13 +84,6 @@
         this.firstLevelNavigationIndex = i;
         storage.setItem('menuSelected', i);
         this.isActive = i;
-      },
-      secondNavigation(i) {
-        this.isSubActive = i;
-        alert(0)
-      },
-      handleSelect(key, keyPath) {
-        // this.$store.commit('changeMenu', key);
       }
     }
   }
@@ -95,37 +92,48 @@
 <style lang="stylus" scoped>
   @import '~@/assets/styles/varibles.styl'
   .active
-    color white
+    color $color
   
-  #firstLevelNavigation
-    font-size 27px
-    font-weight: bold
-    height: 80px
-    line-height: 80px
+  #menuWrapper
+    width: 1280px
+    margin 0 auto
     background #000
-    color #a5a5a5
-    text-align center
-    li
-      display inline-block
-      margin 0 40px
-      cursor: pointer
+    height: 120px
+    position relative
+    div
+     float left
+    #logoWrapper
+      width: 120px
+    #menu
+      width: 1158px
+      height 100%
+      color #fff
+      font-size $listFontSize
+      #firstLevelNavigation
+        height 100%
+        line-height: 180px
+        background #000
+        li
+          display inline-block
+          margin 0 30px
+          height: 100%
+          cursor: pointer
+      #secondLevelNavigation
+        text-align center
+        position: absolute
+        left -160px
+        .secondNavigation
+          cursor pointer
+          width: 160px
+          margin-bottom: 2px
+          padding: 0
+          height: 40px
+          line-height: 40px
+          background #000
+        .router-link-exact-active.router-link-active
+          background-color $color
+      /*color blue*/
   
-  .menu
-    #secondLevelNavigation
-      text-align center
-      background white
-      margin-bottom: 10px
-      box-shadow $boxShadow
-    .secondNavigation
-      cursor pointer
-      display inline-block
-      margin 0 40px
-      padding: 0
-      font-size: 20px
-      height: 60px
-      line-height: 60px
-    .router-link-exact-active.router-link-active
-      color red
 
 
 </style>
