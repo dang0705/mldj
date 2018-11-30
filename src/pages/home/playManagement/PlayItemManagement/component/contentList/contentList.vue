@@ -83,7 +83,7 @@
         label="播放素材"
         prop="FileName"
         align="center"
-        width="345"
+        width="325"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column

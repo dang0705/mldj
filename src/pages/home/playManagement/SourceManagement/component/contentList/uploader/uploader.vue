@@ -1,34 +1,16 @@
 <template>
-  <div class="img-list" v-if="!isShow">
-    <!--    <div class="img-content" v-show="imagelist.url">
-	 &lt;!&ndash;     <el-form
-			:model="form"
-			ref="uploadList"
-		  >
-			<el-form-item prop="imgUrl">
-			  <img :src="clearSrc" v-model="form.imgUrl" width="200px">
-			</el-form-item>
-		  </el-form>&ndash;&gt;
-		  
-	&lt;!&ndash;      <div class="layer" @click="handleFileEnlarge(imagelist.url)">
-			<i class="el-icon-view"></i>
-		  </div>&ndash;&gt;
-		</div>-->
-    <div class="img-upload">
-      <el-upload class="uploader" :accept="uploadType"
-                 ref="upload"
-                 list-type="picture"
-                 drag
-                 :action="params.action"
-                 :auto-upload="false"
-                 :show-file-list="false"
-                 :data="params.data"
-                 :on-change="uploadOnChange"
-      >
-        <el-button icon="el-icon-plus" circle size="large"></el-button>
-      </el-upload>
-    </div>
-    <el-dialog title=""
+  <div class="uploaderWrapper">
+    <el-upload class="uploader" :accept="uploadType"
+               ref="upload"
+               :action="params.action"
+               :auto-upload="false"
+               :show-file-list="false"
+               :data="params.data"
+               :on-change="uploadOnChange"
+    >
+      <el-button size="large" class="add">增加+</el-button>
+    </el-upload>
+  <!--  <el-dialog title=""
                :visible.sync="isEnlargeImage"
                size="large"
                :modal="false"
@@ -36,21 +18,18 @@
                top="8%"
                width="60%">
       <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
-    </el-dialog>
+    </el-dialog>-->
     <video src="" hidden id="video"></video>
-    <p>{{fileName}}</p>
-    <el-progress
-      type="circle"
-      :percentage="progressValue"
-      v-show="progressValue"></el-progress>
-    <!--    <progress id="progress" :value="progressValue" max="100" v-show="progressValue"></progress>
-		<span id="progressNumber" style="font-size: 12px;margin-left: 10px" v-show="progressValue">{{progressValue+'%'}}</span>-->
+    <!--<p>{{fileName}}</p>-->
+    <!--<el-progress-->
+      <!--type="circle"-->
+      <!--:percentage="progressValue"-->
+      <!--v-show="progressValue"></el-progress>-->
   </div>
 </template>
 
 <script>
   import md5 from 'md5'
-  
   const storage = window.localStorage;
   let xhr = new XMLHttpRequest();
   
@@ -92,7 +71,7 @@
         checkFileParams: '',
         EmployeeCode: storage.getItem('userName'),
         uploadUrl: '/Handler/UploadFileHandler.ashx',
-        isShow: false,
+        // isShow: false,
         uploadTitle: '',
         uploadType: '',
         form: {
@@ -135,7 +114,6 @@
       }
     },
     methods: {
-      
       uploadOnChange(file) {
         console.log(val);
         const that = this,
@@ -229,8 +207,8 @@
           xhr.upload.onprogress = function (evt) {
             if ( evt.lengthComputable ) {
               that.progressValue = Math.round((that.chunkSize * i + evt.loaded) * 100 / that.fileSize);
-            }
-            else {
+              that.$emit('getProgressValue',that.progressValue)
+            } else {
               console.log('无法计算');
             }
           };
@@ -255,7 +233,7 @@
                   let res = data.data;
                   if ( res.state == 200 && res.msg === '成功!' ) {
                     that.$message.success("上传成功");
-                    that.$emit('uploaded', true);
+                    that.$emit('closeAlert');
                     that.file = chunks = null;
                   } else {
                     that.$message.error(res.msg);
@@ -299,95 +277,6 @@
 </script>
 
 <style lang="stylus" scoped>
-  * {
-    box-sizing: border-box;
-  }
-  
-  .img-list >>> .el-upload-dragger
-    width: 200px
-    height auto
-    border: none
-  
-  .img-list {
-    overflow: hidden;
-    width: 100%;
-    position: relative
-  }
-  
-  .img-list .img-content {
-    /*height: 270px;*/
-    transition: all .3s;
-  }
-  
-  .img-list .img-upload {
-    width: 200px;
-    text-align: center;
-    margin: 0 auto;
-  }
-  
-  .img-list .uploader {
-    width: 100%;
-    display: table-cell;
-    vertical-align: middle;
-  }
-  
-  .img-list .img-progress {
-    text-align: center;
-    padding-top: 50px;
-  }
-  
-  .img-list .img-content img {
-    display: block;
-    height: 190px;
-    margin: 0 auto;
-  }
-  
-  .img-list .img-content .name {
-    margin-top: 10px;
-  }
-  
-  .img-list .img-content .name > div {
-    width: 90%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    height: 25px;
-    line-height: 25px;
-  }
-  
-  .img-list .img-content:hover .del,
-  .img-list .img-content:hover .layer {
-    opacity: 1;
-  }
-  
-  .img-list .img-content .del,
-  .img-list .img-content .layer {
-    opacity: 0;
-    transition: all .3s;
-  }
-  
-  .img-list .img-content .del {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: #8492a6;
-    cursor: pointer;
-    font-size: 1.1em;
-  }
-  
-  .img-list .img-content .layer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 200px;
-    color: #fff;
-    text-align: center;
-    z-index: 5;
-    background-color: rgba(0, 0, 0, .4);
-  }
-  
-  .img-list .img-content .layer i {
-    font-size: 1.6em;
-    margin-top: 80px;
-  }
+
+
 </style>

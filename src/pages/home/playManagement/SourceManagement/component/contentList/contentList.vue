@@ -46,7 +46,7 @@
         label="素材名称"
         prop="FileName"
         align="left"
-        width="380"
+        width="360"
         :show-overflow-tooltip="true"
       
       >
@@ -65,7 +65,6 @@
                        :icon="scope.row.FileType==0?'el-icon-picture':'el-icon-caret-right'">{{scope.row.FileName}}
             </el-button>
           </el-popover>
-          
           <span v-if="scope.row.FileType==2">{{scope.row.FileName}}</span>
         </template>
       </el-table-column>
@@ -97,9 +96,33 @@
         width="180"
         :show-overflow-tooltip="true">
       </el-table-column>
-      <el-table-column label="增加+">
+      <el-table-column>
+        <template slot="header" slot-scope="scope">
+          <upload-files
+            :isAlertShow="isAlertShow"
+            :getUploadType="uploadType"
+            @closeAlert="closeAlert"
+            @getProgressValue="getProgressValue"
+          >
+          </upload-files>
+        </template>
       </el-table-column>
     </el-table>
+    <el-dialog
+      :visible.sync="isDialogShow"
+      title="文件正在上传中，请稍等。。。"
+      :close-on-press-escape="false"
+      :close-on-click-modal="false"
+      :show-close="false"
+      align="center"
+    >
+      <el-progress
+        type="circle"
+        :percentage="progressValue"
+      >
+      </el-progress>
+    </el-dialog>
+    
     <pagination
       :tableList="list"
       :isListChange="isListChange"
@@ -109,13 +132,13 @@
       @listChanged="listChanged"
     ></pagination>
     
-    <alert-dialog
-      :isAlertShow.sync="isAlertShow"
-      @closeAlert="closeAlert"
-      @getList="getList"
-      :editOrAdd="dialogType"
-      :id="id"
-      :editData="sendDialogData"></alert-dialog>
+    <!--    <alert-dialog
+		  :isAlertShow.sync="isAlertShow"
+		  @closeAlert="closeAlert"
+		  @getList="getList"
+		  :editOrAdd="dialogType"
+		  :id="id"
+		  :editData="sendDialogData"></alert-dialog>-->
   
   </div>
 </template>
@@ -123,6 +146,7 @@
 <script>
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
+  import uploadFiles from './uploader/uploader'
   
   const storage = window.localStorage;
   
@@ -130,11 +154,16 @@
     name: "contentList",
     components: {
       alertDialog,
-      pagination
+      pagination,
+      uploadFiles
+      
     },
     data() {
       return {
         list: [],
+        progressValue: 0,
+        isDialogShow:false,
+        uploadType: 'image/jpg,image/jpeg,image/png,video/mp4,.apk',
         imgWidth: '',
         dataLoading: true,
         isListChange: false,
@@ -169,10 +198,27 @@
         }
       }
     },
+    
     mounted() {
       this.getList()
     },
     methods: {
+      getProgressValue(val) {
+        this.progressValue = val;
+        if ( val > 0 && val < 100 ) {
+          this.isDialogShow=true;
+        } else if ( val === 100 ) {
+          this.isDialogShow=false;
+        }
+      },
+      getUploadStatus(val) {
+        const that = this;
+        that.isUploaded = val;
+        setTimeout(function () {
+          that.$emit('closeAlert');
+          that.$emit('updateList')
+        }, 2000)
+      },
       listChanged() {
         this.isListChange = false
       },
@@ -193,7 +239,6 @@
         this.getList()
       },
       formatter(row, index) {
-        // console.log(row, index);
         let finishStatus;
         return finishStatus = row.Finished = 1 ? '已完成' : '未完成'
       },
@@ -219,16 +264,13 @@
       add(column, event) {
         if ( column.label === '增加+' ) {
           this.isAlertShow = true;
-          this.dialogType = 'a_dd';
           console.log(this.dialogType);
         }
       },
       closeAlert(n) {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
-        if ( !n ) {
-          this.getList();
-        }
+        this.getList();
       }
       ,
       getData(index, row) {
@@ -239,7 +281,8 @@
         this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
         this.sendDialogData.ID = row.ID;
       }
-      , deleteItem(index, row) {
+      ,
+      deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
@@ -283,8 +326,6 @@
           }
         }
       }
-      
-      
     }
   }
 </script>

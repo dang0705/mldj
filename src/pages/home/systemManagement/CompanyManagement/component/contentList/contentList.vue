@@ -58,7 +58,7 @@
       <el-table-column
         label="公司名称"
         prop="CompanyName"
-        width="200"
+        width="230"
         :show-overflow-tooltip="true"
         align="center"
       >

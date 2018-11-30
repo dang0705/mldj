@@ -26,7 +26,7 @@
 
 <script>
   // import upload from '@/component/common/upload/uploadList'
-  import uploadFiles from './uploader/uploader'
+  import uploadFiles from '../contentList/uploader/uploader'
   
   export default {
     // inject:['reload'],

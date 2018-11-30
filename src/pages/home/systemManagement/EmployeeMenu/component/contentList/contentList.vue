@@ -86,7 +86,7 @@
       <el-table-column
         label="用户账号/手机号"
         prop="Phone"
-        width="200"
+        width="180"
         :show-overflow-tooltip="true"
         align="center"
       >

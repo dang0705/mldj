@@ -1,5 +1,5 @@
 $color = #ff005c
-$Width =1280px
+$Width = 1280px
 #app
   height: 100%
 
@@ -35,6 +35,8 @@ $Width =1280px
 #app >>> .el-table
   border-top 1px solid $color
   border-bottom 1px solid $color !important
+  th
+    padding: 0
 
   .el-table__header
     background red
@@ -45,15 +47,15 @@ $Width =1280px
   .tableHeader
     background #e6e6e6
     font-size 16px
+    height: 40px
 
   .addBtn
-    height: 100%
     cursor pointer
     background $color
     color #fff
     text-align center
     font-size 16px
-
+    height 40px
 
 //*****弹出框样式覆盖*****
 #app >>> .el-dialog
@@ -92,6 +94,31 @@ $Width =1280px
   padding: 0
 
 
+//*****上传组件样式******
+#app >>> .uploaderWrapper
+  line-height unset
+  text-align center
+  .el-upload.el-upload--text
+    padding: 0
+    width: 100%
+    height: 100%
+    position: absolute
+    left: 0
+    top: 0
+  .add
+    position: absolute
+    left: 0
+    top: 0
+    background $color
+    font-size: 16px
+    font-weight:bold
+    border none
+    color #fff
+    width: 100%
+    height: 100%
+    padding: 0
+    span
+      vertical-align sub
 /*#app>>>footer
   width: $Width
   position absolute
