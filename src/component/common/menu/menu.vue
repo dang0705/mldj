@@ -1,7 +1,7 @@
 <template>
   <div id="menuWrapper">
     <div id="logoWrapper">
-      <img src="../../../assets/img/logo.png" alt="" width="100%" style="display: block">
+      <img src="../../../assets/img/logo.png" alt="" width="100%" style="display: block;">
     </div>
     <div id="menu">
       <ul id="firstLevelNavigation">
@@ -14,7 +14,6 @@
           {{item.navName}}
         </li>
       </ul>
-      
       <ul id="secondLevelNavigation">
         <router-link
           tag="li"
@@ -26,7 +25,11 @@
           {{eachSub.navName}}
         </router-link>
       </ul>
+      <div id="info">
+        <span>欢迎您：{{userName}}</span>
+      </div>
     </div>
+  
   </div>
 
 </template>
@@ -38,6 +41,7 @@
     name: 'head-Menu',
     data() {
       return {
+        userName: storage.getItem('name'),
         isActive: 0,
         isSubActive: 0,
         firstLevelNavigationArr: [ {navName: '', subNav: []} ],
@@ -52,7 +56,7 @@
       that.$axios.post('/Menu/GetRoleMenListByTree')
         .then(data => {
           console.log(data);
-          this.firstLevelNavigationArr = [];
+          that.firstLevelNavigationArr = [];
           if ( data.data.state !== 1 ) {
             that.$router.push('/login');
             return
@@ -69,6 +73,7 @@
               that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
             }
           }
+          that.firstLevelNavigationArr.unshift({navName: '首页'});
           storage.setItem('menu', JSON.stringify(that.firstLevelNavigationArr));
           if ( storage.getItem('menuSelected') ) {
             that.firstLevelNavigationIndex = parseInt(storage.getItem('menuSelected'))
@@ -81,6 +86,9 @@
     
     methods: {
       showSecondNavigation(i) {
+        if ( i === 0 ) {
+          this.$router.push('/homePage');
+        }
         this.firstLevelNavigationIndex = i;
         storage.setItem('menuSelected', i);
         this.isActive = i;
@@ -100,28 +108,37 @@
     background #000
     height: 120px
     position relative
+    
     div
-     float left
+      float left
+    
     #logoWrapper
       width: 120px
+    
     #menu
-      width: 1158px
+      padding-left: 30px
+      width: 1128px
       height 100%
       color #fff
       font-size $listFontSize
+      
       #firstLevelNavigation
         height 100%
         line-height: 180px
         background #000
+        
         li
           display inline-block
           margin 0 30px
           height: 100%
           cursor: pointer
+      
       #secondLevelNavigation
         text-align center
         position: absolute
         left -160px
+        top: 120px
+        
         .secondNavigation
           cursor pointer
           width: 160px
@@ -130,10 +147,17 @@
           height: 40px
           line-height: 40px
           background #000
+        
         .router-link-exact-active.router-link-active
           background-color $color
-      /*color blue*/
+      
+      #info
+        position: absolute
+        right: 30px;
+        bottom: 25px
+        width: 100px
   
+  /*color blue*/
 
 
 </style>

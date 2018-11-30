@@ -22,7 +22,11 @@ export default new Router({
       path: '/home',
       component: home,
       children: [
-
+        {
+          path:'/homePage',
+          name:'/homePage',
+          component:resolve=>require(['@/pages/home/homePage/homePage'],resolve)
+        },
         {
           path: '/BrandManagement',
           name: 'BrandManagement',

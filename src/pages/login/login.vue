@@ -100,11 +100,12 @@
           console.log(data);
           const res = data.data.Content.UserInfo;
           if ( data.data.state == 1 ) {
-            that.$router.push('/EmployeeMenu');
+            that.$router.push('/homePage');
             storage.setItem('userName', that.loginData.userName);
             storage.setItem('password', that.loginData.password);
             storage.setItem('isHoldLogin', that.loginData.holdLogin);
             storage.setItem('RoleID', res.RoleID);
+            storage.setItem('name', res.UserName);
             storage.setItem('CompanyID', res.CompanyID)
           } else {
             that.$message.error('用户名或密码错误');
