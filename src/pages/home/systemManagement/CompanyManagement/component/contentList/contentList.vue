@@ -216,7 +216,7 @@
       },
       getList(getList) {
         let that = this;
-        // that.list = [];
+        that.dataLoading = true;
         that.$axios.post('/Company/GetComanyList', {
           PageIndex: 1,
           PageSize: 1000,

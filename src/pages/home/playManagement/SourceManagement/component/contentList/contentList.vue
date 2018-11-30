@@ -203,6 +203,7 @@
       getList() {
         const that = this,
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
+        that.dataLoading = true;
         that.$axios.post('/PlayManage/EmployeeFileAllList', url)
           .then(data => {
             if ( data.data.state == 1 ) {

@@ -157,9 +157,9 @@
                       disabled: !res[ k ].Validity
                     });
                   }
-                  
                 }
               }
+              
               // console.log(that.allLabeledDeviceIdList);
               if ( requestCount === length ) {
                 for ( var j = 0; j < that.allDeviceList.length; j++ ) {
@@ -177,10 +177,10 @@
                     break
                   }
                 }
-                
-                
               }
-              
+              for ( var v = 0; v < that.allLabelList.length; v++ ) {
+                that.allLabelList[ v ].disabled = !that.allLabelList[ v ].children.length
+              }
             })
         }
         
@@ -321,19 +321,34 @@
       }
       ,
       renderFunc(h, option) {
+        console.log(option);
         if ( option.node.level == 1 ) {
-          if ( option.data.id > 0 ) {
-            return h(
-              'div', {}, [
-                h('el-tag', {
-                  class: 'labelName',
-                  attrs: {
-                    size: 'medium',
-                    type: 'success'
-                  }
-                }, option.data.label)
-              ]
-            )
+          if ( option.data.children.length ) {
+            if ( option.data.id > 0 ) {
+              return h(
+                'div', {}, [
+                  h('el-tag', {
+                    class: 'labelName',
+                    attrs: {
+                      size: 'medium',
+                      type: 'success'
+                    }
+                  }, option.data.label)
+                ]
+              )
+            } else {
+              return h(
+                'div', {}, [
+                  h('el-tag', {
+                    class: 'labelName',
+                    attrs: {
+                      size: 'medium',
+                      type: 'warning'
+                    }
+                  }, option.data.label)
+                ]
+              )
+            }
           } else {
             return h(
               'div', {}, [
@@ -341,12 +356,14 @@
                   class: 'labelName',
                   attrs: {
                     size: 'medium',
-                    type: 'warning'
+                    type: 'info',
+                    title: '可进入标签管理绑定设备'
                   }
-                }, option.data.label)
+                }, option.data.label+' - 无设备的标签')
               ]
             )
           }
+          
           
         } else {
           if ( !option.data.disabled ) {
@@ -423,7 +440,7 @@
           console.log(this.playListId);
           
           this.getAllDvcAndLblList();
-          this.alertTitle = this.playListName+' - '+'设备推送'
+          this.alertTitle = this.playListName + ' - ' + '设备推送'
         }
       }
     }
@@ -437,6 +454,7 @@
   
   #player >>> .el-tree-node__content
     height auto
+    
     ul
       width 100%
       margin-bottom: 10px

@@ -154,6 +154,7 @@
       },
       getList() {
         let that = this;
+        that.listLoading = true;
         that.$axios.post('/Home/OnloadWarehouseList', {
           WarehouseName: this.keyWord
         })

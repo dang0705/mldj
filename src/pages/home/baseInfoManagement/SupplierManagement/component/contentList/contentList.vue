@@ -161,6 +161,7 @@
       },
       getList() {
         let that = this;
+        that.listLoading = true;
         that.$axios.post('/Home/OnloadSupplierContactList', {
           SupplierName: this.keyWord
         })

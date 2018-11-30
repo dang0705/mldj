@@ -236,6 +236,7 @@
       },
       getList() {
         let that = this;
+        that.dataLoading = true;
         that.$axios.post('/Account/GetEmployeeList', {
           PageIndex: 1,
           PageSize: 1000,

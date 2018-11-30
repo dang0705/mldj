@@ -7,12 +7,12 @@
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="getBrandList"
+        @keyup.enter.native="getList"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="getBrandList"
+          @click="getList"
         >
         </i>
       </el-input>
@@ -132,7 +132,7 @@
       }
     },
     mounted() {
-      this.getBrandList();
+      this.getList();
     },
     methods: {
       listChanged() {
@@ -162,7 +162,7 @@
           console.log(this.dialogType);
         }
       },
-      getBrandList() {
+      getList() {
         let that = this;
         that.listLoading = true;
         that.$axios.post('/Home/OnloadBrandList', {
@@ -210,7 +210,7 @@
               ID: row.ID
             })
               .then(() => {
-                that.getBrandList()
+                that.getList()
               })
           })
           .catch(() => {

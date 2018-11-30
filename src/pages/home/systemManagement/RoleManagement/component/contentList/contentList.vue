@@ -16,7 +16,7 @@
         >
         </i>
       </el-input>
-      <el-select v-model="Validity" placeholder="请选择"
+      <el-select v-model="Validity" placeholder="全部状态"
                  @change="change"
       >
         <el-option
@@ -160,7 +160,7 @@
         this.pageSize = pageSize
       }
       ,
-      change(data) {
+      change() {
         this.getList()
       },
       formatTime(row, column, cellValue, index) {
@@ -185,15 +185,14 @@
           console.log(this.dialogType);
         }
       },
-      getList(getList) {
+      getList() {
         let that = this;
-        // that.list = [];
         that.tableLoading = true;
         that.$axios.post('/OrganizationalRole/GetRoleList', {
           PageIndex: 1,
           PageSize: 1000,
           Validity: that.Validity,
-          RoleName: getList ? this.keyWord : ''
+          RoleName: that.keyWord
         })
           .then(data => {
             console.log(data);

@@ -145,7 +145,7 @@
       },
       getList() {
         let that = this;
-        that.list = [];
+        that.dataLoading = true;
         that.$axios.post('/Home/OnloadApkList',{
           ApkName: this.keyWord
         })

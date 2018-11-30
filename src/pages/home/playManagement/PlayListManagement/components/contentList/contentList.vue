@@ -240,7 +240,6 @@
       ,
       getList() {
         let that = this;
-        
         that.tableLoading = true;
         that.$axios.post('/PlayManage/EmployeePlayListList', that.defaultAndSearchInfo)
           .then(data => {

@@ -1,10 +1,11 @@
 $color = #ff005c
+$Width =1280px
 #app
   height: 100%
 
 //列表搜索区
 #app >>> .filterComponents
-  width 1280px
+  width $Width
   padding 30px 0 10px
 
   > div
@@ -84,9 +85,17 @@ $color = #ff005c
 
 /*分页居右  */
 #app >>> .el-pagination
-  padding 20px 0
+  padding 20px 0 10px
 
 /*表格无内填充  */
 #app >>> .el-table td
   padding: 0
 
+
+/*#app>>>footer
+  width: $Width
+  position absolute
+  left calc(50% - (1280px/2))
+  bottom 0
+  height: 60px
+  background #000*/

@@ -153,7 +153,7 @@
       },
       getList() {
         let that = this;
-        that.list = [];
+        that.listLoading = true;
         that.$axios.post('/Home/OnloadChannelList', {
           ChannelName: this.keyWord
         })

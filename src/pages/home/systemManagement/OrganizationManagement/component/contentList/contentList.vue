@@ -203,6 +203,7 @@
       },
       getList() {
         let that = this;
+        that.dataLoading = true;
         that.$axios.post('/Organization/GetOrganizationList', {
           PageIndex: 1,
           PageSize: 1000,

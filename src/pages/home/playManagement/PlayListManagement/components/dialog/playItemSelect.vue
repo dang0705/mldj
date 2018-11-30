@@ -19,14 +19,16 @@
         filterable
         filter-placeholder="请输入设备名称"
         :render-content="renderFunc"
-        :titles="['待选播放项名称', '已选播放项名称']"
+        :titles="['所有播放项名称', '已添加播放项名称']"
         :button-texts="['去除播放项', '添加播放项']"
         :format="{
         noChecked: '${total}',
         hasChecked: '${checked}/${total}'
         }"
         @change="handleChange"
-        :data="selectList">
+        :data="selectList"
+        v-loading="dataLoading"
+      >
         <el-select slot="left-footer"
                    v-model="fileType"
                    @change="handleScreenClick"
@@ -79,6 +81,7 @@
       return {
         screenClicked: false,
         isTitleCreated: false,
+        dataLoading: true,
         allPmList: [],
         selectList: [],
         list: [],
@@ -112,7 +115,7 @@
           console.log(that.playListName);
           that.getSelectedList();
           that.handleScreenClick();
-          that.alertTitle=that.playListName+' - '+'播放项设置'
+          that.alertTitle = that.playListName + ' - ' + '播放项设置'
         } else {
           that.keyWord = '';
           that.selected = [];
@@ -228,16 +231,18 @@
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {
-              const res = data.data.Content.AllPm, length = res.length;
+              const res = data.data.Content.AllPm,
+                length = res.length;
               for ( var i = 0; i < length; i++ ) {
                 that.selected.push(parseInt(res[ i ].ID))
               }
-              console.log(that.selected);
+              this.dataLoading = false;
             }
           })
       },
       
       handleClose(obj) {
+        this.dataLoading = true;
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           this.$emit('closeSSAlert', 'n')
         } else {
@@ -354,20 +359,26 @@
   
   .dialogWrapper >>> .el-checkbox__label
     text-align center
+    
     p
       border-bottom 1px solid #eee
       height: 30px;
+    
     span
       display inline-block
       line-height 30px
       overflow hidden
       textOverFlow()
+    
     .playItemName
       width: 35%
+    
     .timeLong
       width: 18%
+    
     .fileType
       width: 17%
+    
     .DateCreated
       width 30%
   
