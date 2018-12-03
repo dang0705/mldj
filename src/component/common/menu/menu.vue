@@ -18,6 +18,7 @@
         <router-link
           tag="li"
           v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
+          @click.native="routerClick"
           class="secondNavigation"
           :to="eachSub.subIndex"
           :key="index"
@@ -51,6 +52,7 @@
     },
     
     mounted() {
+      this.$router.push('/homePage');
       console.log(this.firstLevelNavigationIndex);
       var that = this;
       that.$axios.post('/Menu/GetRoleMenListByTree')
@@ -86,12 +88,22 @@
     
     methods: {
       showSecondNavigation(i) {
-        if ( i === 0 ) {
+        /*if ( i === 0 ) {
           this.$router.push('/homePage');
-        }
+        }*/
         this.firstLevelNavigationIndex = i;
         storage.setItem('menuSelected', i);
-        this.isActive = i;
+        if ( i !== 0 ) {
+          this.$router.push(this.firstLevelNavigationArr[ this.firstLevelNavigationIndex ].subNav[ 0 ].subIndex);
+        }else {
+          this.$router.push('/homePage');
+        }
+  
+      }
+      ,
+      routerClick(val) {
+        console.log(val);
+        console.log(this.firstLevelNavigationIndex);
       }
     }
   }
@@ -129,7 +141,7 @@
         
         li
           display inline-block
-          margin 0 30px
+          padding 0 30px
           height: 100%
           cursor: pointer
       

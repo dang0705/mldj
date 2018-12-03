@@ -197,7 +197,7 @@
           return
         }
         
-        that.$axios.post('/Home/BrandSave', this.formData)
+       that.$axios.post('/Home/BrandSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
@@ -216,7 +216,7 @@
           .catch(e => {
             console.log(e);
           })
-        
+  
         // console.log(this.formData.ImgBase);
       },
       getBase64Url(url) {
