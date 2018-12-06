@@ -87,9 +87,27 @@
 		   </tbody>
 		 </table>-->
         <div class="table">
-          <div class="header" v-html="tableHeader">
+          <div class="header">
+            <span class="x">x/y</span>
+            <el-tag size="small" type="info" class='headColumn'
+                    v-for="(item,i) in DataColumnCount"
+                    :key="i"
+            >
+              {{'y'+(i+1)}}
+            </el-tag>
           </div>
-          <div class="tableMain" v-html="tableMain"></div>
+          <div class="tableMain"
+               v-for="(item,i) in DataRowCount">
+            <div>
+                 <span class="columnTitle">
+                   {{'x' + (i+1)}}
+                 </span>
+                <span v-for="(listItem,i) in tableDataList" v-if="listItem.CargoX===item">
+                  <el-input class="input" type="text" v-model="listItem.CargoIndex"></el-input>
+                </span>
+            </div>
+          </div>
+        
         </div>
         <!--        <el-table
 				  :data="tableDataList"
@@ -131,7 +149,6 @@
 
 <script>
   import upload from '@/component/common/upload/uploadList'
-  
   
   
   let Msg = '';
@@ -305,13 +322,8 @@
             }
           }
         }
-        that.tableHeader = '<span class="x">x/y</span>';
-        for ( var l = 0; l < that.DataColumnCount.length; l++ ) {
-          that.tableHeader += "<span class='headColumn'>y" + (l + 1) + "</span>"
-        }
         
         for ( var n = 0; n < that.DataRowCount.length; n++ ) {
-          // that.tableMain="<tr></tr>";
           that.tableMain += "<div><span class='columnTitle'>x" + (n + 1) + "</span>";
           that.tableDataList.forEach(function (item, index, arr) {
             if ( item.CargoX === that.DataRowCount[ n ] ) {
@@ -319,14 +331,6 @@
             }
           });
           that.tableMain += '</div>'
-          
-          
-          // this.tableMain=tableMain
-          /* for ( var o = 0; o < that.tableDataList.length; o++ ) {
-			 if ( this.tableDataList[ o ].CargoX === this.DataRowCount[ n ] ) {
-			   this.tableMain += "<td><input class='input' type='text' value='" + v.CargoIndex + "'></td>"
-			 }
-		   }*/
         }
       },
       
@@ -348,6 +352,7 @@
       },
       confirmUpload(obj) {
         this.add(obj)
+        console.log(this.tableDataList);
       },
       add(obj) {
         const that = this;
@@ -408,9 +413,6 @@
       border-bottom: 1px solid #000
     
     .header
-      height 20px
-      line-height: 20px
-      
       .x
         width: 50px
         color red
@@ -418,6 +420,7 @@
     .headColumn
       width: 100px
       color red
+      margin 0 5px
     
     span
       display inline-block

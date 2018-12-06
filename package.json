@@ -10,9 +10,11 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "el-tree-transfer": "^1.9.8",
     "element-ui": "^2.4.11",
     "fastclick": "^1.0.6",
+    "md5": "^2.2.1",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.2",
     "vue": "^2.5.2",
