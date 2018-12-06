@@ -35,6 +35,16 @@ $Width = 1280px
 #app >>> .el-table
   border-top 1px solid $color
   border-bottom 1px solid $color !important
+
+  //展开行内容
+
+  .el-form-item__label,
+  .el-form-item__content
+    color #99a9bf
+    font-size 12px
+    height: 30px
+    line-height: 30px
+
   th
     padding: 0
 
@@ -76,14 +86,28 @@ $Width = 1280px
 
 //*****输入框,下拉箭头,分页等独立控件样式覆盖
 #app >>> .el-select .el-input .el-select__caret,
-#app >>> .el-cascader .el-icon-arrow-down
+#app >>> .el-cascader .el-icon-arrow-down,
+#app >>> .el-tree-node__expand-icon
   color $color
+
 
 #app >>> .el-input__inner
   inputNoBorder()
 
 #app >>> .el-textarea__inner
   inputNoBorder()
+
+#app >>> div.el-input-number
+  width auto
+
+  .el-input-number__increase,
+  .el-input-number__decrease
+    background $color
+    color #fff
+
+  .el-input__inner
+    border 1px solid #dcdfe6
+    border-radius 4px
 
 /*分页居右  */
 #app >>> .el-pagination
@@ -98,6 +122,7 @@ $Width = 1280px
 #app >>> .uploaderWrapper
   line-height unset
   text-align center
+
   .el-upload.el-upload--text
     padding: 0
     width: 100%
@@ -105,24 +130,41 @@ $Width = 1280px
     position: absolute
     left: 0
     top: 0
+
   .add
     position: absolute
     left: 0
     top: 0
     background $color
     font-size: 16px
-    font-weight:bold
+    font-weight: bold
     border none
     color #fff
     width: 100%
     height: 100%
     padding: 0
+
     span
       vertical-align sub
-/*#app>>>footer
-  width: $Width
-  position absolute
-  left calc(50% - (1280px/2))
-  bottom 0
-  height: 60px
-  background #000*/
+
+#app >>> .uploader
+  .el-upload
+    border: 1px dashed $color;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  .el-upload:hover
+    border-color: #409EFF;
+  .avatar
+    width: 178px;
+    height: 178px;
+    display: block;
+  .uploader-icon
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+

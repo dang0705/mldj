@@ -79,7 +79,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="currentPage"
-        :page-sizes="[5, 10, 20, 40]"
+        :page-sizes="[5, 10, 15]"
         :page-size="pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="list.length">
@@ -232,8 +232,8 @@
     width: 100% !important
   
   .activeName, .el-select
-    float left
-    width 45%
+    float left !important
+    width 45% !important
   
   .el-select
     float right

@@ -17,11 +17,7 @@
 
     methods: {},
     mounted() {
-      console.log(document.body.clientHeight);
-      history.pushState(null, null, document.URL);
-      window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-      });
+      this.$myFunctions.disableBackAndForward()
     },
   }
 </script>

@@ -132,7 +132,13 @@
       }
     },
     mounted() {
-      this.getList();
+      if ( this.$store.state.brand.length ) {
+        this.list = this.$store.state.brand;
+        this.listLoading = false;
+        this.isListChange = true;
+      } else {
+        this.getList();
+      }
     },
     methods: {
       listChanged() {
@@ -175,12 +181,15 @@
             that.listLoading = false;
             that.isListChange = true;
             that.defaultPaginationData()
-  
+            
           })
       }
       ,
-      closeAlert() {
+      closeAlert(n) {
         this.dialogType = 'up_date';
+        if ( !n ) {
+          this.getList();
+        }
         this.isAlertShow = false
       }
       , getData(index, row) {

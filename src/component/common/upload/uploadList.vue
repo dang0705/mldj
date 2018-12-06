@@ -1,49 +1,19 @@
 <template>
   <div class="img-list" v-if="!isShow">
-    <div class="img-content" v-show="imagelist.url">
-      <el-form
-        :model="form"
-        ref="uploadList"
-      >
-        <el-form-item prop="imgUrl">
-          <img :src="clearSrc" v-model="form.imgUrl" width="200px">
-        </el-form-item>
-      </el-form>
-
-      <div class="layer" @click="handleFileEnlarge(imagelist.url)">
-        <i class="el-icon-view"></i>
-      </div>
-    </div>
-    
-    <div v-if="!pass && progress !== 0" class="img-content img-progress">
-      <el-progress type="circle" :percentage="progress" :status="proStatus"></el-progress>
-    </div>
-    
-    <div class="img-upload">
-      <el-upload class="uploader"
-                 :accept="uploadType"
-                 ref="upload"
-                 list-type="picture"
-                 drag
-                 :action="params.action"
-                 :auto-upload="false"
-                 :show-file-list="false"
-                 :data="params.data"
-                 :on-change="uploadOnChange"
-                 :on-progress="uploadOnProgress"
-      >
-        <el-button icon="el-icon-plus" circle size="large"></el-button>
-      </el-upload>
-    </div>
-    <el-dialog title=""
-               :visible.sync="isEnlargeImage"
-               size="large"
-               :modal="false"
-               :modal-append-to-body="true"
-               top="8%"
-               width="60%">
-      <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
-    </el-dialog>
+    <el-upload class="uploader"
+               :accept="uploadType"
+               ref="upload"
+               list-type="picture"
+               :action="params.action"
+               :auto-upload="false"
+               :show-file-list="false"
+               :data="params.data"
+               :on-change="uploadOnChange"
+    >
+      <img v-if="imgUrl||clearSrc" :src="imgUrl||clearSrc" v-model="form.imgUrl" width="200px" class="avatar">
+      <i v-else class="el-icon-plus uploader-icon"></i>
+    </el-upload>
+    <el-tag size="large" type="danger">上传图片</el-tag>
   </div>
 </template>
 
@@ -62,6 +32,10 @@
       },
       getUploadType: {
         type: String
+      },
+      imgUrl: {
+        type: String,
+        default: ''
       }
     },
     data() {
@@ -101,33 +75,32 @@
       }
     },
     methods: {
-      uploadOnProgress(e, file) {//开始上传
-        console.log(e.percent, file);
-        this.progress = Math.floor(e.percent)
-      },
       uploadOnChange(file) {
         console.log("——————————change——————————");
         console.log(file);
         let that = this;
         if ( file.status === 'ready' ) {
-          console.log("ready");
+          // console.log("ready");
           this.pass = null;
           this.progress = 0;
-          if ( file.raw.type.indexOf('image') > -1 ) {
-            let reader = new FileReader();
-            reader.readAsDataURL(file.raw);
-            reader.onload = function (e) {
-              console.log(e.target.result);
-              that.imagelist = {
-                url: e.target.result,
-                name: '新增图片'
+          if ( file.size < 4 * 1024 * 1024 ) {
+            if ( file.raw.type.indexOf('image') > -1 ) {
+              let reader = new FileReader();
+              reader.readAsDataURL(file.raw);
+              reader.onload = function (e) {
+                that.imagelist = {
+                  url: e.target.result,
+                  name: '新增图片'
+                };
+                that.$emit('getBase64Url', that.imagelist.url)
               };
-              // console.log(that.imagelist);
-              that.$emit('getBase64Url', that.imagelist.url)
-            };
+            } else {
+              that.$emit('hasFile', file);
+            }
           } else {
-            that.$emit('hasFile', file);
+            that.$message.error('请上传小于4MB的图片')
           }
+          
           
         } else if ( file.status === 'fail' ) {
           this.$message.error("图片上传出错，请刷新重试！");
@@ -135,7 +108,6 @@
       },
       
       handleFileEnlarge(_url) {//放大图片
-        // console.log(_url);
         if ( _url ) {
           this.enlargeImage = _url;
           this.isEnlargeImage = !this.isEnlargeImage;
@@ -151,95 +123,5 @@
 </script>
 
 <style lang="stylus" scoped>
-  * {
-    box-sizing: border-box;
-  }
-  
-  .img-list >>> .el-upload-dragger
-    width: 200px
-    height auto
-    border: none
-  
-  .img-list {
-    overflow: hidden;
-    width: 100%;
-    position: relative
-  }
-  
-  .img-list .img-content {
-    /*height: 270px;*/
-    transition: all .3s;
-  }
-  
-  .img-list .img-upload {
-    width: 200px;
-    text-align: center;
-    margin: 0 auto;
-  }
-  
-  .img-list .uploader {
-    width: 100%;
-    display: table-cell;
-    vertical-align: middle;
-  }
-  
-  .img-list .img-progress {
-    text-align: center;
-    padding-top: 50px;
-  }
-  
-  .img-list .img-content img {
-    display: block;
-    height: 190px;
-    margin: 0 auto;
-  }
-  
-  .img-list .img-content .name {
-    margin-top: 10px;
-  }
-  
-  .img-list .img-content .name > div {
-    width: 90%;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    height: 25px;
-    line-height: 25px;
-  }
-  
-  .img-list .img-content:hover .del,
-  .img-list .img-content:hover .layer {
-    opacity: 1;
-  }
-  
-  .img-list .img-content .del,
-  .img-list .img-content .layer {
-    opacity: 0;
-    transition: all .3s;
-  }
-  
-  .img-list .img-content .del {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    color: #8492a6;
-    cursor: pointer;
-    font-size: 1.1em;
-  }
-  
-  .img-list .img-content .layer {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 200px;
-    color: #fff;
-    text-align: center;
-    z-index: 5;
-    background-color: rgba(0, 0, 0, .4);
-  }
-  
-  .img-list .img-content .layer i {
-    font-size: 1.6em;
-    margin-top: 80px;
-  }
+
 </style>

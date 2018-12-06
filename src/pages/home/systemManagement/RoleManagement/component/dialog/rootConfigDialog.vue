@@ -40,6 +40,7 @@
     data() {
       return {
         menuList: [],
+        isSplice: false,
         echoSelectedList: [],
         treeLoading: true,
         postNavList: [],
@@ -120,12 +121,16 @@
         console.log(this.$refs.tree);
         const that = this;
         console.log(that.postNavList.length);
+        const sendArr = that.postNavList.filter((item, index, arr) => {
+          return item.MenuCode
+        });
+        console.log(sendArr);
         if ( that.postNavList.length === 1 ) {
           that.$message.error('您还未对 ' + that.roleName + ' 配置任何权限')
         } else {
           that.$axios.post('/RoleMenu/BindRoleMenu', {
             roleCode: that.configId,
-            roleMenuList: that.postNavList
+            roleMenuList: sendArr
           })
             .then(data => {
               console.log(data);
@@ -141,7 +146,6 @@
     },
     mounted() {
       const storage = window.localStorage;
-      console.log(JSON.parse(storage.getItem('menu')));
       if ( storage.getItem('menu') ) {
         this.menuList = JSON.parse(storage.getItem('menu'))
       }

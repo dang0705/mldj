@@ -5,43 +5,49 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
+      align="center"
       @closed="closed"
+      width="600px"
     >
       <div id="imgWrapper">
-        <img :src="editFormData.ImgBase" alt="" v-show="!formData.ImgBase" width="200">
-      </div>
-      <el-form
-        ref="upload"
-        :model="formData"
-        :rules="uploadRules"
-        label-width="120px"
-      >
-        <el-form-item>
-          <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url"
-                  :getUpLoadTitle="upLoadTitle"
-                  :getUploadType="uploadType">
-            
-          </upload>
-        </el-form-item>
-        <el-form-item prop="BrandCode" label="品牌编号：">
-          <el-input v-model="formData.BrandCode" clearable minlength="1" maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="BrandName" label="品牌名称：">
-          <el-input v-model="formData.BrandName" clearable minlength="1" maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item label="品牌简介：">
-          <el-input v-model="formData.BrandShowText" clearable minlength="1"
-                    maxlength="15"></el-input>
-        </el-form-item>
-        <el-form-item label="品牌描述：">
-          <el-input type="textarea" v-model="formData.BrandComments" maxlength="250"></el-input>
-        </el-form-item>
-       
-        <!--上传图片插件-->
+        <upload :isClose="isClose"
+                :imgUrl="formData.ImgBase"
+                @closeDialog="handleClose"
+                @getBase64Url="getBase64Url"
+                :getUpLoadTitle="upLoadTitle"
+                :getUploadType="uploadType">
         
-      </el-form>
- 
+        </upload>
+      </div>
+      <div id="info">
+        <el-form
+          ref="upload"
+          :model="formData"
+          :rules="uploadRules"
+          label-width="120px"
+        >
+          <!--     <el-form-item>
+			   
+			   </el-form-item>-->
+          <el-form-item prop="BrandCode" label="品牌编号：">
+            <el-input v-model="formData.BrandCode" clearable minlength="1" maxlength="10"></el-input>
+          </el-form-item>
+          <el-form-item prop="BrandName" label="品牌名称：">
+            <el-input v-model="formData.BrandName" clearable minlength="1" maxlength="10"></el-input>
+          </el-form-item>
+          <el-form-item label="品牌简介：">
+            <el-input v-model="formData.BrandShowText" clearable minlength="1"
+                      maxlength="15"></el-input>
+          </el-form-item>
+          <el-form-item label="品牌描述：">
+            <el-input type="textarea" v-model="formData.BrandComments" maxlength="250"></el-input>
+          </el-form-item>
+          
+          <!--上传图片插件-->
+        
+        </el-form>
       
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
@@ -115,8 +121,6 @@
             }
           ]
         }
-        ,
-        editString: ''
       }
     },
     computed: {
@@ -139,7 +143,7 @@
             this.formData.BrandComments = this.editData.BrandComments;
             this.formData.BrandShowText = this.editData.BrandShowText;
             this.formData.ID = this.editData.ID;
-            this.editFormData.ImgBase = this.editData.ImgBase;
+            this.formData.ImgBase = this.editData.ImgBase;
             this.alertTitle = '编辑品牌'
             Msg = '编辑成功'
           } else {
@@ -156,21 +160,21 @@
     },
     
     methods: {
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.$emit('closeAlert','n');
+        }else {
+          this.$emit('closeAlert');
+  
+        }
         this.formData.ImgBase = '';
-        this.editFormData.ImgBase = ''
       },
       closed() {
         this.$store.commit('clearUpload');
         this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-      handleAvatarSuccess(res, file) {
-        this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(this.imageUrl);
-      },
+
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
         const isPNG = file.type === 'image/png';
@@ -187,7 +191,7 @@
         
       },
       
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.BrandCode === '' ) {
           that.$message.error('品牌编号不能为空');
@@ -197,16 +201,14 @@
           return
         }
         
-       that.$axios.post('/Home/BrandSave', this.formData)
+        that.$axios.post('/Home/BrandSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
               that.pass = true;
-              that.$emit('closeAlert');
-              that.$store.commit('BrandUpdateData');
+              that.handleClose(obj);
               that.$refs[ 'upload' ].resetFields();
-              that.formData.ImgBase = '';
             } else {
               that.$message.error(res.msg);
             }
@@ -216,7 +218,7 @@
           .catch(e => {
             console.log(e);
           })
-  
+        
         // console.log(this.formData.ImgBase);
       },
       getBase64Url(url) {
@@ -228,29 +230,17 @@
 </script>
 
 <style scoped lang="stylus">
+  .dialogWrapper >>> .el-dialog
+    height 450px
   
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
+  .dialogWrapper
+    #imgWrapper, #info
+      display inline-block
+    #imgWrapper
+     vertical-align text-bottom
+    #info
+      width: 60%
+      margin-left: 20px
 
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+
 </style>

@@ -9,7 +9,7 @@
       <!--推送历史列表-->
       <div class="tableWrapper">
         <el-tag type="info">推送历史列表</el-tag>
-        <el-select v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史"
+        <el-select class="dataSelect" v-model="pushHistorySelectModel" @change="changePushHistoryList" placeholder="推送历史"
                    v-loading="pushHistorySelectLoading">
           <el-option
             v-for="(item,i) in myPushHistorySelectList"
@@ -43,7 +43,7 @@
       <!--推送进度-->
       <div class="tableWrapper">
         <el-tag type="info">推送进度状态</el-tag>
-        <el-select v-model="pushProgressSelectModel" @change="changePushProgressList" placeholder="推送进度"
+        <el-select class="dataSelect" v-model="pushProgressSelectModel" @change="changePushProgressList" placeholder="推送进度"
                    v-loading="pushProgressSelectLoading">
           <el-option
             v-for="(item,i) in pushProgressSelectList"
@@ -274,7 +274,7 @@
       'isPushHistoryAndStatusShow': function () {
         this.isAlertShow = this.isPushHistoryAndStatusShow;
         if ( this.isPushHistoryAndStatusShow ) {
-          this.alertTitle = this.playListName +' - '+ '推送历史及状态';
+          this.alertTitle = this.playListName +' - '+ '推送历史及进度';
           this.getHistorySelectOption();
           this.pusHistoryListLoading = false;
         }
@@ -292,5 +292,7 @@
     display inline-block
     margin 0 5% 0
     width: 35%
+    .dataSelect
+      margin-bottom: 40px
 
 </style>

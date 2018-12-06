@@ -118,7 +118,6 @@
         //先清空验证码的输入
         this.code = "";
         this.checkCode = "";
-        this.picLyanzhengma = "";
         //验证码的长度
         var codeLength = 4;
         //随机数
@@ -134,6 +133,7 @@
       }
     },
     created() {
+     this.$myFunctions.disableBackAndForward();
       storage.removeItem('menuSelected');
       this.createCode();
       if ( storage.getItem('isHoldLogin') === 'true' ) {

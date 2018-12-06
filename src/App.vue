@@ -8,10 +8,7 @@
   export default {
     name: 'App',
     mounted() {
-      history.pushState(null, null, document.URL);
-      window.addEventListener('popstate', function () {
-        history.pushState(null, null, document.URL);
-      });
+     this.$myFunctions.disableBackAndForward()
     }
   }
 </script>

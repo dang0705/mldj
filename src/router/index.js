@@ -11,7 +11,7 @@ import home from '@/pages/home/home'
 Vue.use(Router);
 
 export default new Router({
-  base:'/HomeWeb',
+  base: '/HomeWeb',
   routes: [
     {
       path: '*/',
@@ -23,9 +23,9 @@ export default new Router({
       component: home,
       children: [
         {
-          path:'/homePage',
-          name:'/homePage',
-          component:resolve=>require(['@/pages/home/homePage/homePage'],resolve)
+          path: '/homePage',
+          name: '/homePage',
+          component: resolve => require([ '@/pages/home/homePage/homePage' ], resolve)
         },
         {
           path: '/BrandManagement',
@@ -35,12 +35,12 @@ export default new Router({
         {
           path: '/ApkManagement',
           name: 'ApkManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/ApkManagement/ApkManagement'], resolve)
+          component: resolve => require([ '@/pages/home/baseInfoManagement/ApkManagement/ApkManagement' ], resolve)
         },
         {
           path: '/SupplierManagement',
           name: 'SupplierManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/SupplierManagement/SupplierManagement'], resolve)
+          component: resolve => require([ '@/pages/home/baseInfoManagement/SupplierManagement/SupplierManagement' ], resolve)
         },
         {
           path: '/channelManagement',
@@ -59,51 +59,66 @@ export default new Router({
           component: resolve => require([ '@/pages/home/baseInfoManagement/storeManagement/storeManagement' ], resolve)
         },
         {
+          path: '/productClassMenu',
+          name: 'productClassMenu',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/productClassMenu/productClassMenu' ], resolve)
+        },
+        {
+          path: '/productMenu',
+          name: 'productMenu',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/productMenu/productMenu' ], resolve)
+        },
+        {
           path: '/EquipManagement',
           name: 'EquipManagement',
-          component: resolve => require([ '@/pages/home/deviceManagement/EquipManagement/EquipManagement'], resolve)
+          component: resolve => require([ '@/pages/home/deviceManagement/EquipManagement/EquipManagement' ], resolve)
         },
         {
           path: '/LabelManagement',
           name: 'LabelManagement',
-          component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement'], resolve)
+          component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement' ], resolve)
+        },
+        {
+          path: '/huodaoMenu',
+          name: 'huodaoMenu',
+          component: resolve => require([ '@/pages/home/deviceManagement/huodaoMenu/huodaoMenu' ], resolve)
         },
 
         {
           path: '/EmployeeMenu',
           name: 'EmployeeMenu',
-          component: resolve => require([ '@/pages/home/systemManagement/EmployeeMenu/EmployeeMenu'], resolve)
+          component: resolve => require([ '@/pages/home/systemManagement/EmployeeMenu/EmployeeMenu' ], resolve)
         },
 
         {
           path: '/CompanyManagement',
           name: 'CompanyManagement',
-          component: resolve => require([ '@/pages/home/systemManagement/CompanyManagement/CompanyManagement'], resolve)
+          component: resolve => require([ '@/pages/home/systemManagement/CompanyManagement/CompanyManagement' ], resolve)
         },
         {
           path: '/RoleManagement',
           name: 'RoleManagement',
-          component: resolve => require([ '@/pages/home/systemManagement/RoleManagement/RoleManagement'], resolve)
+          component: resolve => require([ '@/pages/home/systemManagement/RoleManagement/RoleManagement' ], resolve)
         },
         {
           path: '/OrganizationManagement',
           name: 'OrganizationManagement',
-          component: resolve => require([ '@/pages/home/systemManagement/OrganizationManagement/OrganizationManagement'], resolve)
+          component: resolve => require([ '@/pages/home/systemManagement/OrganizationManagement/OrganizationManagement' ], resolve)
         },
         {
           path: '/SourceManagement',
           name: 'SourceManagement',
-          component: resolve => require([ '@/pages/home/playManagement/SourceManagement/SourceManagement'], resolve)
+          component: resolve => require([ '@/pages/home/playManagement/SourceManagement/SourceManagement' ], resolve)
         },
         {
           path: '/PlayItemManagement',
           name: 'PlayItemManagement',
-          component: resolve => require([ '@/pages/home/playManagement/PlayItemManagement/PlayItemManagement'], resolve)
+          component: resolve => require([ '@/pages/home/playManagement/PlayItemManagement/PlayItemManagement' ], resolve)
         },
         {
           path: '/PlayListManagement',
           name: 'PlayListManagement',
-          component: resolve => require([ '@/pages/home/playManagement/PlayListManagement/PlayListManagement'], resolve)
+          component: resolve => require([ '@/pages/home/playManagement/PlayListManagement/PlayListManagement' ], resolve)
         }
 
 

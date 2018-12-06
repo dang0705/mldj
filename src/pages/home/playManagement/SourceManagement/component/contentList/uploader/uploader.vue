@@ -10,21 +10,7 @@
     >
       <el-button size="large" class="add">增加+</el-button>
     </el-upload>
-  <!--  <el-dialog title=""
-               :visible.sync="isEnlargeImage"
-               size="large"
-               :modal="false"
-               :modal-append-to-body="true"
-               top="8%"
-               width="60%">
-      <img @click="isEnlargeImage = false" style="width:100%;" :src="enlargeImage">
-    </el-dialog>-->
     <video src="" hidden id="video"></video>
-    <!--<p>{{fileName}}</p>-->
-    <!--<el-progress-->
-      <!--type="circle"-->
-      <!--:percentage="progressValue"-->
-      <!--v-show="progressValue"></el-progress>-->
   </div>
 </template>
 
@@ -34,7 +20,6 @@
   let xhr = new XMLHttpRequest();
   
   export default {
-    
     name: 'uploader',
     props: {
       isAlertShow: {

@@ -9,7 +9,7 @@
           v-for="(item,i) of firstLevelNavigationArr"
           :key="i"
           :class="{ active: firstLevelNavigationIndex ===i}"
-          @click="showSecondNavigation(i)"
+          @click="showSecondNavigation(i,item)"
         >
           {{item.navName}}
         </li>
@@ -18,7 +18,6 @@
         <router-link
           tag="li"
           v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
-          @click.native="routerClick"
           class="secondNavigation"
           :to="eachSub.subIndex"
           :key="index"
@@ -27,7 +26,7 @@
         </router-link>
       </ul>
       <div id="info">
-        <span>欢迎您：{{userName}}</span>
+        <a @click="logOut">欢迎您：{{userName}}</a>
       </div>
     </div>
   
@@ -52,58 +51,96 @@
     },
     
     mounted() {
-      this.$router.push('/homePage');
-      console.log(this.firstLevelNavigationIndex);
-      var that = this;
-      that.$axios.post('/Menu/GetRoleMenListByTree')
-        .then(data => {
-          console.log(data);
-          that.firstLevelNavigationArr = [];
-          if ( data.data.state !== 1 ) {
-            that.$router.push('/login');
-            return
-          }
-          const myData = data.data.Content;
-          for ( var i = 0; i < myData.length; i++ ) {
-            that.firstLevelNavigationArr.push({
-              navName: myData[ i ].MenuName,
-              subNav: [],
-              subIndex: myData[ i ].MenuCode
-            });
-            for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
-              var MenuList = myData[ i ].MenuList[ j ];
-              that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
-            }
-          }
-          that.firstLevelNavigationArr.unshift({navName: '首页'});
-          storage.setItem('menu', JSON.stringify(that.firstLevelNavigationArr));
-          if ( storage.getItem('menuSelected') ) {
-            that.firstLevelNavigationIndex = parseInt(storage.getItem('menuSelected'))
-          } else {
-            that.firstLevelNavigationIndex = 0
-          }
-          
-        })
+      this.getMenu()
     },
     
     methods: {
-      showSecondNavigation(i) {
+      getMenu() {
+        var that = this;
+        that.$axios.post('/Menu/GetRoleMenListByTree')
+          .then(data => {
+            console.log(data);
+            that.firstLevelNavigationArr = [];
+            if ( data.data.state !== 1 ) {
+              that.$router.push('/');
+              return
+            }
+            const myData = data.data.Content;
+            for ( var i = 0; i < myData.length; i++ ) {
+              that.firstLevelNavigationArr.push({
+                navName: myData[ i ].MenuName,
+                subNav: [],
+                subIndex: myData[ i ].MenuCode
+              });
+              for ( var j = 0; j < myData[ i ].MenuList.length; j++ ) {
+                var MenuList = myData[ i ].MenuList[ j ];
+                that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
+              }
+            }
+            that.firstLevelNavigationArr.unshift({navName: '首页'});
+            const sendArr = that.firstLevelNavigationArr.filter((ele, idx, arr) => {
+              return idx !== 0;
+            });
+            storage.setItem('menu', JSON.stringify(sendArr));
+            if ( storage.getItem('menuSelected') ) {
+              that.firstLevelNavigationIndex = parseInt(storage.getItem('menuSelected'))
+            } else {
+              that.firstLevelNavigationIndex = 0
+            }
+            
+          })
+      },
+      showSecondNavigation(i, item) {
         /*if ( i === 0 ) {
           this.$router.push('/homePage');
         }*/
         this.firstLevelNavigationIndex = i;
-        storage.setItem('menuSelected', i);
-        if ( i !== 0 ) {
+        if ( this.firstLevelNavigationIndex !== 0 ) {
           this.$router.push(this.firstLevelNavigationArr[ this.firstLevelNavigationIndex ].subNav[ 0 ].subIndex);
-        }else {
+        } else {
           this.$router.push('/homePage');
         }
-  
+        if ( item.navName === '基础数据管理' ) {
+          if ( storage.getItem('catalog') ) {
+            this.$store.commit('catalog', JSON.parse(storage.getItem('catalog')))
+          } else {
+            const that = this;
+            that.$axios.post('Home/OnloadProductClassList')
+              .then(data => {
+                if ( data.data.state == 1 ) {
+                  storage.setItem('catalog', JSON.stringify(data.data.Content))
+                }
+              })
+          }
+          if ( storage.getItem('brand') ) {
+            this.$store.commit('brand', JSON.parse(storage.getItem('brand')))
+          } else {
+            const that = this;
+            that.$axios.post('Home/OnloadBrandList')
+              .then(data => {
+                if ( data.data.state == 1 ) {
+                  storage.setItem('brand', JSON.stringify(data.data.Content))
+                }
+              })
+          }
+        }else {
+          storage.removeItem('catalog');
+          storage.removeItem('brand')
+        }
+        storage.setItem('menuSelected', i);
       }
       ,
-      routerClick(val) {
-        console.log(val);
-        console.log(this.firstLevelNavigationIndex);
+      logOut() {
+        this.$confirm('确定退出此账号?', '退出', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          // this.$router.push('../../pages/login/login')
+          this.$router.push('/')
+        }).catch(() => {
+        
+        });
       }
     }
   }
@@ -168,6 +205,9 @@
         right: 30px;
         bottom: 25px
         width: 100px
+        
+        a
+          cursor pointer
   
   /*color blue*/
 

@@ -10,16 +10,9 @@ export default new Vuex.Store({
     organizationList: [],
     getAllLabelList: [],
     menuIndex: '',
-    activeCity: [],
-    withDrawCity: [],
-    dataPickerTitle: '',
-    citySelectTitle: '',
-    startDate: '',
-    endDate: '',
-    advanceDate: '',
-    withDrawlDate: '',
-    ProvinceAndCityCode: '',
     clearUpload: false,
+    catalog:[],
+    brand:[]
 
   },
   mutations: {
@@ -38,6 +31,12 @@ export default new Vuex.Store({
     },
     clearUpload(state) {
       state.clearUpload = true;
+    },
+    catalog(state, catalog) {
+      state.catalog = catalog
+    },
+    brand(state, brand) {
+      state.brand = brand
     }
   },
   // actions:{

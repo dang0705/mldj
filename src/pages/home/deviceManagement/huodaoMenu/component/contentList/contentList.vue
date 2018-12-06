@@ -3,7 +3,7 @@
     <div class="filterComponents">
       <el-input
         autofocus
-        class="input activeName"
+        class="input"
         v-model="keyWord"
         autocomplete="on"
         placeholder="名称"
@@ -16,6 +16,7 @@
         >
         </i>
       </el-input>
+
     </div>
     
     <el-table width="100%"
@@ -24,46 +25,72 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               @header-click="add"
-              v-loading="listLoading"
+              v-loading="dataLoading"
     >
-      <el-table-column label="操作" width="100" align="center">
+      <el-table-column
+        width="100"
+        label="操作"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
+          <el-button size="small"
+                     icon="el-icon-edit"
+                     circle
+                     @click="getData(scope.$index,scope.row)">
           </el-button>
+          
+          <el-switch
+            v-model="scope.row.Validity"
+            :active-value="1"
+            :inactive-value="0"
+            @change=switchChange(scope.$index,scope.row)
+          >
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column
-        label="仓库名称"
+        prop="DeviceName"
+        label="货道外观图"
         align="center"
-        prop="WarehouseName"
-        width="180">
+        width="140"
+      >
       </el-table-column>
       <el-table-column
-        label="仓库编号"
+        prop="EmployeeName"
+        label="货道型号"
         align="center"
-        prop="WarehouseCode"
-        width="180">
+        width="180"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      
+      <el-table-column
+        prop="ProvinceName"
+        label="省份"
+        align="center"
+        width="80"
+      >
       </el-table-column>
       <el-table-column
-        label="仓库地址"
+        prop="CityName"
+        label="城市"
         align="center"
-        prop="WarehouseAdd"
-        width="340"
+        width="80"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
-        label="仓库描述"
+        prop="Address"
+        label="地址"
         align="center"
-        prop="WarehouseDec"
-        width="320"
+        width="520"
         :show-overflow-tooltip="true">
       </el-table-column>
+      
       <el-table-column
         label="增加+"
-        align="center">
+      >
+      
       </el-table-column>
+    
     </el-table>
     <pagination
       :tableList="list"
@@ -72,7 +99,6 @@
       @pageSize="getPageSize"
       @defaultPaginationData="defaultPaginationData"
       @listChanged="listChanged"
-    
     ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
@@ -82,8 +108,8 @@
 </template>
 
 <script>
-  import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
+  import alertDialog from '../dialog/dialog'
   
   export default {
     name: "contentList",
@@ -94,9 +120,10 @@
     data() {
       return {
         list: [],
-        listLoading: true,
+        dataLoading: true,
         isListChange: false,
         dialogType: 'up_date',
+        switchData: '',
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -104,7 +131,7 @@
           color: '#000',
         },
         rowStyle: {
-          height: '40px'
+          height: '40px',
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -112,14 +139,14 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          WarehouseCode: '',
-          WarehouseAdd: '',
-          WarehouseName: '',
-          WarehouseDec: '',
+          DeviceName: '',
+          EmployeeCode: '',
+          AddEmployeeCode: '',
+          ProvinceName: '',
+          CityName: '',
+          Address: '',
           ID: '',
         }
-        
-        // isUpdateDate:false
       }
     },
     mounted() {
@@ -152,20 +179,19 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(city) {
         let that = this;
-        that.listLoading = true;
-        that.$axios.post('/Home/OnloadWarehouseList', {
-          WarehouseName: this.keyWord
+        that.$axios.post('/Home/OnloadCargoTypeList', {
+          CargoName: that.keyWord
         })
           .then(data => {
             if ( data.data.state == 1 ) {
               that.list = data.data.Content;
             }
-            that.listLoading = false;
+            that.dataLoading = false;
             that.isListChange = true;
-            this.defaultPaginationData()
           })
+        
       }
       
       ,
@@ -173,43 +199,56 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList();
         }
       }
-      ,
-      getData(index, row) {
+      , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        console.log(row);
         this.isAlertShow = true;
-        this.sendDialogData.WarehouseCode = this.list[ realIndex ].WarehouseCode;
-        this.sendDialogData.WarehouseName = this.list[ realIndex ].WarehouseName;
-        this.sendDialogData.WarehouseAdd = this.list[ realIndex ].WarehouseAdd;
-        this.sendDialogData.WarehouseDec = this.list[ realIndex ].WarehouseDec;
+        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+        this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
+        this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
+        this.sendDialogData.Address = this.list[ realIndex ].Address;
+        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
+        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
+        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
+        this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
       }
       ,
-      deleteItem(index, row) {
+      switchChange(index, row) {
         let that = this;
-        this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        console.log(index, row);
+        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        that.$axios.post('/Home/EmployeeDeviceSave', {
+          DogType: 'd_elete',
+          EmployeeCode: row.EmployeeCode,
+          Validity: row.Validity,
+          ID: row.ID
         })
-          .then(() => {
-            that.$axios.post('/Home/WarehouseSave', {
-              DogType: 'd_elete',
-              ID: row.ID
-            })
-              .then(() => {
-                that.getList()
-              })
-          })
-          .catch(() => {
+          .then(data => {
           
           })
+      }
+      ,
+      handleSizeChange: function (size) {
+        this.pageSize = size;
+        console.log(this.pageSize)  //每页下拉显示数据
+      },
+      handleCurrentChange: function (currentPage) {
+        this.currentPage = currentPage;
+        // console.log(this.currentPage)  //点击第几页
+      }
+      ,
+      cityFilter(city) {
+        this.getList(city)
       }
     }
   }
 </script>
 
 <style scoped lang="stylus">
+
 </style>

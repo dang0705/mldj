@@ -20,13 +20,17 @@
     
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-              :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
+              :row-style="rowStyle"
               @header-click="add"
               v-loading="listLoading"
     >
-      <el-table-column label="操作" width="100" align="center">
+      <el-table-column
+        label="操作"
+        width="100"
+        align="center"
+      >
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
@@ -34,36 +38,18 @@
           </el-button>
         </template>
       </el-table-column>
+      
       <el-table-column
-        label="仓库名称"
+        label="品类根目录名称"
+        prop="label"
+        width="1000"
         align="center"
-        prop="WarehouseName"
-        width="180">
+      >
       </el-table-column>
-      <el-table-column
-        label="仓库编号"
-        align="center"
-        prop="WarehouseCode"
-        width="180">
+      
+      <el-table-column label="增加+">
       </el-table-column>
-      <el-table-column
-        label="仓库地址"
-        align="center"
-        prop="WarehouseAdd"
-        width="340"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column
-        label="仓库描述"
-        align="center"
-        prop="WarehouseDec"
-        width="320"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column
-        label="增加+"
-        align="center">
-      </el-table-column>
+    
     </el-table>
     <pagination
       :tableList="list"
@@ -74,7 +60,6 @@
       @listChanged="listChanged"
     
     ></pagination>
-    
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
@@ -104,26 +89,28 @@
           color: '#000',
         },
         rowStyle: {
-          height: '40px'
+          height: '40px',
         },
         keyWord: '',
         currentPage: 1, //初始页
         pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
-        sendDialogData: {
-          WarehouseCode: '',
-          WarehouseAdd: '',
-          WarehouseName: '',
-          WarehouseDec: '',
-          ID: '',
-        }
-        
-        // isUpdateDate:false
+        sendDialogData: [ {
+          label: '',
+          children: [],
+          id: 0,
+        } ]
       }
     },
     mounted() {
-      this.getList()
+      if ( this.$store.state.catalog.length ) {
+        this.list = this.$store.state.catalog
+        this.listLoading = false;
+        this.isListChange = true;
+      } else {
+        this.getList()
+      }
     },
     methods: {
       listChanged() {
@@ -155,8 +142,8 @@
       getList() {
         let that = this;
         that.listLoading = true;
-        that.$axios.post('/Home/OnloadWarehouseList', {
-          WarehouseName: this.keyWord
+        that.$axios.post('/Home/OnloadProductClassList', {
+          label: this.keyWord
         })
           .then(data => {
             if ( data.data.state == 1 ) {
@@ -164,6 +151,7 @@
             }
             that.listLoading = false;
             that.isListChange = true;
+            that.$store.commit('catalog', that.list);
             this.defaultPaginationData()
           })
       }
@@ -178,24 +166,24 @@
       }
       ,
       getData(index, row) {
+        console.log(row);
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
-        this.sendDialogData.WarehouseCode = this.list[ realIndex ].WarehouseCode;
-        this.sendDialogData.WarehouseName = this.list[ realIndex ].WarehouseName;
-        this.sendDialogData.WarehouseAdd = this.list[ realIndex ].WarehouseAdd;
-        this.sendDialogData.WarehouseDec = this.list[ realIndex ].WarehouseDec;
-        this.sendDialogData.ID = row.ID;
+        this.sendDialogData[ 0 ].label = this.list[ realIndex ].label.replace(/\ +/g, "");
+        this.sendDialogData[ 0 ].children = this.list[ realIndex ].children;
+        this.sendDialogData[ 0 ].id = row.id;
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
+        console.log(this.sendDialogData);
       }
-      ,
-      deleteItem(index, row) {
+      , deleteItem(index, row) {
         let that = this;
-        this.$confirm('此操作将永久删除该仓库, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            that.$axios.post('/Home/WarehouseSave', {
+            that.$axios.post('/Home/ChannelSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
@@ -206,10 +194,22 @@
           .catch(() => {
           
           })
+        
       }
+      
+      
+    },
+    watch: {
+      '$store.state.isChannelUpdateData': function () {
+        if ( this.$store.state.isChannelUpdateData === true ) {
+          this.getList()
+        }
+      },
+      
     }
   }
 </script>
 
 <style scoped lang="stylus">
+
 </style>
