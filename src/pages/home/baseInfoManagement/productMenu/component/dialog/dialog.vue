@@ -9,20 +9,19 @@
       width="700px"
       :height="editOrAdd==='a_dd'?'':'300px'"
     >
-      <div id="productBaseInfo">
-        <div id="uploadProductImg">
+      <div class="basInfo">
+        <div class="uploadImg">
           <upload :isClose="isClose"
                   :imgUrl="formData.ImgBase"
                   @closeDialog="handleClose"
                   @getBase64Url="getBase64Url"
                   :getUpLoadTitle="upLoadTitle"
                   :getUploadType="uploadType">
-          
           </upload>
         </div>
         <el-form
           label-width="120px"
-          class="form"
+          class='upImgForm'
           :rules="uploadRules"
         >
           <el-form-item
@@ -158,8 +157,8 @@
         cargoWayName: '',
         upLoadTitle: '',
         uploadType: 'image/jpeg',
-        rows: 5,
-        column: 5,
+/*        rows: 5,
+        column: 5,*/
         alertTitle: '',
         formData: {
           ProductName: '',
@@ -433,15 +432,7 @@
 </script>
 
 <style scoped lang="stylus">
-  
-  .dialogWrapper >>> #uploadProductImg,
-  .dialogWrapper >>> .form
-    float left
-    margin 0 10px 0
-    vertical-align text-top
-  
-  .dialogWrapper >>> #uploadProductImg
-    width: 200px
+
   
   .dialogWrapper >>> .priceInfo
     .el-form-item

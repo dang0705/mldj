@@ -80,6 +80,7 @@ $Width = 1280px
   .el-select
     width: 100%
 
+
 //*****表单样式覆盖*****
 #app >>> .el-form-item__label
   text-align left
@@ -118,6 +119,25 @@ $Width = 1280px
   padding: 0
 
 
+#app >>> .basInfo
+  display inline-block
+  margin 0 50px
+  .uploadImg,
+  .upImgForm
+    display inline-block
+    margin 0 10px 0
+    vertical-align text-top
+#app >>>#editCargoWay
+  display inline-block
+  margin 0 50px
+  vertical-align top
+
+#app >>> .uploadImg
+  width: 200px
+
+.dialogWrapper >>> .uploadImg
+  width: 200px
+
 //*****上传组件样式******
 #app >>> .uploaderWrapper
   line-height unset
@@ -154,12 +174,15 @@ $Width = 1280px
     cursor: pointer;
     position: relative;
     overflow: hidden;
+
   .el-upload:hover
     border-color: #409EFF;
+
   .avatar
     width: 178px;
     height: 178px;
     display: block;
+
   .uploader-icon
     font-size: 28px;
     color: #8c939d;
@@ -167,4 +190,5 @@ $Width = 1280px
     height: 178px;
     line-height: 178px;
     text-align: center;
+
 

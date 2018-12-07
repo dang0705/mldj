@@ -16,7 +16,7 @@
         >
         </i>
       </el-input>
-
+    
     </div>
     
     <el-table width="100%"
@@ -38,25 +38,35 @@
                      circle
                      @click="getData(scope.$index,scope.row)">
           </el-button>
-          
-          <el-switch
-            v-model="scope.row.Validity"
-            :active-value="1"
-            :inactive-value="0"
-            @change=switchChange(scope.$index,scope.row)
-          >
-          </el-switch>
+          <el-button type="danger" icon="el-icon-delete" circle size="small"
+                     @click="deleteItem(scope.$index,scope.row)">
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column
-        prop="DeviceName"
         label="货道外观图"
         align="center"
         width="140"
       >
+        <template slot-scope="scope">
+          <el-popover
+            placement="right"
+            trigger="click">
+            <img :src="scope.row.ImgBase||noLogo " alt="">
+            <img :src="scope.row.ImgBase||noLogo" slot="reference" width="40px" height="40px"
+                 style="vertical-align: middle;cursor: pointer"/>
+          </el-popover>
+        </template>
       </el-table-column>
       <el-table-column
-        prop="EmployeeName"
+        prop="CargoName"
+        label="货到名称"
+        align="center"
+        width="180"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column
+        prop="CargoCode"
         label="货道型号"
         align="center"
         width="180"
@@ -64,22 +74,8 @@
       </el-table-column>
       
       <el-table-column
-        prop="ProvinceName"
-        label="省份"
-        align="center"
-        width="80"
-      >
-      </el-table-column>
-      <el-table-column
-        prop="CityName"
-        label="城市"
-        align="center"
-        width="80"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column
-        prop="Address"
-        label="地址"
+        prop="CargoDec"
+        label="货道描述"
         align="center"
         width="520"
         :show-overflow-tooltip="true">
@@ -104,12 +100,11 @@
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
                   :editOrAdd="dialogType"
+                  :sendDialogData="sendDialogData"
                   :id="id"
-                  ></alert-dialog>
-  
+    ></alert-dialog>
   </div>
 </template>
-
 <script>
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
@@ -123,6 +118,7 @@
     data() {
       return {
         list: [],
+        noLogo: 'static/img/noData.jpg',
         dataLoading: true,
         isListChange: false,
         dialogType: 'up_date',
@@ -141,15 +137,12 @@
         pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
-        // sendDialogData: {
-        //   DeviceName: '',
-        //   EmployeeCode: '',
-        //   AddEmployeeCode: '',
-        //   ProvinceName: '',
-        //   CityName: '',
-        //   Address: '',
-        //   ID: '',
-        // }
+        sendDialogData: {
+          CargoName: '',
+          CargoCode: '',
+          CargoDec: '',
+          ID: '',
+        }
       }
     },
     mounted() {
@@ -194,9 +187,7 @@
             that.dataLoading = false;
             that.isListChange = true;
           })
-        
       }
-      
       ,
       closeAlert(n) {
         this.dialogType = 'up_date';
@@ -205,35 +196,40 @@
           this.getList();
         }
       }
-      , getData(index, row) {
-        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+      ,
+      getData(index, row) {
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(row);
         this.isAlertShow = true;
-        /*this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
-        this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
-        this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
-        this.sendDialogData.Address = this.list[ realIndex ].Address;
-        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
-        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
-        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
-        this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
-        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;*/
-        this.id = row.ID;
+        
+        this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;
+        this.sendDialogData.CargoDec = this.list[ realIndex ].CargoDec;
+        this.sendDialogData.CargoName = this.list[ realIndex ].CargoName;
+        this.sendDialogData.CargoCode = this.list[ realIndex ].CargoCode;
+        this.sendDialogData.ID = row.ID;
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
-      ,
-      switchChange(index, row) {
+      , deleteItem(index, row) {
         let that = this;
-        console.log(index, row);
-        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        that.$axios.post('/Home/EmployeeDeviceSave', {
-          DogType: 'd_elete',
-          EmployeeCode: row.EmployeeCode,
-          Validity: row.Validity,
-          ID: row.ID
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        this.$confirm('此操作将永久删除该货道, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-          .then(data => {
+          .then(() => {
+            that.$axios.post('/Home/CargoTypeSave', {
+              DogType: 'd_elete',
+              ID: row.ID
+            })
+              .then(() => {
+                that.getList()
+              })
+          })
+          .catch(() => {
           
           })
+        
       }
       ,
       handleSizeChange: function (size) {

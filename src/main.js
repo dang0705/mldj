@@ -21,9 +21,6 @@ fastClick.attach(document.body);
 
 new Vue({
   el: '#app',
-  data: {
-    Bus: new Vue()
-  },
   router,
   store,
   components: {App},

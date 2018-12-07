@@ -6,20 +6,23 @@
       :close-on-click-modal='false'
       :before-close="handleClose"
       align="center"
-      width="80%"
-      :height="editOrAdd==='a_dd'?'':'300px'"
+      :width="editOrAdd==='up_date'?'100%':''"
+      max-width="100%"
+      v-loading="dataLoading"
     >
-      <div id="addCargoWayName" v-if="editOrAdd==='a_dd'">
-        <div id="uploadCargoWayImg">
-          <upload :isClose="isClose" @closeDialog="handleClose" @getBase64Url="getBase64Url"
+      <div class="basInfo">
+        <div class="uploadImg">
+          <upload :isClose="isClose"
+                  :imgUrl="formData.ImgBase "
+                  @closeDialog="handleClose"
+                  @getBase64Url="getBase64Url"
                   :getUpLoadTitle="upLoadTitle"
                   :getUploadType="uploadType">
-          
           </upload>
         </div>
         <el-form
           label-width="120px"
-          class="form"
+          class="upImgForm"
           :rules="uploadRules"
         >
           <el-form-item
@@ -47,99 +50,66 @@
         </el-form>
       </div>
       
-      <div id="editCargoWay" v-else>
+      <div id="editCargoWay" v-if="editOrAdd==='up_date'">
         <el-form
           :model="formData"
           :rules="uploadRules"
-          label-width="150px"
-          inline
+          label-width="180px"
+          align="left"
         >
           <el-form-item prop="EmployeeName" label="每层单元格数（Y）：">
             <el-input-number v-model="defaultColumn"
                              :min="1"
-                             :max="15"
                              class="defaultColumn"
-                             ></el-input-number>
+            ></el-input-number>
           </el-form-item>
           <el-form-item label="货道层数（X）：">
             <el-input-number v-model="defaultRows"
                              :min="1"
-                             :max="15"
                              class="defaultRows"
-                            ></el-input-number>
+            ></el-input-number>
           </el-form-item>
-          <el-form-item label="产品规格：">
-            <el-input-number v-model="productSize"
+          <el-form-item label="产品尺寸（mm×mm）：">
+            <el-input-number v-model="productSize1"
                              :min="5"
-                             :max="50"
                              class="defaultRows"
-                             ></el-input-number>
-          </el-form-item>
-          <el-form-item>
-            <el-button @click="creatCargoWay">生成新货道</el-button>
+                             size="small"
+            ></el-input-number>
+            ×
+            <el-input-number v-model="productSize2"
+                             :min="5"
+                             class="defaultRows"
+                             size="small"
+            ></el-input-number>
           </el-form-item>
         </el-form>
-        <!-- <table width="300">
-		   <thead id="TableHead" ref="TableHead">
-		   <tr v-html="tableHeader"></tr>
-		   </thead>
-		   <tbody id="TableMain" ref="TableMain" v-html="tableMain">
-		   </tbody>
-		 </table>-->
-        <div class="table">
-          <div class="header">
-            <span class="x">x/y</span>
-            <el-tag size="small" type="info" class='headColumn'
-                    v-for="(item,i) in DataColumnCount"
-                    :key="i"
-            >
-              {{'y'+(i+1)}}
+      
+      </div>
+      <div class="table" v-if="DataColumnCount.length&&editOrAdd==='up_date'">
+        <div class="header">
+          <span class="x">x/y</span>
+          <el-tag size="small" type="info" class='headColumn'
+                  v-for="(item,i) in DataColumnCount"
+                  :key="i"
+          >
+            {{'Y'+(i+1)}}
+          </el-tag>
+        </div>
+        <div class="tableMain"
+             v-for="(item,i) in DataRowCount">
+          <div>
+            <el-tag size="small" type="success" class="columnTitle">
+              {{'X' + (i+1)}}
             </el-tag>
-          </div>
-          <div class="tableMain"
-               v-for="(item,i) in DataRowCount">
-            <div>
-              <el-tag size="small" type="success" class="columnTitle">
-                {{'x' + (i+1)}}
-              </el-tag>
-              <span v-for="(listItem,i) in tableDataList" v-if="listItem.CargoX===item">
+            <span v-for="(listItem,i) in tableDataList" v-if="listItem.CargoX===item">
                   <el-input class="input" type="text" v-model="listItem.CargoIndex"></el-input>
                 </span>
-            </div>
           </div>
-        
         </div>
-        <!--        <el-table
-				  :data="tableDataList"
-				  ref="tables"
-				  :border="true"
-				>
-				  <el-table-column
-					type="index"
-					label="X/Y"
-					:index="indexFormatter"
-					width="50">
-				  </el-table-column>
-				  <template
-					v-for="(item,i) in tableHeaderList"
-				  >
-					<el-table-column
-					  width="120"
-					  align="center"
-					  :key="i"
-					  :label="item"
-					>
-					  <template slot-scope="scope">
-						<el-input ref="rowX" v-model="scope.row.CargoX"
-								  @input="inputInfo(scope.$index,scope.row)"></el-input>
-						<el-input @input="colInput(scope)"
-								  v-model="scope.column.label.charAt(1)"></el-input>
-					  </template>
-					</el-table-column>
-				  </template>
-				</el-table>-->
+      
       </div>
       <div slot="footer" class="dialog-footer">
+        <el-button type="success" @click="creatCargoWay" v-if="editOrAdd==='up_date'">生成新货道</el-button>
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
@@ -149,7 +119,6 @@
 
 <script>
   import upload from '@/component/common/upload/uploadList'
-  
   
   let Msg = '';
   const storage = window.localStorage;
@@ -165,54 +134,27 @@
       editOrAdd: {
         type: String
       },
-      id: {}
+      sendDialogData: {
+        type: Object
+      }
     },
     data() {
       return {
         tableHeader: '',
+        hasAjaxData: false,
+        dataLoading: true,
         tableMain: '',
         tableTextArr: [],
         DataRowCount: [],
         DataColumnCount: [],
-        tableDataList: [
-          /*{CargoX: '1', CargoY: '1', CargoIndex: '11', CargoSize: '50mm*50mm'},
-          {CargoX: '1', CargoY: '2', CargoIndex: '12', CargoSize: '50mm*50mm'},
-          {CargoX: '1', CargoY: '3', CargoIndex: '13', CargoSize: '50mm*50mm'},
-          {CargoX: '1', CargoY: '4', CargoIndex: '14', CargoSize: '50mm*50mm'},
-          {CargoX: '1', CargoY: '5', CargoIndex: '15', CargoSize: '50mm*50mm'},
-  
-          {CargoX: '2', CargoY: '1', CargoIndex: '21', CargoSize: '50mm*50mm'},
-          {CargoX: '2', CargoY: '2', CargoIndex: '22', CargoSize: '50mm*50mm'},
-          {CargoX: '2', CargoY: '3', CargoIndex: '23', CargoSize: '50mm*50mm'},
-          {CargoX: '2', CargoY: '4', CargoIndex: '24', CargoSize: '50mm*50mm'},
-          {CargoX: '2', CargoY: '5', CargoIndex: '25', CargoSize: '50mm*50mm'},*/
-          // {CargoX: '1', CargoY: '1', CargoIndex: '11', CargoSize: '50mm*50mm'},
-          // {CargoX: '1', CargoY: '2', CargoIndex: '12', CargoSize: '50mm*50mm'},
-          // {CargoX: '1', CargoY: '3', CargoIndex: '13', CargoSize: '50mm*50mm'},
-          // {CargoX: '2', CargoY: '1', CargoIndex: '21', CargoSize: '50mm*50mm'},
-          // {CargoX: '2', CargoY: '2', CargoIndex: '22', CargoSize: '50mm*50mm'},
-          // {CargoX: '2', CargoY: '3', CargoIndex: '23', CargoSize: '50mm*50mm'},
-          // {CargoX: '3', CargoY: '1', CargoIndex: '31', CargoSize: '60mm*60mm'},
-          // {CargoX: '3', CargoY: '2', CargoIndex: '32', CargoSize: '60mm*60mm'},
-          // {CargoX: '3', CargoY: '3', CargoIndex: '33', CargoSize: '60mm*60mm'},
-          // {CargoX: '3', CargoY: '4', CargoIndex: '34', CargoSize: '60mm*60mm'},
-          // {CargoX: '4', CargoY: '1', CargoIndex: '41', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '2', CargoIndex: '42', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '3', CargoIndex: '43', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '4', CargoIndex: '44', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '5', CargoIndex: '45', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '6', CargoIndex: '46', CargoSize: '50mm*50mm'},
-          // {CargoX: '4', CargoY: '7', CargoIndex: '47', CargoSize: '50mm*50mm'},
-          // {CargoX: '5', CargoY: '1', CargoIndex: '51', CargoSize: '60mm*60mm'},
-          // {CargoX: '5', CargoY: '2', CargoIndex: '52', CargoSize: '60mm*60mm'},
-          // {CargoX: '5', CargoY: '3', CargoIndex: '53', CargoSize: '60mm*60mm'}
-        ],
+        tableDataList: [],
         cargoWayName: '',
         upLoadTitle: '',
         uploadType: 'image/jpeg',
-        defaultColumn: 5,
+        defaultColumn: 8,
         defaultRows: 5,
-        productSize: 50,
+        productSize1: 50,
+        productSize2: 50,
         alertTitle: '',
         formData: {
           CargoName: '',
@@ -272,21 +214,13 @@
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData.ID = this.ID;
+            this.formData = this.sendDialogData;
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑货道';
             this.tableOnload();
-            /*
-				  let tablesData = {
-					CargoX: '',
-					CargoY: '',
-					CargoIndex: '',
-					CargoSize: ''
-				  };*/
-            
             Msg = '编辑成功'
           } else {
-            
+            this.dataLoading=false
             this.alertTitle = '新增货道';
             Msg = '增加成功'
           }
@@ -298,13 +232,20 @@
     },
     methods: {
       creatCargoWay() {
-        console.log(this.DataRowCount);
-        const getMax = Math.max.apply(null, this.DataRowCount);
-        console.log(this.defaultRows, this.defaultColumn);
+        let getMax;
+        
+        if ( this.DataRowCount.length ) {
+          getMax = Math.max.apply(null, this.DataRowCount);
+        } else {
+          getMax = 0;
+        }
         for ( var i = 1; i <= this.defaultRows; i++ ) {
           for ( var j = 1; j <= this.defaultColumn; j++ ) {
             this.tableDataList.push({
-              CargoX: i + getMax + '', CargoY: j + '', CargoIndex: i + '' + j, CargoSize: this.productSize
+              CargoX: i + getMax + '',
+              CargoY: j + '',
+              CargoIndex: i + '' + j,
+              CargoSize: this.productSize1.toString() + 'mm*' + this.productSize2.toString() + 'mm'
             })
           }
         }
@@ -313,36 +254,35 @@
       tableOnload() {
         this.DataRowCount = [];
         this.DataColumnCount = [];
+        
         const that = this;
-        // that.$axios.post('Home/CargoTypeListByCargoId', {
-        //   ID: that.id
-        // })
-        //   .then(data => {
-        //     console.log(data);
-        //   })
-        for ( var i = 0; i < that.tableDataList.length; i++ ) {
-          if ( i === 0 ) {
-            that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
-            that.DataColumnCount.push(that.tableDataList[ i ][ "CargoY" ]);
-          } else {
-            if ( that.DataRowCount.indexOf(that.tableDataList[ i ][ "CargoX" ]) < 0 ) {
-              that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
+        that.$axios.post('Home/CargoTypeListByCargoId', {
+          ID: that.formData.ID
+        })
+          .then(data => {
+            // console.log(data);
+            if ( data.data.state === 1 && !that.hasAjaxData ) {
+              that.tableDataList = data.data.Content;
             }
-            if ( that.DataColumnCount.indexOf(that.tableDataList[ i ][ "CargoY" ]) < 0 ) {
-              that.DataColumnCount.push(that.tableDataList[ i ][ "CargoY" ]);
+            for ( var i = 0; i < that.tableDataList.length; i++ ) {
+              if ( i === 0 ) {
+                that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
+                that.DataColumnCount.push(that.tableDataList[ i ][ "CargoY" ]);
+              } else {
+                if ( that.DataRowCount.indexOf(that.tableDataList[ i ][ "CargoX" ]) < 0 ) {
+                  that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
+                }
+                if ( that.DataColumnCount.indexOf(that.tableDataList[ i ][ "CargoY" ]) < 0 ) {
+                  that.DataColumnCount.push(that.tableDataList[ i ][ "CargoY" ]);
+                }
+              }
             }
-          }
-        }
-        console.log(that.DataColumnCount);
-        /* for ( var n = 0; n < that.DataRowCount.length; n++ ) {
-		   that.tableMain += "<div><span class='columnTitle'>x" + (n + 1) + "</span>";
-		   that.tableDataList.forEach(function (item, index, arr) {
-			 if ( item.CargoX === that.DataRowCount[ n ] ) {
-			   that.tableMain += "<span><input class='input' type='text' @input='onInput(" + item.CargoIndex + ")' value='" + item.CargoIndex + "'></span>"
-			 }
-		   });
-		   that.tableMain += '</div>'
-		 }*/
+            that.hasAjaxData = true;
+            that.dataLoading = false;
+            console.log(that.DataColumnCount);
+          });
+        
+        
       },
       
       getBase64Url(url) {
@@ -354,17 +294,22 @@
         } else {
           this.$emit('closeAlert')
         }
-        this.$emit('closeAlert');
-        this.editString = '';
         this.formData.ImgBase = '';
+        for ( var i in this.formData ) {
+          this.formData[i]=''
+        }
+        this.hasAjaxData = false;
+        this.dataLoading = true;
         this.tableDataList = [];
-        this.defaultColumn = this.defaultRows = 5
+        this.defaultColumn = 8;
+        this.defaultRows = 5
       },
       confirmUpload(obj) {
-        this.add(obj)
+        this.add(obj);
         console.log(this.tableDataList);
       },
       add(obj) {
+        console.log(this.formData);
         const that = this;
         if ( that.formData.CargoName === '' ) {
           that.$message.error('货道名称不能为空');
@@ -373,12 +318,43 @@
           that.$message.error('货道编号不能为空');
           return
         }
+        if ( this.editOrAdd === 'up_date' ) {
+          if ( !this.defaultRows ) {
+            that.$message.error('货道层数不能为空');
+            return;
+          } else if ( !this.defaultColumn ) {
+            that.$message.error('每层单元格不能为空');
+            return;
+          } else if ( !this.productSize1 || !this.productSize2 ) {
+            that.$message.error('请完善产品长宽尺寸');
+            return;
+          }
+          
+        }
+        console.log(that.tableDataList);
+        let json = {
+          CargoTypeList: that.tableDataList
+        };
         that.$axios.post('/Home/CargoTypeSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success(Msg);
               that.handleClose(obj)
+              if ( this.editOrAdd === 'up_date' ) {
+                that.$axios.post('Home/CargoTypeSave', {
+                  DogType: 'CargoBind',
+                  CargoId: that.formData.ID,
+                  CargoTypeListString: JSON.stringify(json)
+                })
+                  .then(data => {
+                    console.log(data);
+                    if ( data.data.state == 1 ) {
+                    } else {
+                      that.$message.error(data.data.msg);
+                    }
+                  })
+              }
             } else {
               that.$message.error(res.msg);
             }
@@ -386,6 +362,7 @@
           .catch(e => {
             console.log(e);
           })
+        
       },
       edit() {
       },
@@ -413,22 +390,18 @@
     width: 40%
   
   .dialogWrapper >>> .table
-    text-align left
-    border: 1px solid #000
-    border-bottom none
     margin 0 auto
     display inline-block
+    text-align left
     
     div
-      border-bottom: 1px solid #000
-    
     .header
       .x
         width: 50px
         color red
     
     .headColumn
-      width: 100px
+      width: 60px
       color red
       margin 0 5px
     
@@ -441,10 +414,14 @@
       color red
     
     .input
-      width: 100px
+      width: 60px
       height: 30px
       border: none
       text-align center
-
+      margin 0 5px
+    
+    input
+      text-align center
+      height: 30px
 
 </style>

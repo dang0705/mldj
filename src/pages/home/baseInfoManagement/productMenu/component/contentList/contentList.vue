@@ -30,20 +30,6 @@
         >
         </el-option>
       </el-select>
-      
-      <!--      <el-select
-			  v-model="searchData.catalog"
-			  @change="getList"
-			>
-			  <el-option
-				v-for="(item,i) in catalogList"
-				:key="i"
-				:label="item.label"
-				:value="item.value"
-			  >
-			  
-			  </el-option>
-			</el-select>-->
       <el-cascader
         :options="catalogList"
         clearable
@@ -327,7 +313,7 @@
         this.sendDialogData.cost = this.list[ realIndex ].cost;
         this.sendDialogData.spSale = this.list[ realIndex ].spSale;
         this.sendDialogData.Size = this.list[ realIndex ].Size;
-        this.sendDialogData.ImgBase = this.list[ realIndex ].Column1;
+        this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase ;
         this.sendDialogData.Introduce = this.list[ realIndex ].Introduce;
         this.sendDialogData.ID = row.ID;
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
