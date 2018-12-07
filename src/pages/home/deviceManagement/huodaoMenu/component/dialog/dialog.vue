@@ -99,10 +99,10 @@
           <div class="tableMain"
                v-for="(item,i) in DataRowCount">
             <div>
-                 <span class="columnTitle">
-                   {{'x' + (i+1)}}
-                 </span>
-                <span v-for="(listItem,i) in tableDataList" v-if="listItem.CargoX===item">
+              <el-tag size="small" type="success" class="columnTitle">
+                {{'x' + (i+1)}}
+              </el-tag>
+              <span v-for="(listItem,i) in tableDataList" v-if="listItem.CargoX===item">
                   <el-input class="input" type="text" v-model="listItem.CargoIndex"></el-input>
                 </span>
             </div>
@@ -165,9 +165,7 @@
       editOrAdd: {
         type: String
       },
-      editData: {
-        type: Object
-      }
+      id: {}
     },
     data() {
       return {
@@ -177,26 +175,37 @@
         DataRowCount: [],
         DataColumnCount: [],
         tableDataList: [
-          {CargoX: '1', CargoY: '1', CargoIndex: '11', CargoSize: '50mm*50mm'},
+          /*{CargoX: '1', CargoY: '1', CargoIndex: '11', CargoSize: '50mm*50mm'},
           {CargoX: '1', CargoY: '2', CargoIndex: '12', CargoSize: '50mm*50mm'},
           {CargoX: '1', CargoY: '3', CargoIndex: '13', CargoSize: '50mm*50mm'},
+          {CargoX: '1', CargoY: '4', CargoIndex: '14', CargoSize: '50mm*50mm'},
+          {CargoX: '1', CargoY: '5', CargoIndex: '15', CargoSize: '50mm*50mm'},
+  
           {CargoX: '2', CargoY: '1', CargoIndex: '21', CargoSize: '50mm*50mm'},
           {CargoX: '2', CargoY: '2', CargoIndex: '22', CargoSize: '50mm*50mm'},
           {CargoX: '2', CargoY: '3', CargoIndex: '23', CargoSize: '50mm*50mm'},
-          {CargoX: '3', CargoY: '1', CargoIndex: '31', CargoSize: '60mm*60mm'},
-          {CargoX: '3', CargoY: '2', CargoIndex: '32', CargoSize: '60mm*60mm'},
-          {CargoX: '3', CargoY: '3', CargoIndex: '33', CargoSize: '60mm*60mm'},
-          {CargoX: '3', CargoY: '4', CargoIndex: '34', CargoSize: '60mm*60mm'},
-          {CargoX: '4', CargoY: '1', CargoIndex: '41', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '2', CargoIndex: '42', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '3', CargoIndex: '43', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '4', CargoIndex: '44', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '5', CargoIndex: '45', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '6', CargoIndex: '46', CargoSize: '50mm*50mm'},
-          {CargoX: '4', CargoY: '7', CargoIndex: '47', CargoSize: '50mm*50mm'},
-          {CargoX: '5', CargoY: '1', CargoIndex: '51', CargoSize: '60mm*60mm'},
-          {CargoX: '5', CargoY: '2', CargoIndex: '52', CargoSize: '60mm*60mm'},
-          {CargoX: '5', CargoY: '3', CargoIndex: '53', CargoSize: '60mm*60mm'}
+          {CargoX: '2', CargoY: '4', CargoIndex: '24', CargoSize: '50mm*50mm'},
+          {CargoX: '2', CargoY: '5', CargoIndex: '25', CargoSize: '50mm*50mm'},*/
+          // {CargoX: '1', CargoY: '1', CargoIndex: '11', CargoSize: '50mm*50mm'},
+          // {CargoX: '1', CargoY: '2', CargoIndex: '12', CargoSize: '50mm*50mm'},
+          // {CargoX: '1', CargoY: '3', CargoIndex: '13', CargoSize: '50mm*50mm'},
+          // {CargoX: '2', CargoY: '1', CargoIndex: '21', CargoSize: '50mm*50mm'},
+          // {CargoX: '2', CargoY: '2', CargoIndex: '22', CargoSize: '50mm*50mm'},
+          // {CargoX: '2', CargoY: '3', CargoIndex: '23', CargoSize: '50mm*50mm'},
+          // {CargoX: '3', CargoY: '1', CargoIndex: '31', CargoSize: '60mm*60mm'},
+          // {CargoX: '3', CargoY: '2', CargoIndex: '32', CargoSize: '60mm*60mm'},
+          // {CargoX: '3', CargoY: '3', CargoIndex: '33', CargoSize: '60mm*60mm'},
+          // {CargoX: '3', CargoY: '4', CargoIndex: '34', CargoSize: '60mm*60mm'},
+          // {CargoX: '4', CargoY: '1', CargoIndex: '41', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '2', CargoIndex: '42', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '3', CargoIndex: '43', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '4', CargoIndex: '44', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '5', CargoIndex: '45', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '6', CargoIndex: '46', CargoSize: '50mm*50mm'},
+          // {CargoX: '4', CargoY: '7', CargoIndex: '47', CargoSize: '50mm*50mm'},
+          // {CargoX: '5', CargoY: '1', CargoIndex: '51', CargoSize: '60mm*60mm'},
+          // {CargoX: '5', CargoY: '2', CargoIndex: '52', CargoSize: '60mm*60mm'},
+          // {CargoX: '5', CargoY: '3', CargoIndex: '53', CargoSize: '60mm*60mm'}
         ],
         cargoWayName: '',
         upLoadTitle: '',
@@ -210,6 +219,7 @@
           CargoCode: '',
           CargoDec: '',
           ImgBase: '',
+          ID: ''
         }
         ,
         editFormData: {
@@ -262,7 +272,7 @@
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData.ID = this.editData.ID;
+            this.formData.ID = this.ID;
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑货道';
             this.tableOnload();
@@ -288,7 +298,9 @@
     },
     methods: {
       creatCargoWay() {
+        console.log(this.DataRowCount);
         const getMax = Math.max.apply(null, this.DataRowCount);
+        console.log(this.defaultRows, this.defaultColumn);
         for ( var i = 1; i <= this.defaultRows; i++ ) {
           for ( var j = 1; j <= this.defaultColumn; j++ ) {
             this.tableDataList.push({
@@ -298,17 +310,16 @@
         }
         this.tableOnload()
       },
-      tableChange(val) {
-        this.tableHeaderList = [];
-      },
-      onInput(val) {
-        console.log(val);
-      },
       tableOnload() {
         this.DataRowCount = [];
         this.DataColumnCount = [];
         const that = this;
-        that.tableMain = '';
+        // that.$axios.post('Home/CargoTypeListByCargoId', {
+        //   ID: that.id
+        // })
+        //   .then(data => {
+        //     console.log(data);
+        //   })
         for ( var i = 0; i < that.tableDataList.length; i++ ) {
           if ( i === 0 ) {
             that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
@@ -317,21 +328,21 @@
             if ( that.DataRowCount.indexOf(that.tableDataList[ i ][ "CargoX" ]) < 0 ) {
               that.DataRowCount.push(that.tableDataList[ i ][ "CargoX" ]);
             }
-            if ( that.DataRowCount.indexOf(that.tableDataList[ i ][ "CargoY" ]) < 0 ) {
+            if ( that.DataColumnCount.indexOf(that.tableDataList[ i ][ "CargoY" ]) < 0 ) {
               that.DataColumnCount.push(that.tableDataList[ i ][ "CargoY" ]);
             }
           }
         }
-        
-        for ( var n = 0; n < that.DataRowCount.length; n++ ) {
-          that.tableMain += "<div><span class='columnTitle'>x" + (n + 1) + "</span>";
-          that.tableDataList.forEach(function (item, index, arr) {
-            if ( item.CargoX === that.DataRowCount[ n ] ) {
-              that.tableMain += "<span><input class='input' type='text' @input='onInput(" + item.CargoIndex + ")' value='" + item.CargoIndex + "'></span>"
-            }
-          });
-          that.tableMain += '</div>'
-        }
+        console.log(that.DataColumnCount);
+        /* for ( var n = 0; n < that.DataRowCount.length; n++ ) {
+		   that.tableMain += "<div><span class='columnTitle'>x" + (n + 1) + "</span>";
+		   that.tableDataList.forEach(function (item, index, arr) {
+			 if ( item.CargoX === that.DataRowCount[ n ] ) {
+			   that.tableMain += "<span><input class='input' type='text' @input='onInput(" + item.CargoIndex + ")' value='" + item.CargoIndex + "'></span>"
+			 }
+		   });
+		   that.tableMain += '</div>'
+		 }*/
       },
       
       getBase64Url(url) {
@@ -346,7 +357,6 @@
         this.$emit('closeAlert');
         this.editString = '';
         this.formData.ImgBase = '';
-        this.tableHeaderList = [];
         this.tableDataList = [];
         this.defaultColumn = this.defaultRows = 5
       },

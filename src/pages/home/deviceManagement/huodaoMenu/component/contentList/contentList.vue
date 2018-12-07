@@ -101,8 +101,11 @@
       @listChanged="listChanged"
     ></pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
-                  :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :id="id"
+                  ></alert-dialog>
   
   </div>
 </template>
@@ -138,15 +141,15 @@
         pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
-        sendDialogData: {
-          DeviceName: '',
-          EmployeeCode: '',
-          AddEmployeeCode: '',
-          ProvinceName: '',
-          CityName: '',
-          Address: '',
-          ID: '',
-        }
+        // sendDialogData: {
+        //   DeviceName: '',
+        //   EmployeeCode: '',
+        //   AddEmployeeCode: '',
+        //   ProvinceName: '',
+        //   CityName: '',
+        //   Address: '',
+        //   ID: '',
+        // }
       }
     },
     mounted() {
@@ -203,10 +206,10 @@
         }
       }
       , getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(row);
         this.isAlertShow = true;
-        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+        /*this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
         this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
         this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
         this.sendDialogData.Address = this.list[ realIndex ].Address;
@@ -214,8 +217,8 @@
         this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
         this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
         this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
-        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
-        this.sendDialogData.ID = row.ID;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;*/
+        this.id = row.ID;
       }
       ,
       switchChange(index, row) {
