@@ -59,21 +59,21 @@
                              :min="1"
                              :max="15"
                              class="defaultColumn"
-                             @change="tableChange"></el-input-number>
+                             ></el-input-number>
           </el-form-item>
           <el-form-item label="货道层数（X）：">
             <el-input-number v-model="defaultRows"
                              :min="1"
                              :max="15"
                              class="defaultRows"
-                             @change="tableChange"></el-input-number>
+                            ></el-input-number>
           </el-form-item>
           <el-form-item label="产品规格：">
             <el-input-number v-model="productSize"
                              :min="5"
                              :max="50"
                              class="defaultRows"
-                             @change="tableChange"></el-input-number>
+                             ></el-input-number>
           </el-form-item>
           <el-form-item>
             <el-button @click="creatCargoWay">生成新货道</el-button>
