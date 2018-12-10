@@ -6,7 +6,7 @@
       :close-on-click-modal='false'
       :before-close="handleClose"
       align="center"
-      width="700px"
+      width="720px"
       :height="editOrAdd==='a_dd'?'':'300px'"
     >
       <div class="basInfo">
@@ -20,6 +20,7 @@
           </upload>
         </div>
         <el-form
+          :model="formData"
           label-width="120px"
           class='upImgForm'
           :rules="uploadRules"
@@ -53,8 +54,9 @@
           </el-form-item>
           <el-form-item prop="ProductClassId" label="所属品类：">
             <el-cascader
-              v-model="catalogSelect"
+              v-model="formData.ProductClassId"
               @change="catalogChange"
+              @blur="getProductClassName"
               :options="catalogList"
               clearable
               change-on-select
@@ -153,12 +155,12 @@
         },
         catalogList: [],
         brandList: [],
-        catalogSelect: [],
+        // catalogSelect: [],
         cargoWayName: '',
         upLoadTitle: '',
         uploadType: 'image/jpeg',
-/*        rows: 5,
-        column: 5,*/
+        /*        rows: 5,
+				column: 5,*/
         alertTitle: '',
         formData: {
           ProductName: '',
@@ -172,6 +174,7 @@
           Size: '50',
           Introduce: '',
           ImgBase: '',
+          id: 0
         }
         ,
         editFormData: {
@@ -283,8 +286,8 @@
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
-            this.catalogSelect = this.formData.ProductClassId ;
-            console.log(this.catalogSelect);
+            // this.catalogSelect = this.formData.ProductClassId ;
+            console.log(this.formData);
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑产品';
             Msg = '编辑成功'
@@ -301,8 +304,13 @@
     methods: {
       catalogChange(val) {
         this.formData.ProductClassId = val;
-        console.log(this.formData.ProductClassId);
+        
       },
+      getProductClassName(val) {
+        console.log(val);
+        
+      },
+      
       getBrandList() {
         const that = this, length = that.$store.state.brand.length;
         if ( length ) {
@@ -349,22 +357,20 @@
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           this.$emit('closeAlert', 'n');
-          this.formData.ProductName
-            = this.formData.ProductEnglish
-            = this.formData.productCode
-            = this.formData.ProductBrandId
-            = this.formData.Introduce
-            = this.formData.ImgBase = '';
-          this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 100;
-          this.catalogSelect = [];
-          this.formData.ProductClassId = [];
-          this.formData.ProductBrandId = '';
+          
         } else {
           this.$emit('closeAlert')
         }
         this.$emit('closeAlert');
-        this.editString = '';
-        this.formData.ImgBase = '';
+        this.formData.ProductName
+          = this.formData.ProductEnglish
+          = this.formData.productCode
+          = this.formData.ProductBrandId
+          = this.formData.Introduce
+          = this.formData.ImgBase = '';
+        this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 100;
+        this.formData.ProductClassId = [];
+        this.formData.ProductBrandId = '';
         this.editFormData.ImgBase = ''
       },
       confirmUpload(obj) {
@@ -404,6 +410,9 @@
       },
       add(obj) {
         const that = this;
+        
+        that.formData.ProductClassId = JSON.stringify(that.formData.ProductClassId);
+        console.log(that.formData);
         that.$axios.post('/Home/Productsave', this.formData)
           .then(data => {
             let res = data.data;
@@ -432,7 +441,7 @@
 </script>
 
 <style scoped lang="stylus">
-
+  
   
   .dialogWrapper >>> .priceInfo
     .el-form-item

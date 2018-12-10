@@ -35,7 +35,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="IsOrgLeader" label="是否负责人：" label-width="120px">
+        <el-form-item prop="IsOrgLeader" label="是否负责人：" label-width="120px" v-if="editOrAdd==='a_dd'">
           <el-select v-model="formData.IsOrgLeader">
             <el-option
               v-for="(item,i) in IsOrgLeaderList"
@@ -45,7 +45,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="OrganizationID" label="所在组织：" label-width="120px" v-show="OrganizationIDList.length">
+        <el-form-item prop="OrganizationID" label="所在组织：" label-width="120px"  v-if="editOrAdd==='a_dd'">
           <el-select v-model="formData.OrganizationID" placeholder="请选择组织">
             <el-option
               v-for="(item,i) in OrganizationIDList"
@@ -173,11 +173,12 @@
         this.alertShow = this.isAlertShow;
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-            this.getUserInfo();
             this.alertTitle = '编辑用户';
             Msg = '编辑成功';
           }
           else {
+            console.log(this.editData);
+            this.getUserInfo();
             this.formLoading = false;
             this.alertTitle = '新增用户';
             this.formData.roleID = this.OrganizationIDList = '';

@@ -54,7 +54,14 @@
                        align="center"
       >
         <template slot-scope="scope">
-          <img :src="scope.row.BrandLogoUrl||noLogo" alt="" width="60" height="60" style="vertical-align: middle">
+          <el-popover
+            placement="right"
+            trigger="click"
+            :disabled="!scope.row.BrandLogoUrl"
+          >
+            <img :src="scope.row.BrandLogoUrl||noLogo" alt="">
+            <img :src="scope.row.BrandLogoUrl||noLogo" slot="reference" alt="" width="40" height="40" style="vertical-align: middle;cursor: pointer">
+          </el-popover>
         </template>
       </el-table-column>
       

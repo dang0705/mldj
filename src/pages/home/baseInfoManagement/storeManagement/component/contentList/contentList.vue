@@ -220,6 +220,7 @@
         this.sendDialogData.StoreCode = this.list[ realIndex ].StoreCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelCode = this.list[ realIndex ].ChannelCode;
+        // this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
         this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
         this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
         this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';

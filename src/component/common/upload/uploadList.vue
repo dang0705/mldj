@@ -13,7 +13,7 @@
       <img v-if="imgUrl||clearSrc" :src="imgUrl||clearSrc" v-model="form.imgUrl" width="200px" class="avatar">
       <i v-else class="el-icon-plus uploader-icon"></i>
     </el-upload>
-    <el-tag size="large" type="danger">上传图片</el-tag>
+    <el-tag size="large" type="danger">{{btnValue||'上传图片'}}</el-tag>
   </div>
 </template>
 
@@ -36,6 +36,9 @@
       imgUrl: {
         type: String,
         default: ''
+      },
+      btnValue:{
+        type:String
       }
     },
     data() {
@@ -84,8 +87,8 @@
           this.pass = null;
           this.progress = 0;
           if ( file.size < 4 * 1024 * 1024 ) {
+            const reader = new FileReader();
             if ( file.raw.type.indexOf('image') > -1 ) {
-              let reader = new FileReader();
               reader.readAsDataURL(file.raw);
               reader.onload = function (e) {
                 that.imagelist = {
@@ -95,7 +98,8 @@
                 that.$emit('getBase64Url', that.imagelist.url)
               };
             } else {
-              that.$emit('hasFile', file);
+              // reader.readAsArrayBuffer(file.raw);
+              that.$emit('hasFile', file.raw);
             }
           } else {
             that.$message.error('请上传小于4MB的图片')

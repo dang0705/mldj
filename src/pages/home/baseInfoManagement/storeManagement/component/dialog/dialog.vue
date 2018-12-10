@@ -39,9 +39,16 @@
           ></city-select>
         </el-form-item>
         
-        <el-form-item prop="ChannelCode" label="渠道编号：">
-          <el-input v-model="formData.ChannelCode" clearable minlength="1"
-                    maxlength="10"></el-input>
+        <el-form-item prop="ChannelCode" label="渠道名称：">
+          <el-select
+            v-model="formData.ChannelCode">
+            <el-option
+              v-for="(item,i) in channelList"
+              :key="i"
+              :label="item.ChannelName"
+              :value="item.ID.toString()"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item prop="ContactPhone" label="联系方式：">
           <el-input v-model="formData.ContactPhone"></el-input>
@@ -58,7 +65,8 @@
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
   
-  let Msg = '';
+  let Msg = '',
+    storage = window.localStorage;
   export default {
     name: "storeManagement_dialog",
     components: {
@@ -78,11 +86,14 @@
     data() {
       return {
         provinceTotalArr: '',
+        channelSelected: '',
+        channelList: [],
         alertTitle: '',
         formData: {
           StoreCode: '',
           StoreName: '',
-          ChannelCode: '',
+          ChannelName: '',
+          ChannelCode:'',
           ProvinceCode: '',
           ProvinceName: '省份',
           CityCode: '',
@@ -134,6 +145,7 @@
           if ( this.editOrAdd === 'up_date' ) {
             this.formData.StoreCode = this.editData.StoreCode;
             this.formData.StoreName = this.editData.StoreName;
+            // this.formData.ChannelName = this.editData.ChannelName;
             this.formData.ChannelCode = this.editData.ChannelCode;
             this.formData.ProvinceCode = this.editData.ProvinceCode;
             this.formData.ProvinceName = this.editData.ProvinceName;
@@ -207,6 +219,19 @@
         }
       }
     },
+    mounted() {
+      if ( storage.getItem('channel') ) {
+        this.channelList = JSON.parse(storage.getItem('channel'))
+      } else {
+        const that = this;
+        that.$axios.post('/Home/OnloadChannelList')
+          .then(data => {
+            if ( data.data.state === 1 ) {
+              that.channelList = data.data.Content;
+            }
+          })
+      }
+    }
     
   }
 </script>

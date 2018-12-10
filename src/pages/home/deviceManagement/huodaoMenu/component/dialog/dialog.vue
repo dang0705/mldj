@@ -24,6 +24,7 @@
           label-width="120px"
           class="upImgForm"
           :rules="uploadRules"
+          :model="formData"
         >
           <el-form-item
             prop="CargoName"
@@ -194,9 +195,7 @@
               trigger: 'blur'
             }
           ]
-          
         }
-        
       }
     },
     computed: {

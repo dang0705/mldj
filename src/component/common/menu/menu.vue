@@ -91,15 +91,9 @@
           })
       },
       showSecondNavigation(i, item) {
-        /*if ( i === 0 ) {
-          this.$router.push('/homePage');
-        }*/
+        console.log(item);
         this.firstLevelNavigationIndex = i;
-        if ( this.firstLevelNavigationIndex !== 0 ) {
-          this.$router.push(this.firstLevelNavigationArr[ this.firstLevelNavigationIndex ].subNav[ 0 ].subIndex);
-        } else {
-          this.$router.push('/homePage');
-        }
+        storage.setItem('menuSelected', i);
         if ( item.navName === '基础数据管理' ) {
           if ( storage.getItem('catalog') ) {
             this.$store.commit('catalog', JSON.parse(storage.getItem('catalog')))
@@ -107,7 +101,7 @@
             const that = this;
             that.$axios.post('Home/OnloadProductClassList')
               .then(data => {
-                if ( data.data.state == 1 ) {
+                if ( data.data.state === 1 ) {
                   storage.setItem('catalog', JSON.stringify(data.data.Content))
                 }
               })
@@ -118,16 +112,21 @@
             const that = this;
             that.$axios.post('Home/OnloadBrandList')
               .then(data => {
-                if ( data.data.state == 1 ) {
+                if ( data.data.state === 1 ) {
                   storage.setItem('brand', JSON.stringify(data.data.Content))
                 }
               })
           }
-        }else {
-          storage.removeItem('catalog');
-          storage.removeItem('brand')
         }
-        storage.setItem('menuSelected', i);
+        else {
+          storage.removeItem('catalog');
+          storage.removeItem('brand');
+        }
+        if ( this.firstLevelNavigationIndex !== 0 ) {
+          this.$router.push(this.firstLevelNavigationArr[ this.firstLevelNavigationIndex ].subNav[ 0 ].subIndex);
+        } else {
+          this.$router.push('/homePage');
+        }
       }
       ,
       logOut() {

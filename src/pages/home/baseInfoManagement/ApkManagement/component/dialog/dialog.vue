@@ -11,26 +11,28 @@
         ref="upload"
         :model="formData"
         :rules="uploadRules"
+        label-width="120px"
       >
-        <el-form-item prop="ApkCode">
+        <upload :isClose="isClose"
+                btnValue="上传APK"
+                @closeDialog="handleClose"
+                :getUpLoadTitle="upLoadTitle"
+                :getUploadType="uploadType" @hasFile="hasFile"></upload>
+        <el-form-item prop="ApkCode" label="版本编号">
           <el-input
             :autofocus="true"
             v-model="formData.ApkCode"
             clearable
-            placeholder="版本编号"
             minlength="1"
             maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="ApkName">
-          <el-input v-model="formData.ApkName" clearable placeholder="版本名称" minlength="1" maxlength="10"></el-input>
+        <el-form-item prop="ApkName" label="版本名称">
+          <el-input v-model="formData.ApkName" clearable minlength="1" maxlength="10"></el-input>
         </el-form-item>
-        <el-form-item prop="ApkDec">
-          <el-input type="textarea" v-model="formData.ApkDec" placeholder="版本描述" maxlength="250"></el-input>
+        <el-form-item prop="ApkDec" label="版本描述">
+          <el-input type="textarea" v-model="formData.ApkDec" maxlength="250"></el-input>
         </el-form-item>
-        <el-form-item>
-          <upload :isClose="isClose" @closeDialog="handleClose" :getUpLoadTitle="upLoadTitle"
-                  :getUploadType="uploadType" @hasFile="hasFile"></upload>
-        </el-form-item>
+      
       </el-form>
       
       <!--<div slot="footer" class="dialog-footer">-->
@@ -125,7 +127,6 @@
             this.formData.ApkCode = this.editData.ApkCode;
             this.formData.ApkName = this.editData.ApkName;
             this.formData.ApkDec = this.editData.ApkDec;
-            this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑版本'
           } else {
             for ( var i in  this.formData ) {
@@ -165,9 +166,24 @@
           that.$message.error('Apk必须上传');
           return
         }
+        const myForm = new window.FormData();
+        myForm.append('UpBusinessLicense', this.formData.UpBusinessLicense);
+        myForm.append('ApkCode', this.formData.ApkCode);
+        myForm.append('ApkName', this.formData.ApkName);
+        myForm.append('ApkDec', this.formData.ApkDec);
+        if ( this.editOrAdd === 'up_date' ) {
+          myForm.append('ID', this.editData.ID);
+        }
         
-        
-        that.$axios.post('/Home/ApkSave', this.formData)
+        const options = {
+          url: '/Home/ApkSave',
+          data: myForm,
+          method: 'post',
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+        that.$axios(options)
           .then(data => {
             // console.log(data);
             let res = data.data;
@@ -175,10 +191,8 @@
               that.$message.success("上传成功");
               that.pass = true;
               that.$emit('closeAlert');
-              that.$store.commit('ApkUpdateData');
               that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+            } else {
               that.$message.error(res.msg)
             }
             // that.reload()

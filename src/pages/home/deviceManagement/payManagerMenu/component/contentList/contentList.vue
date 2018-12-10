@@ -16,10 +16,11 @@
         >
         </i>
       </el-input>
-    
+     
     </div>
     
     <el-table width="100%"
+              max-height="900"
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
               :header-row-style="headerStyle"
@@ -38,52 +39,27 @@
                      circle
                      @click="getData(scope.$index,scope.row)">
           </el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>
+          
+          <el-switch
+            v-model="scope.row.Validity"
+            :active-value="1"
+            :inactive-value="0"
+            @change=switchChange(scope.$index,scope.row)
+          >
+          </el-switch>
         </template>
       </el-table-column>
       <el-table-column
-        label="货道外观图"
+        prop="LabelName"
+        label="标签名称"
         align="center"
-        width="140"
+        width="1000"
       >
-        <template slot-scope="scope">
-          <el-popover
-            placement="right"
-            :disabled="!scope.row.ImgBase"
-            trigger="click">
-            <img :src="scope.row.ImgBase||noLogo " alt="">
-            <img :src="scope.row.ImgBase||noLogo" slot="reference" width="40px" height="40px"
-                 style="vertical-align: middle;cursor: pointer"/>
-          </el-popover>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="CargoName"
-        label="货道名称"
-        align="center"
-        width="180"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      <el-table-column
-        prop="CargoCode"
-        label="货道型号"
-        align="center"
-        width="180"
-        :show-overflow-tooltip="true">
-      </el-table-column>
-      
-      <el-table-column
-        prop="CargoDec"
-        label="货道描述"
-        align="center"
-        width="520"
-        :show-overflow-tooltip="true">
       </el-table-column>
       
       <el-table-column
         label="增加+"
+        align="center"
       >
       
       </el-table-column>
@@ -101,11 +77,11 @@
     <alert-dialog :isAlertShow.sync="isAlertShow"
                   @closeAlert="closeAlert"
                   :editOrAdd="dialogType"
-                  :sendDialogData="sendDialogData"
-                  :id="id"
-    ></alert-dialog>
+                  :editData="sendDialogData"></alert-dialog>
+  
   </div>
 </template>
+
 <script>
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
@@ -119,16 +95,14 @@
     data() {
       return {
         list: [],
-        noLogo: 'static/img/noData.jpg',
         dataLoading: true,
         isListChange: false,
         dialogType: 'up_date',
         switchData: '',
         headerStyle: {
           height: '100%',
-          textAlign: 'center',
-          fontSize: '20px',
           color: '#000',
+          background: '#ccc'
         },
         rowStyle: {
           height: '40px',
@@ -139,9 +113,12 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          CargoName: '',
-          CargoCode: '',
-          CargoDec: '',
+          LabelName: '',
+          EmployeeCode: '',
+          AddEmployeeCode: '',
+          ProvinceName: '',
+          CityName: '',
+          Address: '',
           ID: '',
         }
       }
@@ -173,13 +150,13 @@
         if ( column.label === '增加+' ) {
           this.isAlertShow = true;
           this.dialogType = 'a_dd';
-          console.log(this.dialogType);
         }
       },
-      getList(city) {
+      getList() {
         let that = this;
-        that.$axios.post('/Home/OnloadCargoTypeList', {
-          CargoName: that.keyWord
+        that.list = [];
+        that.$axios.post('Home/payList', {
+          payname: this.keyWord,
         })
           .then(data => {
             if ( data.data.state == 1 ) {
@@ -189,6 +166,7 @@
             that.isListChange = true;
           })
       }
+      
       ,
       closeAlert(n) {
         this.dialogType = 'up_date';
@@ -197,58 +175,33 @@
           this.getList();
         }
       }
-      ,
-      getData(index, row) {
+      , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        console.log(row);
         this.isAlertShow = true;
-        
-        this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;
-        this.sendDialogData.CargoDec = this.list[ realIndex ].CargoDec;
-        this.sendDialogData.CargoName = this.list[ realIndex ].CargoName;
-        this.sendDialogData.CargoCode = this.list[ realIndex ].CargoCode;
+        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+        this.sendDialogData.LabelName = this.list[ realIndex ].LabelName;
+        this.sendDialogData.Address = this.list[ realIndex ].Address;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.ID = row.ID;
-        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
-      , deleteItem(index, row) {
+      , switchChange(index, row) {
+        console.log(row);
         let that = this;
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        this.$confirm('此操作将永久删除该货道, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
+        that.$axios.post('/Home/DeviceLabelSave', {
+          DogType: 'd_elete',
+          EmployeeCode: window.localStorage.getItem('userName'),
+          LabelName: row.LabelName,
+          Validity: row.Validity,
+          ID: row.ID
         })
           .then(() => {
-            that.$axios.post('/Home/CargoTypeSave', {
-              DogType: 'd_elete',
-              ID: row.ID
-            })
-              .then(() => {
-                that.getList()
-              })
+            that.getList();
           })
-          .catch(() => {
-          
-          })
-        
       }
-      ,
-      handleSizeChange: function (size) {
-        this.pageSize = size;
-        console.log(this.pageSize)  //每页下拉显示数据
-      },
-      handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
-      }
-      ,
-      cityFilter(city) {
-        this.getList(city)
-      }
+   
     }
   }
 </script>
 
 <style scoped lang="stylus">
-
 </style>

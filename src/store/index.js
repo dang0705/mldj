@@ -12,7 +12,7 @@ export default new Vuex.Store({
     menuIndex: '',
     clearUpload: false,
     catalog:[],
-    brand:[]
+    brand:[],
 
   },
   mutations: {
@@ -37,7 +37,7 @@ export default new Vuex.Store({
     },
     brand(state, brand) {
       state.brand = brand
-    }
+    },
   },
   // actions:{
   //   changeMenu (ctx,menuIndex){

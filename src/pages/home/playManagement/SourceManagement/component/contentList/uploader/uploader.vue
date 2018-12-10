@@ -1,6 +1,7 @@
 <template>
   <div class="uploaderWrapper">
-    <el-upload class="uploader" :accept="uploadType"
+    <el-upload
+               :accept="uploadType"
                ref="upload"
                :action="params.action"
                :auto-upload="false"
@@ -16,6 +17,7 @@
 
 <script>
   import md5 from 'md5'
+  
   const storage = window.localStorage;
   let xhr = new XMLHttpRequest();
   
@@ -56,37 +58,11 @@
         checkFileParams: '',
         EmployeeCode: storage.getItem('userName'),
         uploadUrl: '/Handler/UploadFileHandler.ashx',
-        // isShow: false,
-        uploadTitle: '',
         uploadType: '',
-        form: {
-          imgUrl: '',
-          name: ''
-        },
-        pass: null,//是否上传成功
-        isEnlargeImage: false,//放大图片
-        enlargeImage: '',//放大图片地址
-        imagelist: {},
-        fileList: {},
         params: {
           action: '',
           data: {}
         }
-      }
-    },
-    computed: {
-      proStatus() {//上传状态
-        if ( this.pass ) {
-          return 'success'
-        } else if ( this.pass === false ) {
-          return 'exception'
-        } else {
-          return ''
-        }
-      },
-      clearSrc() {
-        let clearImg = this.isClose;
-        return this.imagelist.url = clearImg ? '' : this.imagelist.url
       }
     },
     watch: {
@@ -100,7 +76,6 @@
     },
     methods: {
       uploadOnChange(file) {
-        console.log(val);
         const that = this,
           val = file.raw,
           mp4 = "video/mp4",
@@ -145,7 +120,7 @@
           };
           
         } else {
-          that.$message.error("只能上传.mp4，.jpg，.png,.apk素材！");
+          that.$message.error("只能上传.mp4，.jpg，.png,.apk素材！"); /*抽象*/
           return false;
         }
       }
@@ -192,7 +167,7 @@
           xhr.upload.onprogress = function (evt) {
             if ( evt.lengthComputable ) {
               that.progressValue = Math.round((that.chunkSize * i + evt.loaded) * 100 / that.fileSize);
-              that.$emit('getProgressValue',that.progressValue)
+              that.$emit('getProgressValue', that.progressValue)
             } else {
               console.log('无法计算');
             }
@@ -262,6 +237,5 @@
 </script>
 
 <style lang="stylus" scoped>
-
 
 </style>

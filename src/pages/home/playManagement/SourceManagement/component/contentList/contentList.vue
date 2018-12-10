@@ -60,7 +60,7 @@
           >
             <img width="100%" :src="scope.row.OpenFileUrl" alt="" v-if="scope.row.FileType==0"
                  v-show="imgWidth">
-            <video width="100%" :src="scope.row.OpenFileUrl" v-if="scope.row.FileType==1" autoplay controls></video>
+            <video width="100%" :src="scope.row.OpenFileUrl" v-if="scope.row.FileType==1" controls></video>
             <el-button type="text" slot="reference"
                        :icon="scope.row.FileType==0?'el-icon-picture':'el-icon-caret-right'">{{scope.row.FileName}}
             </el-button>
@@ -162,7 +162,7 @@
       return {
         list: [],
         progressValue: 0,
-        isDialogShow:false,
+        isDialogShow: false,
         uploadType: 'image/jpg,image/jpeg,image/png,video/mp4,.apk',
         imgWidth: '',
         dataLoading: true,
@@ -177,7 +177,6 @@
         isListEmpty: true,
         headerStyle: {
           height: '100%',
-          textAlign: 'center',
           fontSize: '20px',
           color: '#000',
         },
@@ -206,19 +205,19 @@
       getProgressValue(val) {
         this.progressValue = val;
         if ( val > 0 && val < 100 ) {
-          this.isDialogShow=true;
+          this.isDialogShow = true;
         } else if ( val === 100 ) {
-          this.isDialogShow=false;
+          this.isDialogShow = false;
         }
       },
-      getUploadStatus(val) {
-        const that = this;
-        that.isUploaded = val;
-        setTimeout(function () {
-          that.$emit('closeAlert');
-          that.$emit('updateList')
-        }, 2000)
-      },
+      /*      getUploadStatus(val) {
+			  const that = this;
+			  that.isUploaded = val;
+			  setTimeout(function () {
+				that.$emit('closeAlert');
+				that.$emit('updateList')
+			  }, 2000)
+			},*/
       listChanged() {
         this.isListChange = false
       },
@@ -242,21 +241,27 @@
         let finishStatus;
         return finishStatus = row.Finished = 1 ? '已完成' : '未完成'
       },
-      sourcePreview(i, row) {
-        console.log(row);
-      },
-      getList() {
+      
+      getList(update) {
         const that = this,
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
-        that.dataLoading = true;
-        that.$axios.post('/PlayManage/EmployeeFileAllList', url)
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content.Rows;
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
-          })
+        if ( storage.getItem('source') && !update ) {
+          that.list = JSON.parse(storage.getItem('source'))
+        } else {
+          that.dataLoading = true;
+          that.$axios.post('/PlayManage/EmployeeFileAllList', url)
+            .then(data => {
+              console.log(data);
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content.Rows;
+                storage.setItem('source', JSON.stringify(that.list))
+                that.dataLoading = false;
+              }
+              
+            })
+        }
+        that.dataLoading = false;
+        that.isListChange = true;
       },
       addBtn({row, column, rowIndex, columnIndex}) {
         return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
@@ -270,7 +275,7 @@
       closeAlert(n) {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
-        this.getList();
+        this.getList('update');
       }
       ,
       getData(index, row) {
@@ -336,4 +341,5 @@
     text-decoration none
     color #000
     font-size: 1.2rem
+    width: 100%
 </style>

@@ -12,14 +12,13 @@
         :model="formData"
         :rules="uploadRules"
         label-width="120px"
-      
       >
-        <el-form-item prop="ChannelCode" label="渠道编号：">
-          <el-input v-model="formData.ChannelCode" clearable minlength="1"
-                    maxlength="10"></el-input>
-        </el-form-item>
         <el-form-item prop="ChannelName" label="渠道名称：">
           <el-input v-model="formData.ChannelName" clearable minlength="1"
+                    maxlength="10"></el-input>
+        </el-form-item>
+        <el-form-item prop="ChannelCode" label="渠道编号：">
+          <el-input v-model="formData.ChannelCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="ChannelDec" label="渠道描述：">

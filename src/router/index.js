@@ -74,6 +74,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/deviceManagement/EquipManagement/EquipManagement' ], resolve)
         },
         {
+          path: '/payManagerMenu',
+          name: 'payManagerMenu',
+          component: resolve => require([ '@/pages/home/deviceManagement/payManagerMenu/payManagerMenu' ], resolve)
+        },
+        {
           path: '/LabelManagement',
           name: 'LabelManagement',
           component: resolve => require([ '@/pages/home/deviceManagement/LabelManagement/LabelManagement' ], resolve)

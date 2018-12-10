@@ -142,8 +142,6 @@
 <script>
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
-  
-  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -195,7 +193,7 @@
           Size: 50,
           Introduce: '',
           ImgBase: '',
-          ID: 0
+          id:0
         }
       }
     },
@@ -307,7 +305,7 @@
         this.sendDialogData.ProductName = this.list[ realIndex ].ProductName;
         this.sendDialogData.ProductEnglish = this.list[ realIndex ].ProductEnglish;
         this.sendDialogData.productCode = this.list[ realIndex ].productCode;
-        this.sendDialogData.ProductClassId = this.list[ realIndex ].ProductClassId;
+        this.sendDialogData.ProductClassId = JSON.parse(this.list[ realIndex ].ProductClassId);
         this.sendDialogData.ProductBrandId = this.list[ realIndex ].ProductBrandId;
         this.sendDialogData.Sale = this.list[ realIndex ].Sale;
         this.sendDialogData.cost = this.list[ realIndex ].cost;
@@ -315,29 +313,28 @@
         this.sendDialogData.Size = this.list[ realIndex ].Size;
         this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase ;
         this.sendDialogData.Introduce = this.list[ realIndex ].Introduce;
-        this.sendDialogData.ID = row.ID;
+        this.sendDialogData.id = row.id;
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
       ,
       deleteItem(index, row) {
         let that = this;
+        console.log(row);
         this.$confirm('此操作将永久删除该产品, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            that.$axios.post('/Home/WarehouseSave', {
+            that.$axios.post('/Home/Productsave', {
               DogType: 'd_elete',
-              ID: row.ID
+              ID: row.id
             })
               .then(() => {
                 that.getList()
               })
           })
-          .catch(() => {
-          
-          })
+   
       }
       
     }

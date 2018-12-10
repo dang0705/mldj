@@ -41,7 +41,7 @@
                 :data="list.slice((currentPage-1)*pagesize,currentPage*pagesize)"
                 :row-style="rowStyle"
                 :header-row-style="headerStyle"
-      
+                v-loading="dataLoading"
       >
         <el-table-column label="单选"
                          width="80"
@@ -74,7 +74,6 @@
           :show-overflow-tooltip="true">
         </el-table-column>
       </el-table>
-      <i v-show="isListEmpty" class="listLoading el-icon-loading"></i>
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
@@ -113,7 +112,7 @@
     data() {
       return {
         list: [],
-        isListEmpty: true,
+        dataLoading: true,
         alertTitle: '播放素材列表',
         sourceInfo: {
           FileName: '',
@@ -174,11 +173,8 @@
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {
-              const res = data.data.Content.Rows;
-              if ( !res || !res.length || res.length ) {
-                that.isListEmpty = false
-              }
-              that.list = res || [];
+              that.list = data.data.Content.Rows;
+              that.dataLoading = false;
             }
           })
       },
@@ -209,7 +205,12 @@
       }
     },
     mounted() {
-      this.getSourceList();
+      if ( storage.getItem('source')) {
+        this.list = JSON.parse(storage.getItem('source'));
+        this.dataLoading = false;
+      } else {
+        this.getSourceList();
+      }
       this.sourceInfo.FileId = this.sendFileId;
       console.log(this.sourceInfo.FileId);
     },

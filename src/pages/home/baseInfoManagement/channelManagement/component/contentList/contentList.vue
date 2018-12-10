@@ -85,6 +85,7 @@
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -151,20 +152,24 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
-        that.listLoading = true;
-        that.$axios.post('/Home/OnloadChannelList', {
-          ChannelName: this.keyWord
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.listLoading = false;
-            that.isListChange = true;
-            this.defaultPaginationData()
+        if ( storage.getItem('channel') && !update ) {
+          that.list = JSON.parse(storage.getItem('channel'))
+        } else {
+          that.listLoading = true;
+          that.$axios.post('/Home/OnloadChannelList', {
+            ChannelName: this.keyWord
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                storage.setItem('channel', JSON.stringify(that.list))
+              }
+            })
+        }
+        that.listLoading = false;
+        that.isListChange = true;
       }
       
       ,
@@ -172,7 +177,7 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
       }
       , getData(index, row) {
