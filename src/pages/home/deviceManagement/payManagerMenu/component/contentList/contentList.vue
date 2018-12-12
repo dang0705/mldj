@@ -16,7 +16,7 @@
         >
         </i>
       </el-input>
-     
+    
     </div>
     
     <el-table width="100%"
@@ -50,10 +50,17 @@
         </template>
       </el-table-column>
       <el-table-column
-        prop="LabelName"
-        label="标签名称"
+        prop="payname"
+        label="支付名称"
         align="center"
-        width="1000"
+        width="800"
+      >
+      </el-table-column>
+      <el-table-column
+        prop="APPID"
+        label="APPID"
+        align="center"
+        width="200"
       >
       </el-table-column>
       
@@ -75,9 +82,11 @@
     ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
-                  @closeAlert="closeAlert"
                   :editOrAdd="dialogType"
-                  :editData="sendDialogData"></alert-dialog>
+                  :editData="sendDialogData"
+                  @closeAlert="closeAlert"
+                  @getProgress="getProgress"
+    ></alert-dialog>
   
   </div>
 </template>
@@ -95,6 +104,7 @@
     data() {
       return {
         list: [],
+        uploadProgress: 0,
         dataLoading: true,
         isListChange: false,
         dialogType: 'up_date',
@@ -113,12 +123,11 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          LabelName: '',
-          EmployeeCode: '',
-          AddEmployeeCode: '',
-          ProvinceName: '',
-          CityName: '',
-          Address: '',
+          SSLCERT_PATH: '',
+          account: '',
+          payname: '',
+          pkey: '',
+          APPID: '',
           ID: '',
         }
       }
@@ -127,6 +136,10 @@
       this.getList()
     },
     methods: {
+      getProgress(val) {
+        console.log(val);
+        this.uploadProgress = val;
+      },
       listChanged() {
         this.isListChange = false
       },
@@ -178,19 +191,21 @@
       , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
-        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
-        this.sendDialogData.LabelName = this.list[ realIndex ].LabelName;
-        this.sendDialogData.Address = this.list[ realIndex ].Address;
-        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
+        this.sendDialogData.SSLCERT_PATH = this.list[ realIndex ].UpBusinessLicense.substring(this.list[ realIndex ].UpBusinessLicense.lastIndexOf('/') + 1);
+        this.sendDialogData.payname = this.list[ realIndex ].payname;
+        this.sendDialogData.account = this.list[ realIndex ].account;
+        this.sendDialogData.APPID = this.list[ realIndex ].APPID;
+        this.sendDialogData.pkey = this.list[ realIndex ].pkey;
         this.sendDialogData.ID = row.ID;
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
       , switchChange(index, row) {
         console.log(row);
         let that = this;
         that.$axios.post('/Home/DeviceLabelSave', {
           DogType: 'd_elete',
-          EmployeeCode: window.localStorage.getItem('userName'),
-          LabelName: row.LabelName,
+          SSLCERT_PATH: window.localStorage.getItem('userName'),
+          payname: row.payname,
           Validity: row.Validity,
           ID: row.ID
         })
@@ -198,10 +213,11 @@
             that.getList();
           })
       }
-   
+      
     }
   }
 </script>
 
 <style scoped lang="stylus">
+
 </style>

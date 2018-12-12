@@ -142,6 +142,7 @@
 <script>
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
+  const storage=window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -193,7 +194,7 @@
           Size: 50,
           Introduce: '',
           ImgBase: '',
-          id:0
+          id: 0
         }
       }
     },
@@ -230,23 +231,38 @@
         }
       }
       ,
-      getList() {
+      getList(update) {
         let that = this;
-        // params = '&PageSize=1000&PageIndex=1&ProductName=' + that.searchData.ProductName +
-        //   '&catalog=' + that.searchData.catalog +
-        //   '&EmployeeCode=' + that.sendDialogData.EmployeeCode +
-        //   '&RoleId=' + storage.getItem('RoleID') +
-        //   '&FileType=' + that.searchData.FileType;
-        // that.list = [];
-        that.$axios.post('/Home/OnloadProductList', {})
+        if ( storage.getItem('productList') && !update ) {
+          that.list = JSON.parse(storage.getItem('productList'))
+          that.dataLoading = false;
+          that.isListChange = true;
+        } else {
+          that.dataLoading = true;
+          that.$axios.post('/Home/OnloadProductList', {})
+            .then(data => {
+              console.log(data);
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                storage.setItem('productList', JSON.stringify(that.list))
+        
+              }
+              that.dataLoading = false;
+              that.isListChange = true;
+            })
+        }
+        
+/*        that.$axios.post('/Home/OnloadProductList', {})
           .then(data => {
             console.log(data);
             if ( data.data.state == 1 ) {
               that.list = data.data.Content;
+              storage.setItem('productList', JSON.stringify(that.list))
+  
             }
             that.dataLoading = false;
             that.isListChange = true;
-          })
+          })*/
       }
       ,
       getBrandList() {
@@ -295,7 +311,7 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
       }
       ,
@@ -311,7 +327,7 @@
         this.sendDialogData.cost = this.list[ realIndex ].cost;
         this.sendDialogData.spSale = this.list[ realIndex ].spSale;
         this.sendDialogData.Size = this.list[ realIndex ].Size;
-        this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase ;
+        this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;
         this.sendDialogData.Introduce = this.list[ realIndex ].Introduce;
         this.sendDialogData.id = row.id;
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
@@ -334,7 +350,7 @@
                 that.getList()
               })
           })
-   
+        
       }
       
     }

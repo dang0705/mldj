@@ -22,10 +22,21 @@ export default new Router({
       path: '/home',
       component: home,
       children: [
+
         {
           path: '/homePage',
           name: '/homePage',
           component: resolve => require([ '@/pages/home/homePage/homePage' ], resolve)
+        },
+        {
+          path: '/AppActivityManagement',
+          name: 'AppActivityManagement',
+          component: resolve => require([ '@/pages/home/ActivityManagement/AppActivityManagement/AppActivityManagement' ], resolve)
+        },
+        {
+          path: '/myActivityMenu',
+          name: 'myActivityMenu',
+          component: resolve => require([ '@/pages/home/ActivityManagement/myActivityMenu/myActivityMenu' ], resolve)
         },
         {
           path: '/BrandManagement',

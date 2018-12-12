@@ -12,7 +12,7 @@
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="getList"
+          @click="getList('update')"
         >
         </i>
       </el-input>
@@ -54,12 +54,10 @@
           <el-popover
             placement="right"
             v-if="scope.row.FileType!=2"
-            :width="imgWidth||'800'"
             trigger="click"
             @show="afterEnterPopover(scope.row)"
           >
-            <img width="100%" :src="scope.row.OpenFileUrl" alt="" v-if="scope.row.FileType==0"
-                 v-show="imgWidth">
+            <img width="600px" :src="scope.row.OpenFileUrl" alt="" v-if="scope.row.FileType==0" v-show="imgWidth">
             <video width="100%" :src="scope.row.OpenFileUrl" v-if="scope.row.FileType==1" controls></video>
             <el-button type="text" slot="reference"
                        :icon="scope.row.FileType==0?'el-icon-picture':'el-icon-caret-right'">{{scope.row.FileName}}
@@ -235,7 +233,7 @@
       }
       ,
       change() {
-        this.getList()
+        this.getList('update')
       },
       formatter(row, index) {
         let finishStatus;

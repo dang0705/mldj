@@ -1,16 +1,12 @@
 <template>
-  <div id="channelManagementWrapper">
-
-    <content-list>
-    </content-list>
-  </div>
+<content-list></content-list>
 </template>
 
 <script>
   import contentList from './component/contentList/contentList'
 	export default {
-		name: "ChannelManagement",
-    components: {
+		name: "myActivityMenu",
+    components:{
       contentList
     }
 	}

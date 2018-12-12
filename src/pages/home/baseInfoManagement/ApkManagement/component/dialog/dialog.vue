@@ -5,19 +5,14 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
     >
       <el-form
-        ref="upload"
         :model="formData"
         :rules="uploadRules"
         label-width="120px"
+        align="left"
       >
-        <upload :isClose="isClose"
-                btnValue="上传APK"
-                @closeDialog="handleClose"
-                :getUpLoadTitle="upLoadTitle"
-                :getUploadType="uploadType" @hasFile="hasFile"></upload>
+        
         <el-form-item prop="ApkCode" label="版本编号">
           <el-input
             :autofocus="true"
@@ -32,11 +27,25 @@
         <el-form-item prop="ApkDec" label="版本描述">
           <el-input type="textarea" v-model="formData.ApkDec" maxlength="250"></el-input>
         </el-form-item>
-      
+        <el-form-item label="上传APK" prop="ApkUrl">
+          <upload
+            btnValue="上传APK"
+            listType="text"
+            :getUploadType="uploadType"
+            @hasFile="hasFile"
+          >
+          </upload>
+          <el-tag v-if="formData.ApkUrl">{{formData.ApkUrl}}</el-tag>
+          <el-progress type="circle" id="progressBar"
+                       :percentage="uploadProgress"
+                       v-if="uploadProgress>0&&uploadProgress<100"
+          ></el-progress>
+        </el-form-item>
       </el-form>
-      
-      <!--<div slot="footer" class="dialog-footer">-->
-      <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="handleClose">取 消</el-button>
+        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+      </div>
       <!--</div>-->
     </el-dialog>
   </div>
@@ -65,18 +74,16 @@
     data() {
       return {
         alertTitle: '',
-        upLoadTitle: '上传APK',
+        uploadProgress: 0,
         uploadType: '.apk',
         formData: {
           ApkCode: '',
           ApkName: '',
           ApkDec: '',
+          ApkUrl: '',
           UpBusinessLicense: {},
-          DogType: "up_date"
         }
         ,
-        editFormData: {},
-        
         uploadRules: {
           ApkCode: [
             {
@@ -105,28 +112,14 @@
             }
           ]
         }
-        ,
-        editString: ''
       }
     },
-    computed: {
-      isClose: {
-        get: function () {
-          let clearImg = this.isAlertShow;
-          return !clearImg
-        },
-        set: function () {
-        
-        }
-      }
-    },
+
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData.ApkCode = this.editData.ApkCode;
-            this.formData.ApkName = this.editData.ApkName;
-            this.formData.ApkDec = this.editData.ApkDec;
+            this.formData = this.editData;
             this.alertTitle = '编辑版本'
           } else {
             for ( var i in  this.formData ) {
@@ -134,27 +127,29 @@
             }
             this.alertTitle = '新增版本';
           }
-          this.formData.DogType = this.editOrAdd;
-          console.log(this.formData.DogType);
+          // this.formData.DogType = this.editOrAdd;
         }
       }
     },
     
     methods: {
-      handleClose() {
-        this.$emit('closeAlert');
-        this.editString = '';
+      handleClose(obj) {
+        if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          if ( this.uploadProgress === 0 || this.uploadProgress === 100 ) {
+            this.$emit('closeAlert', 'n');
+          }
+        } else {
+          this.$emit('closeAlert');
+        }
       },
-      closed() {
-        this.$store.commit('clearUpload');
-        this.$refs[ 'upload' ].resetFields();
-        this.isClose = true;
-      },
+      
       hasFile(hasFile) {
-        console.log(hasFile);
-        this.formData.UpBusinessLicense = hasFile;
+        if ( hasFile ) {
+          this.formData.ApkUrl = hasFile.name;
+          this.formData.UpBusinessLicense = hasFile;
+        }
       },
-      confirmUpload() {
+      confirmUpload(obj) {
         let that = this;
         if ( that.formData.ApkCode === '' ) {
           that.$message.error('Apk编号不能为空');
@@ -162,7 +157,7 @@
         } else if ( that.formData.ApkName === '' ) {
           that.$message.error('Apk名称不能为空');
           return
-        } else if ( !this.formData.UpBusinessLicense && this.formData.DogType === 'a_dd' ) {
+        } else if ( !this.formData.UpBusinessLicense && this.editOrAdd === 'a_dd' ) {
           that.$message.error('Apk必须上传');
           return
         }
@@ -171,6 +166,7 @@
         myForm.append('ApkCode', this.formData.ApkCode);
         myForm.append('ApkName', this.formData.ApkName);
         myForm.append('ApkDec', this.formData.ApkDec);
+        myForm.append('DogType', this.editOrAdd);
         if ( this.editOrAdd === 'up_date' ) {
           myForm.append('ID', this.editData.ID);
         }
@@ -181,17 +177,22 @@
           method: 'post',
           headers: {
             'Content-Type': 'multipart/form-data'
+          },
+          onUploadProgress: progressEvent => {
+            var complete = (progressEvent.loaded / progressEvent.total * 100 | 0)
+            this.uploadProgress = complete;
+            // console.log(complete);
+            this.$emit('getProgress', complete)
           }
-        }
+        };
+        
         that.$axios(options)
           .then(data => {
             // console.log(data);
             let res = data.data;
             if ( res.state == 1 ) {
               that.$message.success("上传成功");
-              that.pass = true;
-              that.$emit('closeAlert');
-              that.$refs[ 'upload' ].resetFields();
+              that.handleClose(obj);
             } else {
               that.$message.error(res.msg)
             }
@@ -213,30 +214,6 @@
     max-width 800px
     text-align center
   
-  .dialogWrapper >>> .avatar-uploader .el-upload {
-    border: 1px dashed #d9d9d9;
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader .el-upload:hover {
-    border-color: #409EFF;
-  }
-  
-  .dialogWrapper >>> .avatar-uploader-icon {
-    font-size: 28px;
-    color: #8c939d;
-    width: 178px;
-    height: 178px;
-    line-height: 178px;
-    text-align: center;
-  }
-  
-  .avatar {
-    width: 178px;
-    height: 178px;
-    display: block;
-  }
+  #progressBar
+    display block
 </style>

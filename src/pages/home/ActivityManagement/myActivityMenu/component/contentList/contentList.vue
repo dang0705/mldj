@@ -20,42 +20,70 @@
     
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-              :row-style="rowStyle"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
+              :row-style="rowStyle"
               @header-click="add"
-              v-loading="dataLoading"
+              v-loading="listLoading"
     
     >
-      <el-table-column label="操作" width="100" align="center">
+      <el-table-column
+        label="操作"
+        width="100"
+        align="center"
+      >
         <template slot-scope="scope">
-          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
+          <el-button size="small"
+                     icon="el-icon-edit" circle
+                     @click="getData(scope.$index,scope.row)"
+          ></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
                      @click="deleteItem(scope.$index,scope.row)">
           </el-button>
         </template>
       </el-table-column>
+      
       <el-table-column
-        label="版本名称"
-        prop="ApkName"
+        label="活动名称"
+        prop="ActivityName"
+        width="180"
         align="center"
-        width="180">
+      >
       </el-table-column>
       <el-table-column
-        label="版本编号"
-        prop="ApkCode"
+        label="活动编号"
+        prop="ActivityCode"
+        width="180"
         align="center"
-        width="180">
+      >
       </el-table-column>
       <el-table-column
-        label="版本描述"
-        prop="ApkDec"
+        label="CRM门店"
+        prop="CRMStoreCode"
+        width="180"
+        :show-overflow-tooltip="true"
         align="center"
-        width="660"
-        :show-overflow-tooltip="true">
+      >
+      </el-table-column>
+      <el-table-column
+        label="活动时间"
+        :formatter="activityTime"
+        width="180"
+        :show-overflow-tooltip="true"
+        align="center"
+      >
+      </el-table-column>
+      <el-table-column
+        label="活动负责人"
+        prop="ActivityEmployeeCode"
+        width="180"
+        :show-overflow-tooltip="true"
+        align="center"
+      >
       </el-table-column>
       <el-table-column label="增加+">
       </el-table-column>
+    
     </el-table>
     <pagination
       :tableList="list"
@@ -64,8 +92,8 @@
       @pageSize="getPageSize"
       @defaultPaginationData="defaultPaginationData"
       @listChanged="listChanged"
-    ></pagination>
     
+    ></pagination>
     <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
@@ -76,6 +104,7 @@
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -85,9 +114,9 @@
     data() {
       return {
         list: [],
-        dialogType: 'up_date',
-        dataLoading: true,
+        listLoading: true,
         isListChange: false,
+        dialogType: 'up_date',
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -95,7 +124,7 @@
           color: '#000',
         },
         rowStyle: {
-          height: '40px'
+          height: '40px',
         },
         keyWord: '',
         currentPage: 1, //初始页
@@ -103,9 +132,9 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
-          ApkName: '',
-          ApkCode: '',
-          ApkDec: '',
+          ActivityCode: '',
+          CRMStoreCode: '',
+          ActivityName: '',
           ID: '',
         }
         
@@ -120,7 +149,6 @@
         this.isListChange = false
       },
       defaultPaginationData(val) {
-        console.log(val);
         if ( val && val.length ) {
           this.currentPage = val[ 0 ];
           this.pageSize = val[ 1 ]
@@ -143,64 +171,78 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
-        that.dataLoading = true;
-        that.$axios.post('/Home/OnloadApkList', {
-          ApkName: this.keyWord
+        /* if ( storage.getItem('activityList') && !update ) {
+		   that.list = JSON.parse(storage.getItem('activityList'))
+		 } else {
+		   that.listLoading = true;
+		   that.$axios.post('/Home/ActicityOnload', {
+			 ActivityName: this.keyWord
+		   })
+			 .then(data => {
+			   if ( data.data.state == 1 ) {
+				 that.list = data.data.Content;
+				 storage.setItem('activityList', JSON.stringify(that.list))
+			   }
+			 })
+		 }*/
+        that.listLoading = true;
+        that.$axios.post('/Home/ActicityOnload', {
+          ActivityName: this.keyWord
         })
           .then(data => {
             if ( data.data.state == 1 ) {
               that.list = data.data.Content;
+              storage.setItem('activityList', JSON.stringify(that.list))
             }
-            that.dataLoading = false;
-            that.isListChange = true;
           })
+        that.listLoading = false;
+        that.isListChange = true;
       }
       
       ,
       closeAlert(n) {
         this.dialogType = 'up_date';
+        this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
-        this.isAlertShow = false
       }
-      ,
-      getData(index, row) {
-        // console.log(index, row);
-        // console.log(this.currentPage);  //点击第几页
+      , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        console.log(realIndex);
         this.isAlertShow = true;
-        this.sendDialogData.ApkCode = this.list[ realIndex ].ApkCode;
-        this.sendDialogData.ApkName = this.list[ realIndex ].ApkName;
-        this.sendDialogData.ApkDec = this.list[ realIndex ].ApkDec;
-        this.sendDialogData.ApkUrl = this.list[ realIndex ].ApkUrl ? this.list[ realIndex ].ApkUrl.substring(this.list[ realIndex ].ApkUrl.lastIndexOf('/') + 1) : '';
+        this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
+        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
+        this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
+        this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
+        this.sendDialogData.ActivityStoreCode = this.list[ realIndex ].ActivityStoreCode;
+        this.sendDialogData.ActivityEmployeeCode = this.list[ realIndex ].ActivityEmployeeCode;
+        this.sendDialogData.DeviceList = this.list[ realIndex ].DeviceList;
+        this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
+        this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
+        this.sendDialogData.DogType='up_date';
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         this.sendDialogData.ID = row.ID;
+        console.log(this.sendDialogData);
       }
       , deleteItem(index, row) {
         let that = this;
-        // var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        this.$confirm('此操作将永久删除该版本, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            that.$axios.post('/Home/ApkSave', {
+            that.$axios.post('/Home/ChannelSave', {
               DogType: 'd_elete',
               ID: row.ID
             })
-              .then(data => {
-                that.$axios.post('/Home/OnloadApkList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
-                  })
+              .then(() => {
+                that.getList()
               })
           })
           .catch(() => {
@@ -208,13 +250,15 @@
           })
         
       }
-      
+      ,
+      activityTime(row, index) {
+        return row.OpenStartDate + '--' + row.OpenEndDate
+      }
       
     },
-    
   }
 </script>
 
 <style scoped lang="stylus">
-  @import '~@/assets/styles/mixin.styl'
+
 </style>

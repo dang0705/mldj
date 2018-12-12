@@ -31,7 +31,11 @@
       },
       allDate: {
         type: Boolean,
-        default:false
+        default: false
+      },
+      isClearDate: {
+        type: Boolean,
+        
       }
     },
     watch: {
@@ -39,6 +43,8 @@
         if ( this.isAlertShow ) {
           console.log(this.selectedDate);
           this.value = this.selectedDate;
+        } else {
+          this.value = [];
         }
       }
     },
@@ -57,8 +63,8 @@
     },
     methods: {
       getDate(val) {
-        console.log(val);
-        this.$emit('getDate', val)
+        this.value = val;
+        this.$emit('getDate', this.value)
       }
     }
     ,
@@ -72,6 +78,7 @@
   #dateWrapper
     display inline-block
     vertical-align top
+    
     > div
       width 100%
   

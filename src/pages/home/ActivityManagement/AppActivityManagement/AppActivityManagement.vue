@@ -1,6 +1,5 @@
 <template>
-  <div id="channelManagementWrapper">
-
+  <div id="appActivityManagementWrapper">
     <content-list>
     </content-list>
   </div>
@@ -8,12 +7,12 @@
 
 <script>
   import contentList from './component/contentList/contentList'
-	export default {
-		name: "ChannelManagement",
+  export default {
+    name: "ActivityManagement",
     components: {
       contentList
     }
-	}
+  }
 </script>
 
 <style scoped lang="stylus">

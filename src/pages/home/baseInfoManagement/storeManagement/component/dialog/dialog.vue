@@ -13,32 +13,25 @@
         :rules="uploadRules"
         label-width="120px"
       >
-        <el-form-item prop="StoreCode"
-                      label="门店编号："
-        >
-          <el-input v-model="formData.StoreCode" clearable minlength="1"
-                    maxlength="10"></el-input>
-        </el-form-item>
         <el-form-item prop="StoreName"
                       label="门店名称："
         >
           <el-input v-model="formData.StoreName" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
+        <el-form-item prop="StoreCode"
+                      label="门店编号："
+        >
+          <el-input v-model="formData.StoreCode" clearable minlength="1"
+                    maxlength="10"></el-input>
+        </el-form-item>
+       
         <el-form-item prop="AddInfo" label="门店地址：">
           <el-input
             v-model="formData.AddInfo"
             minlength="1"
             maxlength="30"></el-input>
         </el-form-item>
-        <el-form-item label="所在省市：">
-          <city-select
-            v-if="isAlertShow"
-            @provincesAndCities="provincesAndCities"
-            :getEditCities="provinceTotalArr"
-          ></city-select>
-        </el-form-item>
-        
         <el-form-item prop="ChannelCode" label="渠道名称：">
           <el-select
             v-model="formData.ChannelCode">
@@ -50,6 +43,15 @@
             ></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="所在省市：">
+          <city-select
+            v-if="isAlertShow"
+            @provincesAndCities="provincesAndCities"
+            :getEditCities="provinceTotalArr"
+          ></city-select>
+        </el-form-item>
+        
+        
         <el-form-item prop="ContactPhone" label="联系方式：">
           <el-input v-model="formData.ContactPhone"></el-input>
         </el-form-item>
@@ -93,7 +95,7 @@
           StoreCode: '',
           StoreName: '',
           ChannelName: '',
-          ChannelCode:'',
+          ChannelCode: '',
           ProvinceCode: '',
           ProvinceName: '省份',
           CityCode: '',
@@ -132,6 +134,27 @@
               trigger: 'blur'
             }
           ]
+          , AddInfo: [
+            {
+              required: true,
+              message: '门店地址为必填项',
+              trigger: 'blur'
+            },
+            {
+              min: 1,
+              max: 30,
+              message: '长度请在1~30个字符',
+              trigger: 'blur'
+            }
+          ]
+          , ChannelCode: [
+            {
+              required: true,
+              message: '渠道名称为必填项',
+              trigger: 'blur'
+            }
+          
+          ],
           
         }
         ,
@@ -196,6 +219,13 @@
           return
         } else if ( that.formData.StoreName === '' ) {
           that.$message.error('门店名称不能为空');
+          return
+        }else if ( that.formData.AddInfo === '' ) {
+          that.$message.error('门店地址不能为空');
+          return
+        }
+        else if ( that.formData.ChannelCode === '' ) {
+          that.$message.error('渠道名称不能为空');
           return
         }
         that.$axios.post('/Home/StoreSave', this.formData)

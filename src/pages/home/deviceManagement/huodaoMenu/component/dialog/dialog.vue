@@ -225,7 +225,9 @@
           }
           this.formData.DogType = this.editOrAdd;
         } else {
-        
+          for ( var i in this.formData ) {
+            this.formData[i]=''
+          }
         }
       }
     },
@@ -294,9 +296,7 @@
           this.$emit('closeAlert')
         }
         this.formData.ImgBase = '';
-        for ( var i in this.formData ) {
-          this.formData[i]=''
-        }
+        
         this.hasAjaxData = false;
         this.dataLoading = true;
         this.tableDataList = [];

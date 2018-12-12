@@ -41,7 +41,8 @@
           <el-button size="small"
                      icon="el-icon-edit"
                      circle
-                     @click="getData(scope.$index,scope.row)">
+                     @click="getData(scope.$index,scope.row)"
+          >
           </el-button>
           
           <el-switch
@@ -117,6 +118,8 @@
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
+  const storage = window.localStorage;
+  
   export default {
     name: "contentList",
     components: {
@@ -186,44 +189,69 @@
           console.log(this.dialogType);
         }
       },
-      getList(city) {
+      getList(update) {
         let that = this;
-        that.$axios.post('/Home/OnloadEmployeeDeviceList', {
-          CityCode: city ? city[ 1 ] : '',
-          DeviceName: that.keyWord
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('device') && !update ) {
+          that.list = JSON.parse(storage.getItem('device'));
+          that.dataLoading = false;
+          that.isListChange = true;
+        } else {
+          that.listLoading = true;
+          that.$axios.post('/Home/OnloadEmployeeDeviceList', {
+            CityCode: update && update !== 'update' ? update[ 1 ] : '',
+            DeviceName: that.keyWord
           })
-        
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                storage.setItem('device', JSON.stringify(that.list));
+                that.dataLoading = false;
+                that.isListChange = true;
+              } else {
+                that.list = [];
+              }
+            })
+        }
+        console.log(that.list);
+        /*       that.$axios.post('/Home/OnloadEmployeeDeviceList', {
+				 CityCode: city ? city[ 1 ] : '',
+				 DeviceName: that.keyWord
+			   })
+				 .then(data => {
+				   if ( data.data.state == 1 ) {
+					 that.list = data.data.Content;
+				   }
+				   that.dataLoading = false;
+				   that.isListChange = true;
+				 })*/
+      
       }
       
       ,
       closeAlert(n) {
-        this.dialogType = 'up_date';
+        // this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList();
+          this.getList('update');
         }
       }
       , getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(row);
         this.isAlertShow = true;
-        this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
-        this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
-        this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
-        this.sendDialogData.Address = this.list[ realIndex ].Address;
-        this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
-        this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
-        this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
-        this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
-        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
-        this.sendDialogData.ID = row.ID;
+        if ( this.list.length ) {
+          this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+          this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
+          this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
+          this.sendDialogData.Address = this.list[ realIndex ].Address;
+          this.sendDialogData.ProvinceCode = this.list[ realIndex ].ProvinceCode;
+          this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
+          this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
+          this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
+          this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
+          this.sendDialogData.ID = row.ID;
+        }
+      
       }
       ,
       switchChange(index, row) {
@@ -237,7 +265,7 @@
           ID: row.ID
         })
           .then(data => {
-          
+            that.getList('update')
           })
       }
       ,
@@ -247,20 +275,11 @@
       },
       handleCurrentChange: function (currentPage) {
         this.currentPage = currentPage;
-        // console.log(this.currentPage)  //点击第几页
       }
       ,
       cityFilter(city) {
         this.getList(city)
       }
-      
-    },
-    watch: {
-      '$store.state.isEmployeeDeviceUpdateData': function () {
-        if ( this.$store.state.isEmployeeDeviceUpdateData === true ) {
-          this.getList()
-        }
-      },
       
     }
   }

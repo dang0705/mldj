@@ -292,6 +292,7 @@
             this.alertTitle = '编辑产品';
             Msg = '编辑成功'
           } else {
+            this.formData.ProductClassId = [];
             this.alertTitle = '新增产品';
             Msg = '增加成功'
           }

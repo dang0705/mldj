@@ -20,7 +20,7 @@
           v-for="(eachSub,index) in firstLevelNavigationArr[firstLevelNavigationIndex].subNav"
           class="secondNavigation"
           :to="eachSub.subIndex"
-          :key="index"
+          :key="index+1"
         >
           {{eachSub.navName}}
         </router-link>
@@ -81,6 +81,7 @@
             const sendArr = that.firstLevelNavigationArr.filter((ele, idx, arr) => {
               return idx !== 0;
             });
+            console.log(sendArr);
             storage.setItem('menu', JSON.stringify(sendArr));
             if ( storage.getItem('menuSelected') ) {
               that.firstLevelNavigationIndex = parseInt(storage.getItem('menuSelected'))

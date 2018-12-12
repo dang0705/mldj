@@ -49,8 +49,8 @@
                        align="center"
       >
       </el-table-column>
-      <el-table-column label="渠道编号"
-                       prop="ChannelCode"
+      <el-table-column label="渠道名称"
+                       prop="ChannelName"
                        width="140"
                        align="center"
       >
@@ -97,7 +97,7 @@
       @pageSize="getPageSize"
       @defaultPaginationData="defaultPaginationData"
       @listChanged="listChanged"
-
+    
     ></pagination>
     
     <alert-dialog :isAlertShow.sync="isAlertShow"
@@ -115,6 +115,7 @@
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -187,21 +188,29 @@
           console.log(this.dialogType);
         }
       },
-      getList(cityCode) {
-        let that = this;
-        that.listLoading = true;
-        that.$axios.post('/Home/OnloadStorelList', {
-          StoreName: that.keyWord,
-          CityCode: cityCode && cityCode.length ? cityCode[ 1 ] : ''
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.listLoading = false;
-            that.isListChange = true;
-            this.defaultPaginationData()
+      getList(update) {
+        if ( storage.getItem('store') && !update ) {
+          this.list = JSON.parse(storage.getItem('store'));
+          this.listLoading = false;
+          this.isListChange = true;
+        } else {
+          let that = this;
+          that.listLoading = true;
+          that.$axios.post('/Home/OnloadStorelList', {
+            StoreName: that.keyWord,
+            CityCode: Array.isArray(update) && update.length ? update[ 1 ] : ''
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                storage.setItem('store', JSON.stringify(that.list))
+              }
+              that.listLoading = false;
+              that.isListChange = true;
+              this.defaultPaginationData()
+            })
+        }
+        
       }
       ,
       
@@ -209,7 +218,7 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
       }
       ,
@@ -242,7 +251,7 @@
               ID: row.ID
             })
               .then(data => {
-               that.getList()
+                that.getList()
               })
           })
           .catch(() => {
@@ -252,6 +261,7 @@
       }
       ,
       cityFilter(city) {
+        console.log(city);
         this.getList(city)
       }
       
