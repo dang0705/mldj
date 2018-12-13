@@ -163,20 +163,26 @@
         // console.log(this.FileId);
       },
       getSourceList() {
-        const that = this,
-          params = '&PageSize=1000&PageIndex=1&filename=' + that.FileName +
-            '&FileType=' + that.FileType +
-            '&RoleId=' + storage.getItem('RoleID') +
-            '&EmployeeCode=' + that.sourceInfo.EmployeeCode;
+        if ( storage.getItem('source') ) {
+          this.list = JSON.parse(storage.getItem('source'));
+          this.dataLoading = false;
+        } else {
+          const that = this,
+            params = '&PageSize=1000&PageIndex=1&filename=' + that.FileName +
+              '&FileType=' + that.FileType +
+              '&RoleId=' + storage.getItem('RoleID') +
+              '&EmployeeCode=' + that.sourceInfo.EmployeeCode;
+          
+          that.$axios.post('/PlayManage/EmployeeFileAllList', params)
+            .then(data => {
+              console.log(data);
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content.Rows;
+                that.dataLoading = false;
+              }
+            })
+        }
         
-        that.$axios.post('/PlayManage/EmployeeFileAllList', params)
-          .then(data => {
-            console.log(data);
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content.Rows;
-              that.dataLoading = false;
-            }
-          })
       },
       
       filter() {
@@ -187,7 +193,7 @@
       },
       handleClose() {
         this.$emit('closeThis');
-        this.FileType=this.FileName='';
+        this.FileType = this.FileName = '';
       },
       handleSizeChange: function (size) {
         this.pagesize = size;
@@ -205,7 +211,7 @@
       }
     },
     mounted() {
-      if ( storage.getItem('source')) {
+      if ( storage.getItem('source') ) {
         this.list = JSON.parse(storage.getItem('source'));
         this.dataLoading = false;
       } else {
@@ -241,5 +247,5 @@
   
   .souceListDialogWrapper >>> .el-dialog
     width: 750px !important
-    margin-top: 20%!important
+    margin-top: 20% !important
 </style>

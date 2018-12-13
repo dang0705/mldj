@@ -5,7 +5,6 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
-      @closed="closed"
     >
       <el-form
         ref="upload"
@@ -100,10 +99,9 @@
           this.$emit('closeAlert');
         }
         this.formData.serviceTime = [];
+        this.formData.RoleName = '';
       },
-      closed() {
-        this.$refs[ 'upload' ].resetFields();
-      },
+      
       confirmUpload(obj) {
         let that = this;
         if ( that.formData.RoleName === '' ) {

@@ -106,7 +106,14 @@
             storage.setItem('isHoldLogin', that.loginData.holdLogin);
             storage.setItem('RoleID', res.RoleID);
             storage.setItem('name', res.UserName);
-            storage.setItem('CompanyID', res.CompanyID)
+            storage.setItem('CompanyID', res.CompanyID);
+            storage.removeItem('menu');
+            storage.removeItem('store');
+            storage.removeItem('source');
+            storage.removeItem('device');
+            storage.removeItem('activityList');
+            storage.removeItem('productList');
+            storage.removeItem('channel')
           } else {
             that.$message.error('用户名或密码错误');
             that.createCode();
@@ -133,7 +140,7 @@
       }
     },
     created() {
-     this.$myFunctions.disableBackAndForward();
+      this.$myFunctions.disableBackAndForward();
       storage.removeItem('menuSelected');
       this.createCode();
       if ( storage.getItem('isHoldLogin') === 'true' ) {
@@ -177,6 +184,7 @@
     background black
     padding-top 5%
     box-sizing border-box
+    
     #loginWrapper
       box-sizing border-box
       width 500px
@@ -184,19 +192,24 @@
       margin 0 auto 0
       border: 1px solid #fff
       padding 60px
+      
       .el-form-item
         margin-bottom: 40px
+      
       .el-button.el-button--danger
         width: 100%
         height: 50px
         background-color red
         border-color red
         font-size: 30px
+      
       .el-button--text
         color white
         float right
+      
       .identify
         width: 300px
+      
       .codeBtn
         height: 50px
         line-height: 50px

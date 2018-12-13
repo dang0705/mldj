@@ -210,6 +210,7 @@
         }
       }
       , getData(index, row) {
+        
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;

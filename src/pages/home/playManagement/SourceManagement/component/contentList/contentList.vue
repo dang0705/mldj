@@ -7,12 +7,12 @@
         v-model="fileName"
         autocomplete="on"
         placeholder="名称"
-        @keyup.enter.native="getList"
+        @keyup.enter.native="getList('update','search')"
       >
         <i
           class="el-icon-search el-input__icon"
           slot="suffix"
-          @click="getList('update')"
+          @click="getList('update','search')"
         >
         </i>
       </el-input>
@@ -55,10 +55,19 @@
             placement="right"
             v-if="scope.row.FileType!=2"
             trigger="click"
-            @show="afterEnterPopover(scope.row)"
+            @show="afterEnterPopover(scope.$index,scope.row)"
           >
-            <img width="600px" :src="scope.row.OpenFileUrl" alt="" v-if="scope.row.FileType==0" v-show="imgWidth">
-            <video width="100%" :src="scope.row.OpenFileUrl" v-if="scope.row.FileType==1" controls></video>
+            <img width="600px"
+                 :ref="'img_'+scope.$index"
+                 :src="scope.row.OpenFileUrl"
+                 alt="" v-if="scope.row.FileType==0">
+            <video
+              :ref="'video_'+scope.$index"
+              width="100%"
+              src=""
+              v-show="scope.row.FileType==1"
+              controls
+              preload="metadata"></video>
             <el-button type="text" slot="reference"
                        :icon="scope.row.FileType==0?'el-icon-picture':'el-icon-caret-right'">{{scope.row.FileName}}
             </el-button>
@@ -159,6 +168,7 @@
     data() {
       return {
         list: [],
+        fileSrc: '',
         progressValue: 0,
         isDialogShow: false,
         uploadType: 'image/jpg,image/jpeg,image/png,video/mp4,.apk',
@@ -233,18 +243,19 @@
       }
       ,
       change() {
-        this.getList('update')
+        this.getList('update', 'search')
       },
       formatter(row, index) {
         let finishStatus;
         return finishStatus = row.Finished = 1 ? '已完成' : '未完成'
       },
       
-      getList(update) {
+      getList(update, search) {
         const that = this,
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
         if ( storage.getItem('source') && !update ) {
           that.list = JSON.parse(storage.getItem('source'))
+          
         } else {
           that.dataLoading = true;
           that.$axios.post('/PlayManage/EmployeeFileAllList', url)
@@ -252,7 +263,9 @@
               console.log(data);
               if ( data.data.state == 1 ) {
                 that.list = data.data.Content.Rows;
-                storage.setItem('source', JSON.stringify(that.list))
+                if ( !search ) {
+                  storage.setItem('source', JSON.stringify(that.list))
+                }
                 that.dataLoading = false;
               }
               
@@ -314,20 +327,15 @@
         
       }
       ,
-      afterEnterPopover(val) {
-        const img = new Image(),
-          that = this;
-        img.src = val.OpenFileUrl;
-        console.log(img.height);
+      afterEnterPopover(index, val) {
+        // console.log(index, val);
+        const videoIndex = 'video_' + index;
         
-        img.onload = function () {
-          if ( img.height / img.width > 1.2 ) {
-            that.imgWidth = '500'
-          } else {
-            that.imgWidth = '1080'
-            
-          }
-        }
+        this.$nextTick(() => {
+          this.$refs[ videoIndex ].src = val.OpenFileUrl;
+          // this.$refs[ imgIndex ].src = val.OpenFileUrl;
+        })
+        
       }
     }
   }

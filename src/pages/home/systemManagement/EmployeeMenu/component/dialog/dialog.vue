@@ -45,7 +45,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="OrganizationID" label="所在组织：" label-width="120px"  v-if="editOrAdd==='a_dd'">
+        <el-form-item prop="OrganizationID" label="所在组织：" label-width="120px" v-if="editOrAdd==='a_dd'">
           <el-select v-model="formData.OrganizationID" placeholder="请选择组织">
             <el-option
               v-for="(item,i) in OrganizationIDList"
@@ -173,27 +173,30 @@
         this.alertShow = this.isAlertShow;
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
+            this.getUser()
             this.alertTitle = '编辑用户';
             Msg = '编辑成功';
-          }
-          else {
-            console.log(this.editData);
-            this.getUserInfo();
+          } else {
             this.formLoading = false;
+            
             this.alertTitle = '新增用户';
-            this.formData.roleID = this.OrganizationIDList = '';
+           
+            for ( var i in this.formData ) {
+              this.formData[ i ] = ''
+            }
+            console.log(this.formData);
             Msg = '增加成功';
           }
           this.formData.DogType = this.editOrAdd;
         }
+        
       }
     },
     
     methods: {
-      getUserInfo() {
+      GetOrganizationList() {
         const that = this;
         that.formLoading = true;
-        that.formData.ID = this.editData.ID;
         that.$axios.post('/Organization/GetOrganizationList', {
           pageindex: 0,
           validity: 1,
@@ -201,9 +204,16 @@
         }).then(data => {
           console.log(data);
           if ( data.data.state == 1 ) {
-            that.OrganizationIDList = data.data.Content.DataList
+            that.OrganizationIDList = data.data.Content.DataList;
+            that.formLoading = false
+  
           }
         })
+      }
+      ,
+      getUser() {
+        const that = this;
+        that.formData.ID = this.editData.ID;
         that.$axios.post('/Account/GetUser', {
           ID: that.formData.ID
         }).then(data => {
@@ -250,37 +260,32 @@
         if ( !that.formData.Phone ) {
           that.$message.error('手机号码不能为空');
           return
-        }
-        else if ( !/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8])|(19[7]))\d{8}$/.test(that.formData.Phone) ) {
+        } else if ( !/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8])|(19[7]))\d{8}$/.test(that.formData.Phone) ) {
           that.$message.error('手机号码格式不正确');
           return
-        }
-        else if ( !that.formData.EmployeeName ) {
+        } else if ( !that.formData.EmployeeName ) {
           that.$message.error('用户名不能为空');
           return
-        }
-        else if ( !that.formData.Email ) {
+        } else if ( !that.formData.Email ) {
           that.$message.error('邮箱不能为空');
           return
-        }
-        else if ( !/^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/.test(that.formData.Email) ) {
+        } else if ( !/^[A-Za-z\d]+([-_.][A-Za-z\d]+)*@([A-Za-z\d]+[-.])+[A-Za-z\d]{2,4}$/.test(that.formData.Email) ) {
           that.$message.error('邮箱格式不正确');
           return
-        }
-        else if ( !that.formData.roleID ) {
+        } else if ( !that.formData.roleID ) {
           that.$message.error('角色不能为空');
           return
         }
         
         if ( that.formData.DogType === 'a_dd' ) {
-          that.postData('AddUser',obj)
+          that.postData('AddUser', obj)
         } else {
-          that.postData('UpdUser',obj)
+          that.postData('UpdUser', obj)
         }
         
       }
       ,
-      postData(url,obj) {
+      postData(url, obj) {
         const that = this;
         var params = '';
         params += '&Phone=' + that.formData.Phone;
@@ -299,8 +304,7 @@
             if ( res.state == 1 ) {
               that.$message.success(Msg);
               that.handleClose(obj);
-            }
-            else {
+            } else {
               that.$message.error(res.msg);
             }
           })
@@ -312,6 +316,8 @@
     ,
     mounted() {
       this.getRoleNameList();
+      this.GetOrganizationList();
+  
     }
   }
 </script>
@@ -319,5 +325,5 @@
 <style scoped lang="stylus">
   .dialogWrapper >>> .el-select
     width: 100%
-  
+
 </style>

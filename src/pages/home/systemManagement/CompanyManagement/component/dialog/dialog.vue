@@ -139,7 +139,7 @@
             }
           ]
           ,
-          BeginTimeAndEndTime:[
+          BeginTimeAndEndTime: [
             {
               required: true,
               message: '续费起止时间为必选项',
@@ -164,8 +164,7 @@
             this.formData.ID = this.editData.ID;
             this.alertTitle = '编辑公司';
             Msg = '编辑成功';
-          }
-          else {
+          } else {
             this.alertTitle = '新增公司';
             Msg = '增加成功';
           }
@@ -187,29 +186,28 @@
         } else {
           this.$emit('closeAlert');
         }
+        for ( var i in this.formData ) {
+          this.formData[ i ] = ''
+        }
         this.formData.serviceTime = [];
         
       },
-   
+      
       confirmUpload(obj) {
         let that = this;
         if ( that.formData.CompanyName === '' ) {
           that.$message.error('公司名称不能为空');
           return
-        }
-        else if ( that.formData.AccountName === '' ) {
+        } else if ( that.formData.AccountName === '' ) {
           that.$message.error('开户人不能为空');
           return
-        }
-        else if ( that.formData.BankName === '' ) {
+        } else if ( that.formData.BankName === '' ) {
           that.$message.error('开户银行不能为空');
           return
-        }
-        else if ( that.formData.BankCard === '' ) {
+        } else if ( that.formData.BankCard === '' ) {
           that.$message.error('银行卡号不能为空');
           return
-        }
-        else if ( that.formData.serviceTime === [] || !that.formData.serviceTime ) {
+        } else if ( that.formData.serviceTime === [] || !that.formData.serviceTime ) {
           that.$message.error('续费起止日期不能为空');
           return
         }
@@ -245,8 +243,7 @@
               that.$message.success(Msg);
               that.handleClose(obj);
               that.$refs[ 'upload' ].resetFields();
-            }
-            else {
+            } else {
               that.$message.error(res.msg);
             }
           })

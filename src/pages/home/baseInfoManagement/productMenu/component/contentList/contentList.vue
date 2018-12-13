@@ -77,11 +77,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="图片" width="60" align="center">
-        <template slot-scope="scope">
-          <img width="100%" :src="scope.row.ImgURL" alt="">
-        </template>
-      </el-table-column>
+   
       <el-table-column
         label="产品名称"
         prop="ProductName"
@@ -90,16 +86,27 @@
         :show-overflow-tooltip="true"
       >
       </el-table-column>
+      <el-table-column label="图片" width="60" align="center">
+        <template slot-scope="scope">
+          <el-popover
+            placement="right"
+            trigger="click"
+          >
+            <img :src="scope.row.ImgBase" alt="">
+            <img class="thumbnail" slot="reference" width="40px" height="40px" :src="scope.row.ImgBase" alt="">
+          </el-popover>
+        </template>
+      </el-table-column>
       <el-table-column
         label="产品品类"
-        prop="ProductClass"
+        prop="ProductClassName"
         align="center"
         width="140"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
         label="所属品牌"
-        prop="BrandName"
+        prop="ProductBrand"
         align="center"
         width="225"
         :show-overflow-tooltip="true">
@@ -142,7 +149,8 @@
 <script>
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
-  const storage=window.localStorage;
+  
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -245,24 +253,24 @@
               if ( data.data.state == 1 ) {
                 that.list = data.data.Content;
                 storage.setItem('productList', JSON.stringify(that.list))
-        
+                
               }
               that.dataLoading = false;
               that.isListChange = true;
             })
         }
         
-/*        that.$axios.post('/Home/OnloadProductList', {})
-          .then(data => {
-            console.log(data);
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-              storage.setItem('productList', JSON.stringify(that.list))
-  
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
-          })*/
+        /*        that.$axios.post('/Home/OnloadProductList', {})
+				  .then(data => {
+					console.log(data);
+					if ( data.data.state == 1 ) {
+					  that.list = data.data.Content;
+					  storage.setItem('productList', JSON.stringify(that.list))
+		  
+					}
+					that.dataLoading = false;
+					that.isListChange = true;
+				  })*/
       }
       ,
       getBrandList() {
@@ -347,12 +355,19 @@
               ID: row.id
             })
               .then(() => {
-                that.getList()
+                that.getList('update')
               })
           })
+      }
+      ,
+      afterEnterPopover(index, val) {
+        const imgIndex = 'img' + index;
+        this.$nextTick(() => {
+          this.$refs[ imgIndex ].src = val.ImgBase;
+          // this.$refs[ imgIndex ].src = val.OpenFileUrl;
+        })
         
       }
-      
     }
   }
 </script>

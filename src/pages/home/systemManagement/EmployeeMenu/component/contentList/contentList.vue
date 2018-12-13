@@ -272,6 +272,7 @@
         this.sendDialogData.OrganizationID = 0;
         this.sendDialogData.IsOrgLeader = 0;
         this.sendDialogData.ID = row.ID;
+        this.sendDialogData=JSON.parse(JSON.stringify(this.sendDialogData))
       }
     }
   }

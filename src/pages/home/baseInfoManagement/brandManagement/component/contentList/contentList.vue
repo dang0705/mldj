@@ -60,7 +60,7 @@
             :disabled="!scope.row.BrandLogoUrl"
           >
             <img :src="scope.row.BrandLogoUrl||noLogo" alt="">
-            <img :src="scope.row.BrandLogoUrl||noLogo" slot="reference" alt="" width="40" height="40" style="vertical-align: middle;cursor: pointer">
+            <img class="thumbnail" :src="scope.row.BrandLogoUrl||noLogo" slot="reference" alt="" width="40" height="40" >
           </el-popover>
         </template>
       </el-table-column>

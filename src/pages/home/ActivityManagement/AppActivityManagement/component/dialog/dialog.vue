@@ -14,7 +14,7 @@
         label-width="120px"
       >
         <el-form-item prop="ActivityName" label="活动名称：">
-          <el-input v-model="formData.ActivityName" clearable minlength="1"
+          <el-input v-model="formData.ActivityName" ref="autoFocus" :autofocus="true" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="activityDate" label="活动起止时间" :show-message="false">
@@ -73,6 +73,7 @@
                      :multiple="true">
             <el-option
               v-for="(item,i) in deviceList"
+              :key="i"
               :label="item.DeviceName"
               :value="item.ID"
             ></el-option>
@@ -138,6 +139,7 @@
     data() {
       return {
         alertTitle: '',
+        cancel:null,
         isProductAlertShow: false,
         isStoreAlertShow: false,
         isProductSelected: false,
@@ -217,6 +219,9 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.$nextTick(()=>{
+            this.$refs.autoFocus.focus()
+          })
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
             this.selectedStoreObj.StoreName = this.formData.StoreName;

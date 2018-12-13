@@ -33,9 +33,9 @@
       >
         <template slot-scope="scope">
           <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
+          <!--<el-button type="danger" icon="el-icon-delete" circle size="small"
                      @click="deleteItem(scope.$index,scope.row)">
-          </el-button>
+          </el-button>-->
         </template>
       </el-table-column>
       
@@ -175,7 +175,7 @@
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         console.log(this.sendDialogData);
       }
-      , deleteItem(index, row) {
+      /*, deleteItem(index, row) {
         let that = this;
         this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -195,7 +195,7 @@
           
           })
         
-      }
+      }*/
       
       
     },

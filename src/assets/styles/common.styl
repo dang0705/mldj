@@ -67,6 +67,12 @@ $Width = 1280px
     font-size 16px
     height 40px
 
+
+/*popover缩略图*/
+#app >>> .thumbnail
+  vertical-align: middle
+  cursor: pointer
+
 //*****弹出框样式覆盖*****
 #app >>> .el-dialog
   width: 450px
@@ -122,12 +128,14 @@ $Width = 1280px
 #app >>> .basInfo
   display inline-block
   margin 0 50px
+
   .uploadImg,
   .upImgForm
     display inline-block
     margin 0 10px 0
     vertical-align text-top
-#app >>>#editCargoWay
+
+#app >>> #editCargoWay
   display inline-block
   margin 0 50px
   vertical-align top

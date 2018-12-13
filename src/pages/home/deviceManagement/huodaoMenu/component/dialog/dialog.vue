@@ -257,7 +257,7 @@
         this.DataColumnCount = [];
         
         const that = this;
-        that.$axios.post('Home/CargoTypeListByCargoId', {
+        that.$axios.post('/Home/CargoTypeListByCargoId', {
           ID: that.formData.ID
         })
           .then(data => {
@@ -341,7 +341,7 @@
               that.$message.success(Msg);
               that.handleClose(obj)
               if ( this.editOrAdd === 'up_date' ) {
-                that.$axios.post('Home/CargoTypeSave', {
+                that.$axios.post('/Home/CargoTypeSave', {
                   DogType: 'CargoBind',
                   CargoId: that.formData.ID,
                   CargoTypeListString: JSON.stringify(json)

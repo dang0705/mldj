@@ -168,7 +168,7 @@
       getList() {
         let that = this;
         that.list = [];
-        that.$axios.post('Home/payList', {
+        that.$axios.post('/Home/payList', {
           payname: this.keyWord,
         })
           .then(data => {

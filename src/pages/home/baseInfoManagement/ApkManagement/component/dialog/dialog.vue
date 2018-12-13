@@ -42,7 +42,8 @@
           ></el-progress>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer"
+      >
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
       </div>
@@ -114,7 +115,7 @@
         }
       }
     },
-
+    
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
@@ -135,9 +136,11 @@
     methods: {
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          this.cancel();
           if ( this.uploadProgress === 0 || this.uploadProgress === 100 ) {
             this.$emit('closeAlert', 'n');
           }
+          
         } else {
           this.$emit('closeAlert');
         }
@@ -170,7 +173,9 @@
         if ( this.editOrAdd === 'up_date' ) {
           myForm.append('ID', this.editData.ID);
         }
-        
+  
+        let CancelToken=that.$axios.CancelToken;
+  
         const options = {
           url: '/Home/ApkSave',
           data: myForm,
@@ -178,14 +183,18 @@
           headers: {
             'Content-Type': 'multipart/form-data'
           },
+          cancelToken: new CancelToken(function executor(c) {
+            that.cancel = c;
+            console.log(c)
+            // 这个参数 c 就是CancelToken构造函数里面自带的取消请求的函数，这里把该函数当参数用
+          }),
           onUploadProgress: progressEvent => {
-            var complete = (progressEvent.loaded / progressEvent.total * 100 | 0)
+            var complete = (progressEvent.loaded / progressEvent.total * 100 | 0);
             this.uploadProgress = complete;
             // console.log(complete);
             this.$emit('getProgress', complete)
           }
         };
-        
         that.$axios(options)
           .then(data => {
             // console.log(data);

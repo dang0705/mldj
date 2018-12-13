@@ -201,24 +201,13 @@
               ID: row.ID
             })
               .then(() => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {
           
           })
-        
       }
-      
-      
-    },
-    watch: {
-      '$store.state.isChannelUpdateData': function () {
-        if ( this.$store.state.isChannelUpdateData === true ) {
-          this.getList()
-        }
-      },
-      
     }
   }
 </script>
