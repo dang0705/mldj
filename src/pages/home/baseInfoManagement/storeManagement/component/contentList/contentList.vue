@@ -251,7 +251,7 @@
               ID: row.ID
             })
               .then(data => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {

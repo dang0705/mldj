@@ -81,7 +81,7 @@
       return {
         alertTitle: '',
         upLoadTitle: '',
-        uploadType: 'image/jpeg',
+        uploadType: 'image/jpeg,image/png',
         formData: {
           BrandCode: '',
           BrandName: '',

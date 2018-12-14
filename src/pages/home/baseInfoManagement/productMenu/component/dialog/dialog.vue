@@ -11,12 +11,12 @@
     >
       <div class="basInfo">
         <div class="uploadImg">
-          <upload :isClose="isClose"
-                  :imgUrl="formData.ImgBase"
-                  @closeDialog="handleClose"
-                  @getBase64Url="getBase64Url"
-                  :getUpLoadTitle="upLoadTitle"
-                  :getUploadType="uploadType">
+          <upload
+            :imgUrl="formData.ImgBase"
+            @closeDialog="handleClose"
+            @getBase64Url="getBase64Url"
+            :getUpLoadTitle="upLoadTitle"
+            :getUploadType="uploadType">
           </upload>
         </div>
         <el-form
@@ -54,7 +54,7 @@
           </el-form-item>
           <el-form-item prop="ProductClassId" label="所属品类：">
             <el-cascader
-              v-model="formData.ProductClassId"
+              v-model="ProductClassId"
               @change="catalogChange"
               @blur="getProductClassName"
               :options="catalogList"
@@ -155,18 +155,17 @@
         },
         catalogList: [],
         brandList: [],
-        // catalogSelect: [],
         cargoWayName: '',
         upLoadTitle: '',
-        uploadType: 'image/jpeg',
-        /*        rows: 5,
-				column: 5,*/
+        uploadType: 'image/jpeg,image/png',
+        
         alertTitle: '',
+        ProductClassId: [],
         formData: {
           ProductName: '',
           ProductEnglish: '',
           productCode: '',
-          ProductClassId: [],
+          ProductClassId: '',
           ProductBrandId: '',
           Sale: 50,
           cost: 50,
@@ -286,13 +285,15 @@
         if ( this.isAlertShow === true ) {
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
+            // this.ProductClassId = JSON.parse(this.formData.ProductClassId)
             // this.catalogSelect = this.formData.ProductClassId ;
+            this.ProductClassId = this.formData.ProductClassId
             console.log(this.formData);
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑产品';
             Msg = '编辑成功'
           } else {
-            this.formData.ProductClassId = [];
+            this.ProductClassId = '';
             this.alertTitle = '新增产品';
             Msg = '增加成功'
           }
@@ -304,7 +305,8 @@
     },
     methods: {
       catalogChange(val) {
-        this.formData.ProductClassId = val;
+        this.ProductClassId = val;
+        this.formData.ProductClassId = JSON.stringify(val)
         
       },
       getProductClassName(val) {
@@ -370,7 +372,7 @@
           = this.formData.Introduce
           = this.formData.ImgBase = '';
         this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 100;
-        this.formData.ProductClassId = [];
+        this.formData.ProductClassId = '';
         this.formData.ProductBrandId = '';
         this.editFormData.ImgBase = ''
       },
@@ -384,7 +386,7 @@
         } else if ( this.formData.productCode === '' ) {
           this.$message.error('产品编号不能为空');
           return
-        } else if ( this.formData.ProductClassId === '' ) {
+        } else if ( this.ProductClassId === '' ) {
           this.$message.error('产品品类不能为空');
           return
         } else if ( this.formData.ProductBrandId === '' ) {
@@ -412,7 +414,7 @@
       add(obj) {
         const that = this;
         
-        that.formData.ProductClassId = JSON.stringify(that.formData.ProductClassId);
+        // that.formData.ProductClassId = JSON.stringify(that.formData.ProductClassId);
         console.log(that.formData);
         that.$axios.post('/Home/Productsave', this.formData)
           .then(data => {

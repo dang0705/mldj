@@ -25,7 +25,7 @@
           <el-input v-model="formData.StoreCode" clearable minlength="1"
                     maxlength="10"></el-input>
         </el-form-item>
-       
+        
         <el-form-item prop="AddInfo" label="门店地址：">
           <el-input
             v-model="formData.AddInfo"
@@ -214,17 +214,16 @@
       
       confirmUpload(obj) {
         let that = this;
-        if ( that.formData.StoreCode === '' ) {
-          that.$message.error('门店编号不能为空');
-          return
-        } else if ( that.formData.StoreName === '' ) {
+        if ( that.formData.StoreName === '' ) {
           that.$message.error('门店名称不能为空');
           return
-        }else if ( that.formData.AddInfo === '' ) {
+        } else if ( that.formData.StoreCode === '' ) {
+          that.$message.error('门店编号不能为空');
+          return
+        } else if ( that.formData.AddInfo === '' ) {
           that.$message.error('门店地址不能为空');
           return
-        }
-        else if ( that.formData.ChannelCode === '' ) {
+        } else if ( that.formData.ChannelCode === '' ) {
           that.$message.error('渠道名称不能为空');
           return
         }

@@ -46,7 +46,15 @@
       <el-table-column
         label="活动名称"
         prop="ActivityName"
-        width="180"
+        width="220"
+        align="center"
+      >
+      </el-table-column>
+      <el-table-column
+        label="活动负责人"
+        prop="EmployeeName"
+        width="220"
+        :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
@@ -68,19 +76,12 @@
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
-        width="180"
+        width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
-      <el-table-column
-        label="活动负责人"
-        prop="ActivityEmployeeCode"
-        width="180"
-        :show-overflow-tooltip="true"
-        align="center"
-      >
-      </el-table-column>
+     
       <el-table-column label="增加+">
       </el-table-column>
     
@@ -173,20 +174,7 @@
       },
       getList(update) {
         let that = this;
-        /* if ( storage.getItem('activityList') && !update ) {
-		   that.list = JSON.parse(storage.getItem('activityList'))
-		 } else {
-		   that.listLoading = true;
-		   that.$axios.post('/Home/ActicityOnload', {
-			 ActivityName: this.keyWord
-		   })
-			 .then(data => {
-			   if ( data.data.state == 1 ) {
-				 that.list = data.data.Content;
-				 storage.setItem('activityList', JSON.stringify(that.list))
-			   }
-			 })
-		 }*/
+
         that.listLoading = true;
         that.$axios.post('/Home/ActicityOnload', {
           ActivityName: this.keyWord
@@ -214,6 +202,7 @@
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
         // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
@@ -221,6 +210,8 @@
         this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
         this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
         this.sendDialogData.ActivityStoreCode = this.list[ realIndex ].ActivityStoreCode;
+        this.sendDialogData.realStoreCode = this.list[ realIndex ].StoreCode;
+        this.sendDialogData.StoreValidity = this.list[ realIndex ].StoreValidity;
         this.sendDialogData.ActivityEmployeeCode = this.list[ realIndex ].ActivityEmployeeCode;
         this.sendDialogData.DeviceList = this.list[ realIndex ].DeviceList;
         this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
@@ -228,6 +219,7 @@
         this.sendDialogData.DogType='up_date';
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         this.sendDialogData.ID = row.ID;
+        console.log(row);
         console.log(this.sendDialogData);
       }
       , deleteItem(index, row) {

@@ -19,6 +19,7 @@
       <el-select
         v-model="searchData.brand"
         clearable
+        @clear="getList"
         @change="getList"
         placeholder="品牌选择"
       >
@@ -32,7 +33,9 @@
       </el-select>
       <el-cascader
         :options="catalogList"
+        v-model="searchData.catalog"
         clearable
+        @change="getList"
         change-on-select
         :props="props"
         placeholder="品类选择"
@@ -77,7 +80,7 @@
           </el-button>
         </template>
       </el-table-column>
-   
+      
       <el-table-column
         label="产品名称"
         prop="ProductName"
@@ -108,7 +111,7 @@
         label="所属品牌"
         prop="ProductBrand"
         align="center"
-        width="225"
+        width="185"
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
@@ -122,6 +125,14 @@
       <el-table-column
         label="原价"
         prop="cost"
+        align="center"
+        width="100"
+        sortable
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column
+        label="活动价"
+        prop="spSale"
         align="center"
         width="100"
         sortable
@@ -188,7 +199,7 @@
         searchData: {
           ProductName: '',
           brand: '',
-          catalog: ''
+          catalog: []
         },
         sendDialogData: {
           ProductName: '',
@@ -240,19 +251,26 @@
       }
       ,
       getList(update) {
+        console.log(update);
         let that = this;
         if ( storage.getItem('productList') && !update ) {
-          that.list = JSON.parse(storage.getItem('productList'))
+          that.list = JSON.parse(storage.getItem('productList'));
           that.dataLoading = false;
           that.isListChange = true;
         } else {
           that.dataLoading = true;
-          that.$axios.post('/Home/OnloadProductList', {})
+          that.$axios.post('/Home/OnloadProductList', {
+            ProductName: that.searchData.ProductName,
+            ProductBrandID: that.searchData.brand,
+            ProductClassID: that.searchData.catalog[ that.searchData.catalog.length - 1 || 0 ]
+          })
             .then(data => {
               console.log(data);
               if ( data.data.state == 1 ) {
                 that.list = data.data.Content;
-                storage.setItem('productList', JSON.stringify(that.list))
+                if ( update === 'update' ) {
+                  storage.setItem('productList', JSON.stringify(that.list))
+                }
                 
               }
               that.dataLoading = false;
@@ -260,17 +278,6 @@
             })
         }
         
-        /*        that.$axios.post('/Home/OnloadProductList', {})
-				  .then(data => {
-					console.log(data);
-					if ( data.data.state == 1 ) {
-					  that.list = data.data.Content;
-					  storage.setItem('productList', JSON.stringify(that.list))
-		  
-					}
-					that.dataLoading = false;
-					that.isListChange = true;
-				  })*/
       }
       ,
       getBrandList() {
@@ -300,8 +307,8 @@
         
       },
       getCatalogList() {
-        if ( this.$store.state.catalog.length ) {
-          this.catalogList = this.$store.state.catalog;
+        if ( storage.getItem('catalog') ) {
+          this.catalogList = JSON.parse(storage.getItem('catalog'))
         } else {
           const that = this;
           that.$axios.post('/Home/OnloadProductClassList')

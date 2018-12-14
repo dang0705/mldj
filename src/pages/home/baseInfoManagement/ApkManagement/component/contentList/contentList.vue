@@ -194,13 +194,7 @@
               ID: row.ID
             })
               .then(data => {
-                that.$axios.post('/Home/OnloadApkList', {
-                  ApkName: this.keyWord
-                })
-                  .then(res => {
-                    that.list = res.data.Content;
-                    that.$store.state.isApkUpdateData = false;
-                  })
+                that.getList()
               })
           })
           .catch(() => {

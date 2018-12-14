@@ -12,7 +12,9 @@
         label-width="120px"
         align="left"
       >
-        
+        <el-form-item prop="ApkName" label="版本名称">
+          <el-input v-model="formData.ApkName" clearable minlength="1" maxlength="10"></el-input>
+        </el-form-item>
         <el-form-item prop="ApkCode" label="版本编号">
           <el-input
             :autofocus="true"
@@ -20,9 +22,6 @@
             clearable
             minlength="1"
             maxlength="10"></el-input>
-        </el-form-item>
-        <el-form-item prop="ApkName" label="版本名称">
-          <el-input v-model="formData.ApkName" clearable minlength="1" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="ApkDec" label="版本描述">
           <el-input type="textarea" v-model="formData.ApkDec" maxlength="250"></el-input>
@@ -119,6 +118,8 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.uploadProgress = 0;
+          this.cancel = null;
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
             this.alertTitle = '编辑版本'
@@ -136,11 +137,11 @@
     methods: {
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
-          this.cancel();
-          if ( this.uploadProgress === 0 || this.uploadProgress === 100 ) {
-            this.$emit('closeAlert', 'n');
+          if ( (this.uploadProgress !== 0 || this.uploadProgress !== 100) &&this.cancel ) {
+            this.cancel();
+            this.$message.error('您已取消上次')
           }
-          
+          this.$emit('closeAlert', 'n');
         } else {
           this.$emit('closeAlert');
         }
@@ -173,9 +174,9 @@
         if ( this.editOrAdd === 'up_date' ) {
           myForm.append('ID', this.editData.ID);
         }
-  
-        let CancelToken=that.$axios.CancelToken;
-  
+        
+        let CancelToken = that.$axios.CancelToken;
+        
         const options = {
           url: '/Home/ApkSave',
           data: myForm,
@@ -183,7 +184,7 @@
           headers: {
             'Content-Type': 'multipart/form-data'
           },
-          cancelToken: new CancelToken(function executor(c) {
+          cancelToken: new CancelToken((c) => {
             that.cancel = c;
             console.log(c)
             // 这个参数 c 就是CancelToken构造函数里面自带的取消请求的函数，这里把该函数当参数用

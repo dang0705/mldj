@@ -191,7 +191,7 @@
       gitList(keyWord, name) {
         let that = this;
         console.log(keyWord);
-        if ( (storage.getItem('store') && !name) && !keyWord instanceof Array ) {
+        if ( (storage.getItem('store') && (!name || !keyWord)) ||(keyWord && !keyWord instanceof Array) ) {
           that.storeList = JSON.parse(storage.getItem('store'));
           that.dataLoading = false;
           that.isListChange = true;
@@ -247,7 +247,7 @@
     watch: {
       'isStoreAlertShow': function () {
         if ( this.isStoreAlertShow ) {
-          this.getStoreSelectedModel = this.storeSelectedModel
+          this.getStoreSelectedModel = this.storeSelectedModel;
           console.log(this.getStoreSelectedModel);
           // this.getStoreSelectedModel=this.storeSelectedModel;
           // console.log(this.getStoreSelectedModel);
@@ -256,9 +256,11 @@
       }
     },
     mounted() {
-      this.getStoreSelectedModel = this.storeSelectedModel
+      this.getStoreSelectedModel = this.storeSelectedModel;
+      console.log(this.getStoreSelectedModel);
+      
       this.getChannelList();
-   
+      
       // this.getProductClass()
     }
   }

@@ -75,6 +75,7 @@
     },
     data() {
       return {
+        cancel: null,
         uploadProgress: 0,
         alertTitle: '',
         uploadType: '.p12',
@@ -161,6 +162,8 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.uploadProgress = 0;
+          this.cancel = null;
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
             this.alertTitle = '编辑支付方式'
@@ -178,9 +181,11 @@
     methods: {
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
-          if ( this.uploadProgress === 0 || this.uploadProgress === 100 ) {
-            this.$emit('closeAlert', 'n');
+          if ( (this.uploadProgress !== 0 || this.uploadProgress !== 100) && this.cancel ) {
+            this.cancel();
+            this.$message.error('您已取消上次')
           }
+          this.$emit('closeAlert', 'n');
         } else {
           this.$emit('closeAlert');
         }
@@ -221,6 +226,7 @@
           myForm.append('ID', this.editData.ID);
         }
         
+        let CancelToken = that.$axios.CancelToken;
         const options = {
           url: '/Home/pay',
           data: myForm,
@@ -228,6 +234,9 @@
           headers: {
             'Content-Type': 'multipart/form-data'
           },
+          cancelToken: new CancelToken((c) => {
+            that.cancel = c
+          }),
           onUploadProgress: progressEvent => {
             var complete = (progressEvent.loaded / progressEvent.total * 100 | 0)
             this.uploadProgress = complete;

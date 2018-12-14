@@ -75,9 +75,9 @@
               :disabled="!scope.row.ImgBase"
             >
               <img :src="scope.row.ImgBase||noLogo" alt="" width="600px">
-              <img :src="scope.row.ImgBase||noLogo" slot="reference" alt="" width="40" height="40" style="vertical-align: middle;cursor: pointer">
+              <img :src="scope.row.ImgBase||noLogo" slot="reference" alt="" width="40" height="40"
+                   style="vertical-align: middle;cursor: pointer">
             </el-popover>
-          
           </template>
         </el-table-column>
         <el-table-column
@@ -85,6 +85,12 @@
           align="center"
           width="200"
           prop="ProductName"
+        ></el-table-column>
+        <el-table-column
+          label="产品品类（最末级）"
+          align="center"
+          width="200"
+          prop="ProductClassName"
         ></el-table-column>
       </el-table>
       <el-pagination
@@ -212,6 +218,7 @@
       }
       ,
       handleProductSelect(val) {
+        console.log(val);
         this.productSelectList = val
         this.$emit('productSelected', this.productSelectList)
         // console.log('this.productSelectList', this.productSelectList);
@@ -222,7 +229,7 @@
         that.$nextTick(() => {
           that.selectedProductList.forEach((item, i) => {
             that.productList.forEach((_item, _i) => {
-              if ( item.ProductCode === _item.productCode ) {
+              if ( parseInt(item.ProductCode) === _item.id ) {
                 that.$refs.products.toggleRowSelection(_item)
               }
             })
@@ -251,6 +258,8 @@
       'isProductAlertShow': function () {
         if ( this.isProductAlertShow ) {
           this.gitList()
+          console.log(this.selectedProductList);
+  
           // console.log(this.selectedProductList);
         }
       }

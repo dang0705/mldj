@@ -151,7 +151,7 @@
         tableDataList: [],
         cargoWayName: '',
         upLoadTitle: '',
-        uploadType: 'image/jpeg',
+        uploadType: 'image/jpeg,image/png',
         defaultColumn: 8,
         defaultRows: 5,
         productSize1: 50,
