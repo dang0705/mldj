@@ -13,7 +13,7 @@
       :file-list="myFileList"
     >
       <img v-if="imgUrl||clearSrc" :src="imgUrl||clearSrc" v-model="form.imgUrl" width="200px" class="avatar">
-      <i  class="el-icon-plus uploader-icon" v-if="listType==='picture'&&(!imgUrl)"></i>
+      <i class="el-icon-plus uploader-icon" v-if="listType==='picture'&&!imgUrl"></i>
       <el-button size="small" type="primary" v-if="listType==='text'">上传文件</el-button>
       <!--<el-tag v-if="fileName">{{fileName}}</el-tag>-->
     </el-upload>
@@ -83,7 +83,7 @@
         return this.imagelist.url = clearImg ? '' : this.imagelist.url
       }
     },
- 
+    
     methods: {
       uploadOnChange(file) {
         console.log("——————————change——————————");
@@ -129,6 +129,8 @@
       console.log(this.fileName);
       this.uploadType = this.getUploadType;
       this.isShow = this.isDisplay;
+      console.log(this.imgUrl);
+      console.log(this.form.imgUrl);
     }
   }
 </script>

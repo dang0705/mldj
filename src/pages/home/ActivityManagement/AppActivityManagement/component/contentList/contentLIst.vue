@@ -33,13 +33,15 @@
         align="center"
       >
         <template slot-scope="scope">
-          <el-button size="small"
-                     icon="el-icon-edit" circle
-                     @click="getData(scope.$index,scope.row)"
-          ></el-button>
           <el-button type="danger" icon="el-icon-delete" circle size="small"
                      @click="deleteItem(scope.$index,scope.row)">
           </el-button>
+          <el-button size="small"
+                     v-if="!scope.row.ApprovalStataus"
+                     icon="el-icon-edit" circle
+                     @click="getData(scope.$index,scope.row)"
+          ></el-button>
+         
         </template>
       </el-table-column>
       

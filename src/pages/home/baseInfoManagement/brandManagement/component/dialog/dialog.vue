@@ -10,12 +10,13 @@
       width="600px"
     >
       <div id="imgWrapper">
-        <upload :isClose="isClose"
-                :imgUrl="formData.ImgBase"
-                @closeDialog="handleClose"
-                @getBase64Url="getBase64Url"
-                :getUpLoadTitle="upLoadTitle"
-                :getUploadType="uploadType">
+        <upload
+          :isClose="isClose"
+          :imgUrl="formData.ImgBase"
+          @closeDialog="handleClose"
+          @getBase64Url="getBase64Url"
+          :getUpLoadTitle="upLoadTitle"
+          :getUploadType="uploadType">
         
         </upload>
       </div>
@@ -162,10 +163,10 @@
     methods: {
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
-          this.$emit('closeAlert','n');
-        }else {
+          this.$emit('closeAlert', 'n');
+        } else {
           this.$emit('closeAlert');
-  
+          
         }
         this.formData.ImgBase = '';
       },
@@ -174,7 +175,7 @@
         this.$refs[ 'upload' ].resetFields();
         this.isClose = true;
       },
-
+      
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
         const isPNG = file.type === 'image/png';
@@ -236,8 +237,10 @@
   .dialogWrapper
     #imgWrapper, #info
       display inline-block
+    
     #imgWrapper
-     vertical-align text-bottom
+      vertical-align text-bottom
+    
     #info
       width: 60%
       margin-left: 20px

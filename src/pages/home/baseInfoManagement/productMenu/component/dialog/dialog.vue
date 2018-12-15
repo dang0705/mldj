@@ -12,6 +12,7 @@
       <div class="basInfo">
         <div class="uploadImg">
           <upload
+            :isClose="isClose"
             :imgUrl="formData.ImgBase"
             @closeDialog="handleClose"
             @getBase64Url="getBase64Url"
@@ -146,6 +147,7 @@
         type: Object
       }
     },
+    
     data() {
       return {
         list: [],
@@ -287,19 +289,19 @@
             this.formData = this.editData;
             // this.ProductClassId = JSON.parse(this.formData.ProductClassId)
             // this.catalogSelect = this.formData.ProductClassId ;
-            this.ProductClassId = this.formData.ProductClassId
+            this.ProductClassId = this.formData.ProductClassId;
             console.log(this.formData);
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑产品';
             Msg = '编辑成功'
           } else {
-            this.ProductClassId = '';
+            this.ProductClassId = [];
             this.alertTitle = '新增产品';
+            this.formData.ImgBase='';
             Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
         } else {
-        
         }
       }
     },
@@ -355,15 +357,19 @@
         console.log(this.catalogList);
       },
       getBase64Url(url) {
-        this.formData.ImgBase = url;
+        if ( this.isAlertShow ) {
+          this.formData.ImgBase = url;
+        }
       },
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
+          // this.formData.ImgBase = '';
           this.$emit('closeAlert', 'n');
-          
+  
         } else {
           this.$emit('closeAlert')
         }
+        this.isClose = true;
         this.$emit('closeAlert');
         this.formData.ProductName
           = this.formData.ProductEnglish
@@ -374,7 +380,7 @@
         this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 100;
         this.formData.ProductClassId = '';
         this.formData.ProductBrandId = '';
-        this.editFormData.ImgBase = ''
+        // this.editFormData.ImgBase = ''
       },
       confirmUpload(obj) {
         if ( this.formData.ProductName === '' ) {

@@ -57,12 +57,15 @@
               </el-form-item>
             </el-form>
           </div>
-          <div v-else>
+          <div v-else v-show="editOrAdd==='up_date'">
             <el-form
-              label-width="140px"
+              align="left"
             >
-              <el-form-item label="已被删除的门店：">
+              <el-form-item>
                 <el-tag size="small" type="info">{{selectedStoreObj.StoreName}}</el-tag>
+                
+                <!--<el-tag size="small" type="success">{{item.ProductName}}</el-tag>-->
+                <span>----该门店已被删除,请重新选择</span>
               </el-form-item>
             </el-form>
           
@@ -80,10 +83,12 @@
                           v-if="item.number>0"
             >
               <el-tag size="small" type="success">{{item.ProductName}}</el-tag>
-              <img :src="item.ImgBase" alt="">
+              <span v-if="item.Validity===0">----上一次所选择的该产品已被删除</span>
+              
               <el-input-number
                 size="small"
                 v-model="item.number"
+                v-if="item.Validity>0||(item.Validity===undefined&&item.number>0)"
                 @change="ifNumberIsZero"
                 @input.native="ifNumberIsZero"
               ></el-input-number>
@@ -104,9 +109,9 @@
           </el-select>
           <div id="disabledDevice" style="text-align: left;">
             
-            <span v-if="disabledDeviceArr.length">已停用的设备：</span>
+            <span v-if="disabledDeviceArr.length">选中且被停用的设备：</span>
             <template v-for="(item,i) in disabledDeviceArr">
-              <el-tag  type="info">{{item}}</el-tag>
+              <el-tag type="info">{{item}}</el-tag>
             </template>
           </div>
         </el-form-item>
@@ -268,10 +273,8 @@
             this.selectedProductList = this.formData.ProductList;
             
             console.log(this.storeSelectedModel);
-            // console.log(this.formData.ProductList);
-            // console.log(this.selectedProductList);
             const deviceArr = this.formData.DeviceList
-              , length = deviceArr.length
+              , length = deviceArr.length;
             console.log(deviceArr);
             for ( var i = 0; i < length; i++ ) {
               if ( deviceArr[ i ].Validity ) {
@@ -280,13 +283,15 @@
                 this.disabledDeviceArr.push(deviceArr[ i ].DeviceName)
               }
             }
-            // this.selectedDeviceArr = JSON.parse(this.formData.DeviceList);
             console.log(this.formData);
             console.log(this.disabledDeviceArr);
             this.alertTitle = '编辑活动';
             Msg = '编辑成功';
           } else {
-            
+            this.selectedStoreObj = {};
+            this.storeSelectedModel = '';
+            console.log(this.selectedStoreObj);
+            console.log(this.storeSelectedModel);
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
@@ -401,7 +406,7 @@
         this.formData.ProductList = JSON.stringify(this.selectedProductList);
         this.formData.DeviceList = JSON.stringify(this.selectedDeviceArr);
         this.formData.ActivityEmployeeCode = storage.getItem('userName');
-        console.log(this.storeSelectedModel);
+        console.log(this.selectedProductList);
         
         if ( !that.formData.ActivityName ) {
           that.$message.error('活动名称不能为空');
@@ -413,7 +418,7 @@
           that.$message.error('门店必须选择');
           return
           
-        } else if ( this.formData.ProductList === '[]' ) {
+        } else if ( this.selectedProductList === [] || (this.selectedProductList[ 0 ].Validity !== undefined && this.selectedProductList[ 0 ].Validity === 0) ) {
           that.$message.error('至少要选择一个产品');
           return
         } else if ( this.formData.DeviceList === '[]' ) {
@@ -478,9 +483,8 @@
       margin-left: 0 !important
     
     .el-tag--small
-      vertical-align super
+      vertical-align middle
     
     div.el-input-number
-      float right
       width: 130px !important
 </style>

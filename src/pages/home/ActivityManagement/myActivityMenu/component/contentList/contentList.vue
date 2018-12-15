@@ -33,20 +33,37 @@
         align="center"
       >
         <template slot-scope="scope">
+          <!--<el-button type="danger" icon="el-icon-delete" circle size="small"-->
+          <!--@click="deleteItem(scope.$index,scope.row)">-->
+          <!--</el-button>-->
           <el-button size="small"
-                     icon="el-icon-edit" circle
+                     icon="el-icon-edit"
+                     circle
                      @click="getData(scope.$index,scope.row)"
           ></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>
+        
         </template>
       </el-table-column>
-      
+      <el-table-column
+        label="活动状态"
+        width="180"
+      >
+        <template slot-scope="scope">
+          <el-tag :type="tagType(scope.row.ApprovalStataus)" v-text="tagText(scope.row.ApprovalStataus)"></el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         label="活动名称"
         prop="ActivityName"
-        width="180"
+        width="220"
+        align="center"
+      >
+      </el-table-column>
+      <el-table-column
+        label="活动负责人"
+        prop="EmployeeName"
+        width="220"
+        :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
@@ -57,30 +74,23 @@
         align="center"
       >
       </el-table-column>
-      <el-table-column
-        label="CRM门店"
-        prop="CRMStoreCode"
-        width="180"
-        :show-overflow-tooltip="true"
-        align="center"
-      >
-      </el-table-column>
+      <!-- <el-table-column
+		 label="CRM门店"
+		 prop="CRMStoreCode"
+		 width="180"
+		 :show-overflow-tooltip="true"
+		 align="center"
+	   >
+	   </el-table-column>-->
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
-        width="180"
+        width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
-      <el-table-column
-        label="活动负责人"
-        prop="ActivityEmployeeCode"
-        width="180"
-        :show-overflow-tooltip="true"
-        align="center"
-      >
-      </el-table-column>
+      
       <el-table-column label="增加+">
       </el-table-column>
     
@@ -133,9 +143,6 @@
         id: '',
         sendDialogData: {
           ActivityCode: '',
-          CRMStoreCode: '',
-          ActivityName: '',
-          ID: '',
         }
         
         // isUpdateDate:false
@@ -152,6 +159,32 @@
         if ( val && val.length ) {
           this.currentPage = val[ 0 ];
           this.pageSize = val[ 1 ]
+        }
+      },
+      tagType(val) {
+        let type;
+        if ( !val ) {
+          return type = 'info'
+        } else if ( val === 1 ) {
+          return type = 'warning'
+        } else if ( val === 2 ) {
+          return type = 'success'
+        } else if ( val === 3 ) {
+          return type = ''
+        }
+        
+      },
+      tagText(val) {
+        let text;
+        if ( !val ) {
+          return text = '未通过'
+        } else if ( val === 1 ) {
+          return text = '待审核'
+        } else if ( val === 2 ) {
+          return text = '已通过'
+        } else if ( val === 3 ) {
+          return text = '已完成'
+    
         }
       },
       getCurrentPage(currentPage) {
@@ -173,20 +206,7 @@
       },
       getList(update) {
         let that = this;
-        /* if ( storage.getItem('activityList') && !update ) {
-		   that.list = JSON.parse(storage.getItem('activityList'))
-		 } else {
-		   that.listLoading = true;
-		   that.$axios.post('/Home/ActicityOnload', {
-			 ActivityName: this.keyWord
-		   })
-			 .then(data => {
-			   if ( data.data.state == 1 ) {
-				 that.list = data.data.Content;
-				 storage.setItem('activityList', JSON.stringify(that.list))
-			   }
-			 })
-		 }*/
+        
         that.listLoading = true;
         that.$axios.post('/Home/ActicityOnload', {
           ActivityName: this.keyWord
@@ -210,9 +230,15 @@
         }
       }
       , getData(index, row) {
-        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
-        this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.$axios.post('/Home/ActivityStepOnload',{
+          type:'next',
+          ActivityCode:row.ActivityCode
+        }).then(data=>{
+          console.log(data);
+        })
+       /* this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
         // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
@@ -220,14 +246,15 @@
         this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
         this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
         this.sendDialogData.ActivityStoreCode = this.list[ realIndex ].ActivityStoreCode;
+        this.sendDialogData.realStoreCode = this.list[ realIndex ].StoreCode;
+        this.sendDialogData.StoreValidity = this.list[ realIndex ].StoreValidity;
         this.sendDialogData.ActivityEmployeeCode = this.list[ realIndex ].ActivityEmployeeCode;
         this.sendDialogData.DeviceList = this.list[ realIndex ].DeviceList;
         this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
         this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
-        this.sendDialogData.DogType='up_date';
-        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
-        this.sendDialogData.ID = row.ID;
-        console.log(this.sendDialogData);
+        this.sendDialogData.DogType = 'up_date';
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));*/
+        this.sendDialogData.ActivityCode = row.ActivityCode;
       }
       , deleteItem(index, row) {
         let that = this;
