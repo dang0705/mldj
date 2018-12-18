@@ -110,6 +110,7 @@
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -176,25 +177,35 @@
           console.log(this.dialogType);
         }
       },
-      getList(city) {
+      getList(update) {
         let that = this;
-        that.$axios.post('/Home/OnloadCargoTypeList', {
-          CargoName: that.keyWord
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('cargoWayList') && !update ) {
+          that.list = JSON.parse(storage.getItem('cargoWayList'));
+          that.dataLoading = false;
+          that.isListChange = true;
+        } else {
+          that.$axios.post('/Home/OnloadCargoTypeList', {
+            CargoName: that.keyWord
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                if ( (update && update === 'update') || !update ) {
+                  storage.setItem('cargoWayList', JSON.stringify(that.list))
+                }
+              }
+              that.dataLoading = false;
+              that.isListChange = true;
+            })
+        }
+        
       }
       ,
       closeAlert(n) {
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList();
+          this.getList('update');
         }
       }
       ,
@@ -210,7 +221,8 @@
         this.sendDialogData.ID = row.ID;
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
-      , deleteItem(index, row) {
+      ,
+      deleteItem(index, row) {
         let that = this;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.$confirm('此操作将永久删除该货道, 是否继续?', '提示', {
@@ -224,7 +236,7 @@
               ID: row.ID
             })
               .then(() => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {

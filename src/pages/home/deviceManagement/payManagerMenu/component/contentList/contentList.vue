@@ -95,6 +95,7 @@
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -165,19 +166,28 @@
           this.dialogType = 'a_dd';
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
-        that.list = [];
-        that.$axios.post('/Home/payList', {
-          payname: this.keyWord,
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('payment') && !update ) {
+          this.list = JSON.parse(storage.getItem('payment'));
+          that.dataLoading = false;
+          that.isListChange = true;
+        } else {
+          that.$axios.post('/Home/payList', {
+            payname: this.keyWord,
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                if ( (update && update === 'update') || !update ) {
+                  storage.setItem('payment', JSON.stringify(that.list))
+                }
+              }
+              that.dataLoading = false;
+              that.isListChange = true;
+            })
+        }
+        
       }
       
       ,
@@ -185,7 +195,7 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList();
+          this.getList('update');
         }
       }
       , getData(index, row) {
@@ -204,13 +214,10 @@
         let that = this;
         that.$axios.post('/Home/DeviceLabelSave', {
           DogType: 'd_elete',
-          SSLCERT_PATH: window.localStorage.getItem('userName'),
-          payname: row.payname,
-          Validity: row.Validity,
           ID: row.ID
         })
           .then(() => {
-            that.getList();
+            that.getList('update');
           })
       }
       

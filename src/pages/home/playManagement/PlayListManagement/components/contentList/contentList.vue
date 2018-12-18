@@ -4,6 +4,8 @@
       <data-picker
         @getDate="getDate"
         :allDate="true"
+        :isSearch="true"
+      
       ></data-picker>
       <el-input
         autofocus
@@ -300,8 +302,13 @@
       }
       ,
       getDate(val) {
-        this.defaultAndSearchInfo.PlayListStartDate = val[ 0 ];
-        this.defaultAndSearchInfo.PlayListEndDate = val[ 1 ];
+        if ( val ) {
+          this.defaultAndSearchInfo.PlayListStartDate = val[ 0 ];
+          this.defaultAndSearchInfo.PlayListEndDate = val[ 1 ];
+        } else {
+          this.defaultAndSearchInfo.PlayListStartDate = this.defaultAndSearchInfo.PlayListEndDate = ''
+        }
+        
         this.getList()
       }
       ,

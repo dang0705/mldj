@@ -41,7 +41,6 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               :row-style="rowStyle"
-              @header-click="add"
               v-loading="listLoading"
     
     >
@@ -61,15 +60,15 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column
+     <!-- <el-table-column
         label="操作"
         width="100"
         align="center"
       >
         <template slot-scope="scope">
-       <!--   <el-button type="danger" icon="el-icon-delete" circle size="small"
+        &lt;!&ndash;  <el-button type="danger" icon="el-icon-delete" circle size="small"
                      @click="deleteItem(scope.$index,scope.row)">
-          </el-button>-->
+          </el-button>&ndash;&gt;
           <el-button size="small"
                      v-if="!scope.row.ApprovalStataus"
                      icon="el-icon-edit" circle
@@ -77,12 +76,12 @@
           ></el-button>
         
         </template>
-      </el-table-column>
+      </el-table-column>-->
       
       <el-table-column
         label="活动名称"
         prop="ActivityName"
-        width="340"
+        width="240"
         align="center"
       >
       </el-table-column>
@@ -108,15 +107,11 @@
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
-        width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
       
-      <el-table-column label="活动申请">
-      </el-table-column>
-    
     </el-table>
     <pagination
       :tableList="list"
@@ -125,10 +120,7 @@
       @pageSize="getPageSize"
       @defaultPaginationData="defaultPaginationData"
       @listChanged="listChanged"
-    
     ></pagination>
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
-                  :editData="sendDialogData"></alert-dialog>
   
   </div>
 </template>
@@ -244,16 +236,10 @@
         this.pageSize = pageSize
       }
       ,
-      addBtn({row, column, rowIndex, columnIndex}) {
-        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
+      addBtn({row, column, rowIndex, columnIndex},noAdd) {
+        return this.$myFunctions.tableHeadReset({row, column, rowIndex, columnIndex},noAdd);
       },
-      add(column, event) {
-        if ( column.label === '活动申请' ) {
-          this.isAlertShow = true;
-          this.dialogType = 'a_dd';
-          console.log(this.dialogType);
-        }
-      },
+      
       getList(update) {
         let that = this;
         
@@ -263,7 +249,7 @@
           OpenStartDate: this.searchData.startDate,
           OpenEndDate: this.searchData.endDate,
           ApprovalStataus: this.searchData.ApprovalStataus,
-          ActivityEmployeeCode:storage.getItem('userName')
+          ActivityEmployeeCode:''
         })
           .then(data => {
             if ( data.data.state == 1 ) {
@@ -311,18 +297,18 @@
       }
       , deleteItem(index, row) {
         let that = this;
-        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
+        this.$confirm('此操作将永久删除该活动, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            that.$axios.post('/Home/ChannelSave', {
+            that.$axios.post('/Home/ActivitySave', {
               DogType: 'd_elete',
               ID: row.ID
             })
               .then(() => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {

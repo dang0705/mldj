@@ -95,39 +95,22 @@
         console.log(item);
         this.firstLevelNavigationIndex = i;
         storage.setItem('menuSelected', i);
-        if ( item.navName === '基础数据管理' ) {
-          if ( storage.getItem('catalog') ) {
-            this.$store.commit('catalog', JSON.parse(storage.getItem('catalog')))
-          } else {
-            const that = this;
-            that.$axios.post('Home/OnloadProductClassList')
-              .then(data => {
-                if ( data.data.state === 1 ) {
-                  storage.setItem('catalog', JSON.stringify(data.data.Content))
-                }
-              })
-          }
-          if ( storage.getItem('brand') ) {
-            this.$store.commit('brand', JSON.parse(storage.getItem('brand')))
-          } else {
-            const that = this;
-            that.$axios.post('Home/OnloadBrandList')
-              .then(data => {
-                if ( data.data.state === 1 ) {
-                  storage.setItem('brand', JSON.stringify(data.data.Content))
-                }
-              })
-          }
-        }
-        else {
-          storage.removeItem('catalog');
-          storage.removeItem('brand');
-        }
         if ( this.firstLevelNavigationIndex !== 0 ) {
           this.$router.push(this.firstLevelNavigationArr[ this.firstLevelNavigationIndex ].subNav[ 0 ].subIndex);
         } else {
           this.$router.push('/homePage');
         }
+        storage.removeItem('catalog');
+        storage.removeItem('CRMStore');
+        storage.removeItem('brand');
+        storage.removeItem('store');
+        storage.removeItem('source');
+        storage.removeItem('device');
+        storage.removeItem('activityList');
+        storage.removeItem('productList');
+        storage.removeItem('channel')
+        storage.removeItem('cargoWayList');
+        storage.removeItem('employeeList')
       }
       ,
       logOut() {

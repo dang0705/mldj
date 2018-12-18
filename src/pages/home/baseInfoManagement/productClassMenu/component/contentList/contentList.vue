@@ -70,6 +70,7 @@
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage
   export default {
     name: "contentList",
     components: {
@@ -104,13 +105,7 @@
       }
     },
     mounted() {
-      if ( this.$store.state.catalog.length ) {
-        this.list = this.$store.state.catalog
-        this.listLoading = false;
-        this.isListChange = true;
-      } else {
-        this.getList()
-      }
+      this.getList()
     },
     methods: {
       listChanged() {
@@ -139,21 +134,30 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
         that.listLoading = true;
-        that.$axios.post('/Home/OnloadProductClassList', {
-          label: this.keyWord
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.listLoading = false;
-            that.isListChange = true;
-            that.$store.commit('catalog', that.list);
-            this.defaultPaginationData()
+        if ( storage.getItem('catalog') && !update ) {
+          that.list = JSON.parse(storage.getItem('catalog'));
+          that.listLoading = false;
+          that.isListChange = true;
+        } else {
+          that.$axios.post('/Home/OnloadProductClassList', {
+            label: this.keyWord
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                if ( update && update === 'update' || !update ) {
+                  storage.setItem('catalog', JSON.stringify(that.list))
+                }
+              }
+              that.listLoading = false;
+              that.isListChange = true;
+              this.defaultPaginationData()
+            })
+        }
+        
       }
       
       ,
@@ -161,7 +165,7 @@
         this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
       }
       ,
@@ -175,37 +179,6 @@
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         console.log(this.sendDialogData);
       }
-      /*, deleteItem(index, row) {
-        let that = this;
-        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            that.$axios.post('/Home/ChannelSave', {
-              DogType: 'd_elete',
-              ID: row.ID
-            })
-              .then(() => {
-                that.getList()
-              })
-          })
-          .catch(() => {
-          
-          })
-        
-      }*/
-      
-      
-    },
-    watch: {
-      '$store.state.isChannelUpdateData': function () {
-        if ( this.$store.state.isChannelUpdateData === true ) {
-          this.getList()
-        }
-      },
-      
     }
   }
 </script>

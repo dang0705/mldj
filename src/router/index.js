@@ -39,6 +39,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/ActivityManagement/myActivityMenu/myActivityMenu' ], resolve)
         },
         {
+          path: '/ActivityCheck',
+          name: 'ActivityCheck',
+          component: resolve => require([ '@/pages/home/ActivityManagement/ActivityCheck/ActivityCheck' ], resolve)
+        },
+        {
           path: '/BrandManagement',
           name: 'BrandManagement',
           component: resolve => require([ '@/pages/home/baseInfoManagement/BrandManagement/BrandManagement' ], resolve)
@@ -49,9 +54,9 @@ export default new Router({
           component: resolve => require([ '@/pages/home/baseInfoManagement/ApkManagement/ApkManagement' ], resolve)
         },
         {
-          path: '/SupplierManagement',
-          name: 'SupplierManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/SupplierManagement/SupplierManagement' ], resolve)
+          path: '/CRMStoreMenu',
+          name: 'CRMStoreMenu',
+          component: resolve => require([ '@/pages/home/baseInfoManagement/CRMStoreMenu/CRMStoreMenu' ], resolve)
         },
         {
           path: '/channelManagement',
@@ -59,11 +64,6 @@ export default new Router({
           component: resolve => require([ '@/pages/home/baseInfoManagement/channelManagement/channelManagement' ], resolve)
         },
 
-        {
-          path: '/warehouseManagement',
-          name: 'warehouseManagement',
-          component: resolve => require([ '@/pages/home/baseInfoManagement/warehouseManagement/warehouseManagement' ], resolve)
-        },
         {
           path: '/storeManagement',
           name: 'storeManagement',

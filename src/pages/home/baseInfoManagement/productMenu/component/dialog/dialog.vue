@@ -53,6 +53,15 @@
                       maxlength="12"
             ></el-input>
           </el-form-item>
+          <el-form-item
+            prop="productCode"
+            label="阿里编号："
+          >
+            <el-input v-model="formData.AliCode"
+                      clearable
+                      maxlength="12"
+            ></el-input>
+          </el-form-item>
           <el-form-item prop="ProductClassId" label="所属品类：">
             <el-cascader
               v-model="ProductClassId"
@@ -160,10 +169,10 @@
         cargoWayName: '',
         upLoadTitle: '',
         uploadType: 'image/jpeg,image/png',
-        
         alertTitle: '',
         ProductClassId: [],
         formData: {
+          AliCode: '',
           ProductName: '',
           ProductEnglish: '',
           productCode: '',
@@ -297,7 +306,7 @@
           } else {
             this.ProductClassId = [];
             this.alertTitle = '新增产品';
-            this.formData.ImgBase='';
+            this.formData.ImgBase = '';
             Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
@@ -342,18 +351,14 @@
         }
       },
       getCatalogList() {
-        if ( this.$store.state.catalog.length ) {
-          this.catalogList = this.$store.state.catalog;
-        } else {
-          const that = this;
-          that.$axios.post('/Home/OnloadProductClassList')
-            .then(data => {
-              if ( data.data.state == 1 ) {
-                that.catalogList = data.data.Content;
-                that.$store.commit('catalog', that.list);
-              }
-            })
-        }
+        const that = this;
+        that.$axios.post('/Home/OnloadProductClassList')
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.catalogList = data.data.Content;
+              that.$store.commit('catalog', that.list);
+            }
+          })
         console.log(this.catalogList);
       },
       getBase64Url(url) {
@@ -365,7 +370,7 @@
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           // this.formData.ImgBase = '';
           this.$emit('closeAlert', 'n');
-  
+          
         } else {
           this.$emit('closeAlert')
         }
@@ -383,6 +388,7 @@
         // this.editFormData.ImgBase = ''
       },
       confirmUpload(obj) {
+        console.log(this.ProductClassId);
         if ( this.formData.ProductName === '' ) {
           this.$message.error('产品名称不能为空');
           return
@@ -392,7 +398,10 @@
         } else if ( this.formData.productCode === '' ) {
           this.$message.error('产品编号不能为空');
           return
-        } else if ( this.ProductClassId === '' ) {
+        } else if ( this.formData.AliCode === '' ) {
+          this.$message.error('阿里编号不能为空');
+          return
+        } else if ( !this.ProductClassId.length ) {
           this.$message.error('产品品类不能为空');
           return
         } else if ( this.formData.ProductBrandId === '' ) {

@@ -17,7 +17,7 @@
         </i>
       </el-input>
       <el-select v-model="Validity" placeholder="全部状态"
-                 @change="change"
+                 @change="getList"
       >
         <el-option
           v-for="(item,i) in keySelect"
@@ -45,13 +45,13 @@
           <el-button size="small" title="编辑" icon="el-icon-edit" circle
                      @click="getData(scope.$index,scope.row)"></el-button>
           <el-button size="small" title="权限设置" icon="el-icon-setting" circle @click="rootConfig(scope.row)"></el-button>
-          <el-switch
+        <!--  <el-switch
             v-model="scope.row.Validity"
             :active-value="1"
             :inactive-value="0"
             @change=switchChange(scope.$index,scope.row)
           >
-          </el-switch>
+          </el-switch>-->
         </template>
       </el-table-column>
       
@@ -98,6 +98,7 @@
   import rootDialog from '../dialog/rootConfigDialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -160,9 +161,6 @@
         this.pageSize = pageSize
       }
       ,
-      change() {
-        this.getList()
-      },
       formatTime(row, column, cellValue, index) {
         return cellValue.split(' ')[ 0 ] + ' - ' + row.EndTime.split(' ')[ 0 ]
       },
@@ -172,6 +170,8 @@
         that.$axios.post('/OrganizationalRole/UpdateValidity', {
           Validity: row.Validity,
           ID: row.ID
+        }).then(() => {
+          this.getList('update')
         })
       },
       addBtn({row, column, rowIndex, columnIndex}) {
@@ -185,29 +185,38 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
         that.tableLoading = true;
-        that.$axios.post('/OrganizationalRole/GetRoleList', {
-          PageIndex: 1,
-          PageSize: 1000,
-          Validity: that.Validity,
-          RoleName: that.keyWord
-        })
-          .then(data => {
-            console.log(data);
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content.DataList;
-            }
-            that.tableLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('roleList') && !update ) {
+          that.list = JSON.parse(storage.getItem('roleList'));
+          that.tableLoading = false;
+          that.isListChange = true;
+        }else {
+          that.$axios.post('/OrganizationalRole/GetRoleList', {
+            PageIndex: 1,
+            PageSize: 1000,
+            Validity: that.Validity,
+            RoleName: that.keyWord
           })
+            .then(data => {
+              console.log(data);
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content.DataList;
+                if ( update && update === 'update' || !update ) {
+                  storage.setItem('roleList', JSON.stringify(that.list))
+                }
+              }
+              that.tableLoading = false;
+              that.isListChange = true;
+            })
+        }
       }
       ,
       closeAlert(n) {
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList();
+          this.getList('update');
         }
       }
       ,

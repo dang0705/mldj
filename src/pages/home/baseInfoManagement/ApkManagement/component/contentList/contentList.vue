@@ -76,6 +76,7 @@
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -143,26 +144,38 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
         that.dataLoading = true;
-        that.$axios.post('/Home/OnloadApkList', {
-          ApkName: this.keyWord
-        })
-          .then(data => {
-            if ( data.data.state == 1 ) {
-              that.list = data.data.Content;
-            }
-            that.dataLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('apkList') && !update ) {
+          this.list = JSON.parse(storage.getItem('apkList'));
+          that.dataLoading = false;
+          that.isListChange = true;
+        } else {
+          that.$axios.post('/Home/OnloadApkList', {
+            ApkName: this.keyWord
           })
+            .then(data => {
+              if ( data.data.state == 1 ) {
+                that.list = data.data.Content;
+                if ( (update && update === 'update') || !update ) {
+                  storage.setItem('apkList', JSON.stringify(that.list))
+                  
+                }
+              }
+              that.dataLoading = false;
+              that.isListChange = true;
+            })
+        }
+        
+        
       }
       
       ,
       closeAlert(n) {
         this.dialogType = 'up_date';
         if ( !n ) {
-          this.getList()
+          this.getList('update')
         }
         this.isAlertShow = false
       }
@@ -194,7 +207,7 @@
               ID: row.ID
             })
               .then(data => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {

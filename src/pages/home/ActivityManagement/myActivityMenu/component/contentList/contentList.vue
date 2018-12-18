@@ -23,12 +23,11 @@
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
               :row-style="rowStyle"
-              @header-click="add"
               v-loading="listLoading"
     
     >
       <el-table-column
-        label="操作"
+        label="审批"
         width="100"
         align="center"
       >
@@ -44,14 +43,7 @@
         
         </template>
       </el-table-column>
-      <el-table-column
-        label="活动状态"
-        width="180"
-      >
-        <template slot-scope="scope">
-          <el-tag :type="tagType(scope.row.ApprovalStataus)" v-text="tagText(scope.row.ApprovalStataus)"></el-tag>
-        </template>
-      </el-table-column>
+    
       <el-table-column
         label="活动名称"
         prop="ActivityName"
@@ -85,14 +77,12 @@
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
-        width="200"
         :show-overflow-tooltip="true"
         align="center"
       >
       </el-table-column>
       
-      <el-table-column label="增加+">
-      </el-table-column>
+     
     
     </el-table>
     <pagination
@@ -194,8 +184,8 @@
         this.pageSize = pageSize
       }
       ,
-      addBtn({row, column, rowIndex, columnIndex}) {
-        return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
+      addBtn({row, column, rowIndex, columnIndex},noAdd) {
+        return this.$myFunctions.tableHeadReset({row, column, rowIndex, columnIndex},noAdd);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {
@@ -206,19 +196,21 @@
       },
       getList(update) {
         let that = this;
-        
         that.listLoading = true;
         that.$axios.post('/Home/ActicityOnload', {
-          ActivityName: this.keyWord
+          ActivityName: this.keyWord,
+          ApprovalStataus:1
         })
           .then(data => {
             if ( data.data.state == 1 ) {
               that.list = data.data.Content;
-              storage.setItem('activityList', JSON.stringify(that.list))
+              if ( update && update === 'update' || !update ) {
+                storage.setItem('activityList', JSON.stringify(that.list))
+              }
             }
+            that.listLoading = false;
+            that.isListChange = true;
           })
-        that.listLoading = false;
-        that.isListChange = true;
       }
       
       ,
@@ -231,16 +223,21 @@
       }
       , getData(index, row) {
         this.isAlertShow = true;
-        this.$axios.post('/Home/ActivityStepOnload',{
-          type:'next',
-          ActivityCode:row.ActivityCode
-        }).then(data=>{
-          console.log(data);
-        })
-       /* this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+    
+        /*    this.$axios.post('/Home/ActivityStepOnload',{
+			  type:'next',
+			  ActivityCode:row.ActivityCode
+			}).then(data=>{
+			  console.log(data);
+			})*/
+    
+        this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
         this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.ID = row.ID;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
         this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
         this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
@@ -253,7 +250,7 @@
         this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
         this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
         this.sendDialogData.DogType = 'up_date';
-        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));*/
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         this.sendDialogData.ActivityCode = row.ActivityCode;
       }
       , deleteItem(index, row) {
@@ -269,7 +266,7 @@
               ID: row.ID
             })
               .then(() => {
-                that.getList()
+                that.getList('update')
               })
           })
           .catch(() => {

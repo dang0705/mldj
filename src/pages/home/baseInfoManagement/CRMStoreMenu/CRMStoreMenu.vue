@@ -1,5 +1,6 @@
 <template>
-  <div id="SupplierManagementWrapper">
+  <div id="CRMSStoreManagementWrapper">
+  
     <content-list>
     </content-list>
   </div>
@@ -8,7 +9,7 @@
 <script>
   import contentList from './component/contentList/contentList'
 	export default {
-		name: "SupplierManagement",
+		name: "CRMStoreManagement",
     components: {
       contentList
     }

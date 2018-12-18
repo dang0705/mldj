@@ -255,7 +255,8 @@
           url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
         if ( storage.getItem('source') && !update ) {
           that.list = JSON.parse(storage.getItem('source'))
-          
+          that.dataLoading = false;
+          that.isListChange = true;
         } else {
           that.dataLoading = true;
           that.$axios.post('/PlayManage/EmployeeFileAllList', url)
@@ -267,12 +268,11 @@
                   storage.setItem('source', JSON.stringify(that.list))
                 }
                 that.dataLoading = false;
+                that.isListChange = true;
               }
               
             })
         }
-        that.dataLoading = false;
-        that.isListChange = true;
       },
       addBtn({row, column, rowIndex, columnIndex}) {
         return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);

@@ -98,8 +98,8 @@
           ValidateCode: '59898989'
         }).then(data => {
           console.log(data);
-          const res = data.data.Content.UserInfo;
           if ( data.data.state == 1 ) {
+            const res = data.data.Content.UserInfo;
             that.$router.push('/homePage');
             storage.setItem('userName', that.loginData.userName);
             storage.setItem('password', that.loginData.password);
@@ -114,6 +114,9 @@
             storage.removeItem('activityList');
             storage.removeItem('productList');
             storage.removeItem('channel')
+            storage.removeItem('cargoWayList');
+            storage.removeItem('employeeList');
+            storage.removeItem('CRMStore');
           } else {
             that.$message.error('用户名或密码错误');
             that.createCode();

@@ -268,7 +268,7 @@
               console.log(data);
               if ( data.data.state == 1 ) {
                 that.list = data.data.Content;
-                if ( update === 'update' ) {
+                if ( (update && update === 'update') || !update ) {
                   storage.setItem('productList', JSON.stringify(that.list))
                 }
                 
@@ -334,6 +334,7 @@
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.ProductName = this.list[ realIndex ].ProductName;
+        this.sendDialogData.AliCode = this.list[ realIndex ].AliCode;
         this.sendDialogData.ProductEnglish = this.list[ realIndex ].ProductEnglish;
         this.sendDialogData.productCode = this.list[ realIndex ].productCode;
         this.sendDialogData.ProductClassId = JSON.parse(this.list[ realIndex ].ProductClassId);

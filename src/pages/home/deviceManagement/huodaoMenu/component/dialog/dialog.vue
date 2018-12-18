@@ -70,6 +70,12 @@
                              class="defaultRows"
             ></el-input-number>
           </el-form-item>
+          <el-form-item label="库存上限（件）：">
+            <el-input-number v-model="stock"
+                             :min="1"
+                             class="defaultRows"
+            ></el-input-number>
+          </el-form-item>
           <el-form-item label="产品尺寸（mm×mm）：">
             <el-input-number v-model="productSize1"
                              :min="5"
@@ -83,6 +89,8 @@
                              size="small"
             ></el-input-number>
           </el-form-item>
+        
+
         </el-form>
       
       </div>
@@ -156,6 +164,7 @@
         defaultRows: 5,
         productSize1: 50,
         productSize2: 50,
+        stock:6,
         alertTitle: '',
         formData: {
           CargoName: '',
@@ -246,7 +255,7 @@
               CargoX: i + getMax + '',
               CargoY: j + '',
               CargoIndex: i + '' + j,
-              CargoSize: this.productSize1.toString() + 'mm*' + this.productSize2.toString() + 'mm'
+              CargoSize: this.productSize1.toString() + 'mm*' + this.productSize2.toString() + 'mm',
             })
           }
         }
@@ -264,6 +273,11 @@
             // console.log(data);
             if ( data.data.state === 1 && !that.hasAjaxData ) {
               that.tableDataList = data.data.Content;
+              if ( data.data.Content.length ) {
+                that.stock=data.data.Content[0].CargoStock
+                
+              }
+  
             }
             for ( var i = 0; i < that.tableDataList.length; i++ ) {
               if ( i === 0 ) {
@@ -301,7 +315,8 @@
         this.dataLoading = true;
         this.tableDataList = [];
         this.defaultColumn = 8;
-        this.defaultRows = 5
+        this.defaultRows = 5;
+        this.stock=6;
       },
       confirmUpload(obj) {
         this.add(obj);
@@ -324,31 +339,38 @@
           } else if ( !this.defaultColumn ) {
             that.$message.error('每层单元格不能为空');
             return;
-          } else if ( !this.productSize1 || !this.productSize2 ) {
+          }
+          else if ( !this.productSize1 || !this.productSize2 ) {
             that.$message.error('请完善产品长宽尺寸');
+            return;
+          }
+          else if ( !this.stock ) {
+            that.$message.error('请填写库存上限');
             return;
           }
           
         }
         console.log(that.tableDataList);
         let json = {
-          CargoTypeList: that.tableDataList
+          CargoTypeList: that.tableDataList,
         };
+        console.log(that.stock);
         that.$axios.post('/Home/CargoTypeSave', this.formData)
           .then(data => {
             let res = data.data;
             if ( res.state == 1 ) {
-              that.$message.success(Msg);
-              that.handleClose(obj)
               if ( this.editOrAdd === 'up_date' ) {
                 that.$axios.post('/Home/CargoTypeSave', {
                   DogType: 'CargoBind',
                   CargoId: that.formData.ID,
+                  CargoStock:that.stock,
                   CargoTypeListString: JSON.stringify(json)
                 })
                   .then(data => {
                     console.log(data);
                     if ( data.data.state == 1 ) {
+                      that.$message.success(Msg);
+                      that.handleClose(obj)
                     } else {
                       that.$message.error(data.data.msg);
                     }
@@ -370,10 +392,10 @@
         this.formData.CityCode = code[ 1 ]
         
       },
-      
+  /*
       onChange(val) {
         this.formData.CargoCode = val;
-      }
+      }*/
     },
     mounted() {
     }

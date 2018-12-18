@@ -84,10 +84,18 @@
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
+        prop="DeviceMac"
+        label="激活状态"
+        :formatter="isDeviceActivity"
+        align="center"
+        width="100"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column
         prop="Address"
         label="地址"
         align="center"
-        width="520"
+        width="440"
         :show-overflow-tooltip="true">
       </el-table-column>
       
@@ -107,7 +115,10 @@
       @listChanged="listChanged"
     ></pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :id="id"
                   :editData="sendDialogData"></alert-dialog>
   
   </div>
@@ -204,12 +215,12 @@
             .then(data => {
               if ( data.data.state == 1 ) {
                 that.list = data.data.Content;
-                storage.setItem('device', JSON.stringify(that.list));
-                that.dataLoading = false;
-                that.isListChange = true;
-              } else {
-                that.list = [];
+                if ( update && update === 'update' || !update ) {
+                  storage.setItem('device', JSON.stringify(that.list));
+                }
               }
+              that.dataLoading = false;
+              that.isListChange = true;
             })
         }
         console.log(that.list);
@@ -235,12 +246,21 @@
           this.getList('update');
         }
       }
-      , getData(index, row) {
+      ,
+      getData(index, row) {
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(row);
         this.isAlertShow = true;
+        this.dialogType = 'up_date';
         if ( this.list.length ) {
           this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+          this.sendDialogData.DeviceMac = this.list[ realIndex ].DeviceMac;
+          this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
+          this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;
+          this.sendDialogData.CargoCode = parseInt(this.list[ realIndex ].CargoCode);
+          this.sendDialogData.APKCode = this.list[ realIndex ].APKCode;
+          this.sendDialogData.DeviceType = this.list[ realIndex ].DeviceType;
+          this.sendDialogData.PayCode = this.list[ realIndex ].PayCode;
           this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
           this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
           this.sendDialogData.Address = this.list[ realIndex ].Address;
@@ -248,10 +268,10 @@
           this.sendDialogData.ProvinceName = this.list[ realIndex ].ProvinceName ? this.list[ realIndex ].ProvinceName : '省份';
           this.sendDialogData.CityCode = this.list[ realIndex ].CityCode;
           this.sendDialogData.CityName = this.list[ realIndex ].CityName ? this.list[ realIndex ].CityName : '市';
-          this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
           this.sendDialogData.ID = row.ID;
+          this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
         }
-      
+        
       }
       ,
       switchChange(index, row) {
@@ -279,6 +299,11 @@
       ,
       cityFilter(city) {
         this.getList(city)
+      }
+      ,
+      isDeviceActivity(val) {
+        let activityStatus;
+        return activityStatus = val.DeviceMac ? '已激活' : '未激活'
       }
       
     }

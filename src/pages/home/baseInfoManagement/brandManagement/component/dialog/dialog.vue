@@ -16,7 +16,8 @@
           @closeDialog="handleClose"
           @getBase64Url="getBase64Url"
           :getUpLoadTitle="upLoadTitle"
-          :getUploadType="uploadType">
+          :getUploadType="uploadType"
+        >
         
         </upload>
       </div>
@@ -145,7 +146,7 @@
             this.formData.BrandShowText = this.editData.BrandShowText;
             this.formData.ID = this.editData.ID;
             this.formData.ImgBase = this.editData.ImgBase;
-            this.alertTitle = '编辑品牌'
+            this.alertTitle = '编辑品牌';
             Msg = '编辑成功'
           } else {
             for ( var i in  this.formData ) {

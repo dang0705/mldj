@@ -8,7 +8,7 @@
       type="daterange"
       align="center"
       unlink-panels
-      :clearable="false"
+      :clearable="isSearch"
       range-separator="到"
       start-placeholder="开始日期"
       end-placeholder="结束日期"
@@ -36,6 +36,9 @@
       isClearDate: {
         type: Boolean,
         
+      },
+      isSearch:{
+        type:Boolean
       }
     },
     watch: {

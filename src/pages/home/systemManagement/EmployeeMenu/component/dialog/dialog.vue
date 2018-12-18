@@ -35,7 +35,8 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="IsOrgLeader" label="是否负责人：" label-width="120px" v-if="editOrAdd==='a_dd'">
+        
+        <!--<el-form-item prop="IsOrgLeader" label="是否负责人：" label-width="120px" v-if="editOrAdd==='a_dd'">
           <el-select v-model="formData.IsOrgLeader">
             <el-option
               v-for="(item,i) in IsOrgLeaderList"
@@ -54,7 +55,7 @@
               :value="item.ID"
             ></el-option>
           </el-select>
-        </el-form-item>
+        </el-form-item>-->
       </el-form>
       
       <div slot="footer" class="dialog-footer">

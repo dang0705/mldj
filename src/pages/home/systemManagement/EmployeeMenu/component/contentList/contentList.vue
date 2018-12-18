@@ -47,7 +47,7 @@
         </i>
       </el-input>
       <el-select v-model="Validity" placeholder="请选择"
-                 @change="change"
+                 @change="getList"
       >
         <el-option
           v-for="(item,i) in keySelect"
@@ -143,6 +143,7 @@
   import alertDialog from '../dialog/dialog'
   import pagination from '@/component/common/pagination/pagination'
   
+  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -208,9 +209,7 @@
         this.pageSize = pageSize
       }
       ,
-      change() {
-        this.getList()
-      },
+      
       formatTime(row, column, cellValue, index) {
         return cellValue.split(' ')[ 0 ] + ' - ' + row.EndTime.split(' ')[ 0 ]
       },
@@ -220,6 +219,8 @@
         that.$axios.post('/Account/UpdateValidity', {
           Validity: row.Validity,
           ID: row.ID
+        }).then(() => {
+          this.getList('update');
         })
         
       },
@@ -234,29 +235,38 @@
           console.log(this.dialogType);
         }
       },
-      getList() {
+      getList(update) {
         let that = this;
         that.dataLoading = true;
-        that.$axios.post('/Account/GetEmployeeList', {
-          PageIndex: 1,
-          PageSize: 1000,
-          EmployeeName: that.keyWord,
-          Email: that.email,
-          Phone: that.mobileNumber,
-          Validity: that.Validity,
-        })
-          .then(data => {
-            that.list = data.data.Content.DataList;
-            that.dataLoading = false;
-            that.isListChange = true;
+        if ( storage.getItem('employeeList')&&!update ) {
+          that.list = JSON.parse(storage.getItem('employeeList'))
+          that.dataLoading = false;
+          that.isListChange = true;
+        }else {
+          that.$axios.post('/Account/GetEmployeeList', {
+            PageIndex: 1,
+            PageSize: 1000,
+            EmployeeName: that.keyWord,
+            Email: that.email,
+            Phone: that.mobileNumber,
+            Validity: that.Validity,
           })
+            .then(data => {
+              that.list = data.data.Content.DataList;
+              if ( update && update === 'update' || !update ) {
+                storage.setItem('employeeList',JSON.stringify(that.list))
+              }
+              that.dataLoading = false;
+              that.isListChange = true;
+            })
+        }
+       
       }
       ,
       closeAlert(n) {
-        this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
-          this.getList();
+          this.getList('update');
         }
       }
       ,
@@ -272,7 +282,7 @@
         this.sendDialogData.OrganizationID = 0;
         this.sendDialogData.IsOrgLeader = 0;
         this.sendDialogData.ID = row.ID;
-        this.sendDialogData=JSON.parse(JSON.stringify(this.sendDialogData))
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
     }
   }

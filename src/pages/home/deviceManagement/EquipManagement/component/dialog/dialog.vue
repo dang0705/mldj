@@ -5,53 +5,151 @@
       :title="alertTitle"
       :close-on-click-modal='false'
       :before-close="handleClose"
+      @closed="closed"
       align="center"
     >
-      <el-form
-        ref="upload"
-        :model="formData"
-        :rules="uploadRules"
-        label-width="120px"
-      >
-        <el-form-item prop="DeviceName" label="设备名称：">
-          <el-input
-            v-model="formData.DeviceName"
-            clearable
-            placeholder=""
-            minlength="1"
-            maxlength="10"></el-input>
-        </el-form-item>
-        
-        <el-form-item prop="EmployeeName" label="设备所有人：">
-          <el-select
-            v-model="formData.EmployeeName"
-            filterable
-            clearable
-            autocomplete
-            @change="onChange"
+      <div class="basInfo">
+        <div class="uploadImg">
+          <upload
+            :isClose="isClose"
+            :imgUrl="formData.ImgBase"
+            @closeDialog="handleClose"
+            @getBase64Url="getBase64Url"
+            :getUpLoadTitle="upLoadTitle"
+            :getUploadType="uploadType"
           >
-            <el-option
-              v-for="(item,index) of list"
-              :key="index"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="设备所在省市：">
-          <city-select
-            v-if="isAlertShow"
-            @provincesAndCities="provincesAndCities"
-            :getEditCities="provinceTotalArr"
-          ></city-select>
-        </el-form-item>
-        <el-form-item prop="Address" label="设备所在地址：">
-          <el-input
-            v-model="formData.Address"
-            minlength="1"
-            maxlength="30"></el-input>
-        </el-form-item>
-      </el-form>
+          </upload>
+        </div>
+        <el-form
+          ref="upload"
+          :model="formData"
+          :rules="uploadRules"
+          label-width="120px"
+          class='upImgForm'
+        
+        >
+          <el-form-item prop="DeviceName" label="设备名称：">
+            <el-input
+              v-model="formData.DeviceName"
+              clearable
+              placeholder=""
+              minlength="1"
+              maxlength="10"></el-input>
+          </el-form-item>
+          
+          <el-form-item prop="EmployeeName" label="设备所有人：">
+            <el-select
+              v-model="formData.EmployeeCode"
+              filterable
+              clearable
+              autocomplete
+              @change="onChange"
+            >
+              <el-option
+                v-for="(item,index) of list"
+                :key="index"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item prop="DeviceType" label="设备类型：">
+            <el-select
+              v-model="formData.DeviceType"
+              filterable
+              clearable
+              @change="deviceChange"
+              :disabled="formData.DeviceMac==='未绑定'"
+            >
+              <el-option
+                v-for="(item,i) of deviceTypeList"
+                :key="i"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item prop="APK" label="系统版本：">
+            <el-select
+              v-model="formData.APKCode"
+              filterable
+              clearable
+              @change="apkChange"
+              :disabled="formData.DeviceMac==='未绑定'"
+
+            >
+              <el-option
+                v-for="(item,i) of apkList"
+                :key="i"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item prop="payment" label="支付方式：">
+            <el-select
+              v-model="formData.PayCode"
+              filterable
+              clearable
+              @change="apkChange"
+              :disabled="formData.DeviceMac==='未绑定'"
+            >
+              <el-option
+                v-for="(item,i) of paymentList"
+                :key="i"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="设备所在省市：">
+            <city-select
+              v-if="isAlertShow"
+              @provincesAndCities="provincesAndCities"
+              :getEditCities="provinceTotalArr"
+            ></city-select>
+          </el-form-item>
+          <el-form-item prop="Address" label="设备所在地址：">
+            <el-input
+              v-model="formData.Address"
+              minlength="1"
+              maxlength="30"></el-input>
+          </el-form-item>
+          
+          <el-form-item
+            label="货道名称："
+            prop="cargoWay"
+          >
+            <el-select
+              v-model="formData.CargoCode"
+              filterable
+              clearable
+              @change="cargoWayChange"
+              :disabled="formData.DeviceMac==='未绑定'"
+            >
+              <el-option
+                v-for="(item,i) in cargoWayList"
+                :label="item.label"
+                :value="item.value"
+                :key="item.i"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item>
+            <div class="cargoWayImgWrapper">
+              <img width="100%" :src="cargoWayImg" alt="">
+            </div>
+          </el-form-item>
+        </el-form>
+      
+      </div>
+      <div class="cargoWay">
+      
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="handleClose">取 消</el-button>
         <el-button type="primary" @click="confirmUpload">确 定</el-button>
@@ -62,13 +160,15 @@
 
 <script>
   import citySelect from '@/component/common/citySelect/citySelect'
+  import upload from '@/component/common/upload/uploadList'
   
   let Msg = '';
   const storage = window.localStorage;
   export default {
     name: "EquipManagement_dialog",
     components: {
-      citySelect
+      citySelect,
+      upload
     },
     props: {
       isAlertShow: {
@@ -83,12 +183,24 @@
     },
     data() {
       return {
+        uploadType: 'image/jpeg,image/png',
+        upLoadTitle: '',
+        cargoWayImg: '',
         list: [],
+        deviceTypeList: [],
+        apkList: [],
+        paymentList: [],
+        cargoWayList: [],
         provinceTotalArr: '',
         alertTitle: '',
         formData: {
           AddEmployeeCode: '',
+          CargoCode: '',
+          ImgBase: '',
+          DeviceType: '',
           DeviceName: '',
+          APKCode: '',
+          PayCode: '',
           ProvinceCode: '',
           ProvinceName: '省份',
           CityCode: '',
@@ -114,22 +226,19 @@
               trigger: 'blur'
             }
           ]
-          , AddEmployeeCode: [
+          ,
+          EmployeeName: [
             {
               required: true,
-              message: '分配所有人编号为必填项',
-              trigger: 'blur'
-            },
-            {
-              min: 1,
-              max: 10,
-              message: '长度请在1~10个字符',
+              message: '设备所有人为必填项',
               trigger: 'blur'
             }
+          
           ]
+
           
         }
-       
+        
       }
     },
     computed: {
@@ -146,16 +255,12 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.getCargoWayList();
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData.DeviceName = this.editData.DeviceName;
-            this.formData.ProvinceCode = this.editData.ProvinceCode;
-            this.formData.ProvinceName = this.editData.ProvinceName;
-            this.formData.CityCode = this.editData.CityCode;
-            this.formData.CityName = this.editData.CityName;
-            this.formData.Address = this.editData.Address;
-            this.formData.EmployeeCode = storage.getItem('userName');
-            this.formData.EmployeeName = this.editData.EmployeeName;
-            this.formData.ID = this.editData.ID;
+            this.formData = this.editData;
+            console.log(this.formData);
+            this.formData.EmployeeCode=storage.getItem('userName')
+            // this.formData.EmployeeCode = storage.getItem('userName');
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑设备';
             this.provinceTotalArr = this.formData.ProvinceName + ' / ' + this.formData.CityName;
@@ -177,32 +282,56 @@
             Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
-        } else {
-          this.formData.AddEmployeeCode = '';
-          this.formData.ProvinceCode = '';
-          this.formData.CityCode = '';
         }
       }
     },
     methods: {
+      getBase64Url(url) {
+        this.formData.ImgBase = url;
+        console.log(this.formData.ImgBase);
+      },
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
-          this.$emit('closeAlert','n')
+          this.$emit('closeAlert', 'n')
         } else {
           this.$emit('closeAlert')
         }
         
+        this.cargoWayList=[]
+        this.formData.ImgBase = this.cargoWayImg = '';
+      },
+      closed() {
+        this.isClose = true;
+        
       },
       confirmUpload(obj) {
+        console.log(this.formData);
         const that = this;
         if ( that.formData.DeviceName === '' ) {
           that.$message.error('设备名称不能为空');
           return
-          
-        } else if ( that.formData.AddEmployeeCode === '' ) {
+        }
+        else if ( that.formData.AddEmployeeCode === '' ) {
           that.$message.error('设备所属人不能为空');
           return
         }
+     /*   else if ( !that.formData.DeviceType  ) {
+          that.$message.error('设备类型不能为空');
+          return
+        }
+        else if ( !that.formData.APKCode  ) {
+          that.$message.error('系统版本不能为空');
+          return
+        }
+        else if ( !that.formData.PayCode  ) {
+          that.$message.error('支付方式不能为空');
+          return
+        }
+        else if ( !that.formData.CargoCode  ) {
+          that.$message.error('货道名称不能为空');
+          return
+        }*/
+  
         that.$axios.post('/Home/EmployeeDeviceSave', this.formData)
           .then(data => {
             let res = data.data;
@@ -246,14 +375,156 @@
       onChange(val) {
         this.formData.AddEmployeeCode = val;
       }
+      ,
+      deviceChange(val) {
+        this.formData.DeviceType = val;
+      }
+      ,
+      apkChange() {
+      },
+      cargoWayChange(val) {
+        if ( val ) {
+          this.cargoWayList.forEach((item, index, arr) => {
+            if ( val === item.value ) {
+              this.cargoWayImg = item.ImgBase;
+            }
+          })
+          
+        }
+      },
+      getDeviceType() {
+        const that = this;
+        that.$axios.post('/Home/DeviceType')
+          .then(data => {
+            console.log(data);
+            if ( data.data.state === 1 ) {
+              console.log(data.data.Content);
+              data.data.Content.forEach((item, index, arr) => {
+                that.deviceTypeList.push({
+                  label: item.Name,
+                  value: item.Name
+                })
+              });
+              console.log(that.deviceTypeList);
+            }
+          })
+      }
+      ,
+      getApkList() {
+        let that = this;
+        if ( storage.getItem('apkList') ) {
+          const list = JSON.parse(storage.getItem('apkList'));
+          list.forEach((item, index, arr) => {
+            that.apkList.push({
+              label: item.ApkName,
+              value: item.ID
+            })
+          });
+        } else {
+          that.$axios.post('/Home/OnloadApkList')
+            .then(data => {
+              if ( data.data.state === 1 ) {
+                const list = data.data.Content;
+                list.forEach((item, index, arr) => {
+                  that.apkList.push({
+                    label: item.ApkName,
+                    value: item.ID
+                  })
+                });
+              }
+            })
+        }
+      }
+      ,
+      getPaymentList() {
+        let that = this;
+        if ( storage.getItem('payment') ) {
+          const list = JSON.parse(storage.getItem('payment'));
+          list.forEach((item, index, arr) => {
+            that.paymentList.push({
+              label: item.payname,
+              value: item.ID
+            })
+          });
+        } else {
+          that.$axios.post('/Home/OnloadApkList')
+            .then(data => {
+              if ( data.data.state === 1 ) {
+                const list = data.data.Content;
+                list.forEach((item, index, arr) => {
+                  that.paymentList.push({
+                    label: item.payname,
+                    value: item.ID,
+                  })
+                });
+              }
+            })
+        }
+      }
+      ,
+      getCargoWayList() {
+        let that = this;
+        if ( !that.cargoWayList.length ) {
+          if ( storage.getItem('cargoWayList') ) {
+            const list = JSON.parse(storage.getItem('cargoWayList'));
+            console.log(list);
+            list.forEach((item, index, arr) => {
+              if ( that.formData.CargoCode=== item.ID) {
+                that.cargoWayImg=item.ImgBase;
+                console.log(that.cargoWayImg);
+              }
+              that.cargoWayList.push({
+                label: item.CargoName,
+                value: item.ID,
+                ImgBase: item.ImgBase
+        
+              })
+            })
+          } else {
+            that.$axios.post('/Home/OnloadCargoTypeList')
+              .then(data => {
+                if ( data.data.state === 1 ) {
+                  const list = data.data.Content;
+                  list.forEach((item, index, arr) => {
+                    if ( that.formData.CargoCode=== item.ID ) {
+                      that.cargoWayImg=item.ImgBase
+                    }
+                    that.cargoWayList.push({
+                      label: item.CargoName,
+                      value: item.ID,
+                      ImgBase: item.ImgBase
+              
+                    })
+                  })
+                }
+              })
+          }
+        }
+
+      }
     },
     mounted() {
       this.getUserList();
+      this.getDeviceType();
+      this.getApkList();
+      this.getPaymentList();
+      // this.getCargoWayList()
     }
   }
 </script>
 
 <style scoped lang="stylus">
+  .dialogWrapper >>> .el-dialog
+    width: 750px !important
+  
   .dialogWrapper >>> .el-select
     width: 100%
+  
+  
+  .cargoWayImgWrapper
+    width 178px
+    margin-right 50px
+  
+  .el-select
+    width: 100% !important
 </style>
