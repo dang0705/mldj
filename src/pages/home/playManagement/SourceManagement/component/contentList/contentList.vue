@@ -56,6 +56,7 @@
             v-if="scope.row.FileType!=2"
             trigger="click"
             @show="afterEnterPopover(scope.$index,scope.row)"
+            @hide="hidePopover(scope.$index)"
           >
             <img width="600px"
                  :ref="'img_'+scope.$index"
@@ -63,7 +64,7 @@
                  alt="" v-if="scope.row.FileType==0">
             <video
               :ref="'video_'+scope.$index"
-              width="100%"
+              width="600px"
               src=""
               v-show="scope.row.FileType==1"
               controls
@@ -333,9 +334,21 @@
         
         this.$nextTick(() => {
           this.$refs[ videoIndex ].src = val.OpenFileUrl;
+          if( this.$refs[ videoIndex ].paused){
+            this.$refs[ videoIndex ].play();
+          }
           // this.$refs[ imgIndex ].src = val.OpenFileUrl;
         })
         
+      }
+      ,
+      hidePopover(index) {
+        const videoIndex = 'video_' + index;
+        this.$nextTick(()=>{
+          if ( this.$refs[ videoIndex ].play ) {
+            this.$refs[ videoIndex ].pause()
+          }
+        })
       }
     }
   }
