@@ -299,22 +299,25 @@
         })
           .then(data => {
             console.log(data);
-            const res = data.data.Content.Rows,
-              length = res.length;
-            for ( var i = 0; i < length; i++ ) {
-              that.selectList.push({
-                ID: res[ i ].ID,
-                ItemName: res[ i ].PlayItemName,
-                ItemUrl: res[ i ].PlayItemUrl,
-                TimeLong: res[ i ].Duration,
-                Navigation: res[ i ].Navigation,
-                CreateTime: res[ i ].DateCreated,
-                RuleId: res[ i ].RuleId,
-                SkinId: res[ i ].SkinId,
-                FileType: res[ i ].FileType,
-                disabled: !res[ i ].Validity
-              })
+            if ( data.data.state === 1 ) {
+              const res = data.data.Content.Rows,
+                length = res.length;
+              for ( var i = 0; i < length; i++ ) {
+                that.selectList.push({
+                  ID: res[ i ].ID,
+                  ItemName: res[ i ].PlayItemName,
+                  ItemUrl: res[ i ].PlayItemUrl,
+                  TimeLong: res[ i ].Duration,
+                  Navigation: res[ i ].Navigation,
+                  CreateTime: res[ i ].DateCreated,
+                  RuleId: res[ i ].RuleId,
+                  SkinId: res[ i ].SkinId,
+                  FileType: res[ i ].FileType,
+                  disabled: !res[ i ].Validity
+                })
+              }
             }
+            
             console.log(that.selectList);
             this.createTransferTitle()
           })

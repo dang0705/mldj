@@ -58,7 +58,8 @@
         prop="DeviceName"
         label="设备名称"
         align="center"
-        width="140"
+        width="200"
+        :show-overflow-tooltip="true"
       >
       </el-table-column>
       <el-table-column
@@ -95,7 +96,7 @@
         prop="Address"
         label="地址"
         align="center"
-        width="440"
+        width="380"
         :show-overflow-tooltip="true">
       </el-table-column>
       
@@ -254,6 +255,7 @@
         this.dialogType = 'up_date';
         if ( this.list.length ) {
           this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+          this.sendDialogData.CRMCode = parseInt(this.list[ realIndex ].CRMCode);
           this.sendDialogData.DeviceMac = this.list[ realIndex ].DeviceMac;
           this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
           this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;

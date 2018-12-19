@@ -19,11 +19,28 @@ Vue.config.productionTip = false;
 fastClick.attach(document.body);
 /* eslint-disable no-new */
 
-new Vue({
+let app=new Vue({
   el: '#app',
   router,
   store,
   components: {App},
   template: '<App/>',
   render: h => h(App)
-})
+});
+
+
+function timeOut() {
+  setTimeout(checkSession, 10 * 1000 * 60);
+}
+function checkSession() {
+  axios.post('/Home/checkSession').then(data => {
+    console.log(data);
+    if ( data.data.state === 3 ) {
+      app.$router.push('/')
+    } else {
+      timeOut()
+    }
+  });
+}
+checkSession();
+

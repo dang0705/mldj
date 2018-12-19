@@ -55,42 +55,42 @@
         <el-form
           :model="formData"
           :rules="uploadRules"
-          label-width="180px"
+          label-width="200px"
           align="left"
         >
-          <el-form-item prop="EmployeeName" label="每层单元格数（Y）：">
+          <el-form-item prop="rows" label="每层单元格数（Y）：">
             <el-input-number v-model="defaultColumn"
                              :min="1"
                              class="defaultColumn"
             ></el-input-number>
           </el-form-item>
-          <el-form-item label="货道层数（X）：">
+          <el-form-item prop="column" label="货道层数（X）：">
             <el-input-number v-model="defaultRows"
                              :min="1"
                              class="defaultRows"
             ></el-input-number>
           </el-form-item>
-          <el-form-item label="库存上限（件）：">
+          <el-form-item prop="stock" label="库存上限（件）：">
             <el-input-number v-model="stock"
                              :min="1"
                              class="defaultRows"
             ></el-input-number>
           </el-form-item>
-          <el-form-item label="产品尺寸（mm×mm）：">
+          <el-form-item prop="size" label="产品尺寸（mm×mm）：">
             <el-input-number v-model="productSize1"
                              :min="5"
                              class="defaultRows"
                              size="small"
             ></el-input-number>
             ×
-            <el-input-number v-model="productSize2"
+            <el-input-number prop="size2" v-model="productSize2"
                              :min="5"
                              class="defaultRows"
                              size="small"
             ></el-input-number>
           </el-form-item>
         
-
+        
         </el-form>
       
       </div>
@@ -118,9 +118,11 @@
       
       </div>
       <div slot="footer" class="dialog-footer">
+        <el-button type="warning" @click="clearCargoWay" v-if="editOrAdd==='up_date'">清空货道</el-button>
         <el-button type="success" @click="creatCargoWay" v-if="editOrAdd==='up_date'">生成新货道</el-button>
         <el-button @click="handleClose">取 消</el-button>
-        <el-button type="primary" @click="confirmUpload">确 定</el-button>
+        <el-button type="primary" @click="confirmUpload" :disabled="editOrAdd==='up_date'&&!tableDataList.length">确 定
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -164,7 +166,7 @@
         defaultRows: 5,
         productSize1: 50,
         productSize2: 50,
-        stock:6,
+        stock: 6,
         alertTitle: '',
         formData: {
           CargoName: '',
@@ -178,32 +180,38 @@
           ImgBase: '',
         },
         uploadRules: {
-          CargoName: [
+          rows: [
             {
               required: true,
-              message: '设备名称为必填项',
-              trigger: 'blur'
-            },
+              message: '每层单元格数为必填项',
+              // trigger: 'blur'
+            }
+          ]
+          ,
+          column: [
             {
-              min: 1,
-              max: 10,
-              message: '长度请在1~10个字符',
+              required: true,
+              message: '货道层数为必填项',
               trigger: 'blur'
             }
           ]
-          , CargoCode: [
+          ,
+          stock: [
             {
               required: true,
-              message: '分配所有人编号为必填项',
-              trigger: 'blur'
-            },
-            {
-              min: 1,
-              max: 10,
-              message: '长度请在1~10个字符',
+              message: '库存上限为必填项',
               trigger: 'blur'
             }
           ]
+          ,
+          size: [
+            {
+              required: true,
+              message: '产品尺寸为必填项',
+              trigger: 'blur'
+            }
+          ]
+          ,
         }
       }
     },
@@ -228,14 +236,14 @@
             this.tableOnload();
             Msg = '编辑成功'
           } else {
-            this.dataLoading=false
+            this.dataLoading = false
             this.alertTitle = '新增货道';
             Msg = '增加成功'
           }
           this.formData.DogType = this.editOrAdd;
         } else {
           for ( var i in this.formData ) {
-            this.formData[i]=''
+            this.formData[ i ] = ''
           }
         }
       }
@@ -254,13 +262,20 @@
             this.tableDataList.push({
               CargoX: i + getMax + '',
               CargoY: j + '',
-              CargoIndex: i + '' + j,
+              CargoIndex: (i - 1) + '' + (j - 1),
               CargoSize: this.productSize1.toString() + 'mm*' + this.productSize2.toString() + 'mm',
             })
           }
         }
         this.tableOnload()
       },
+      clearCargoWay() {
+        this.tableDataList = [];
+        this.DataRowCount = [];
+        this.DataColumnCount = [];
+        
+      }
+      ,
       tableOnload() {
         this.DataRowCount = [];
         this.DataColumnCount = [];
@@ -274,10 +289,10 @@
             if ( data.data.state === 1 && !that.hasAjaxData ) {
               that.tableDataList = data.data.Content;
               if ( data.data.Content.length ) {
-                that.stock=data.data.Content[0].CargoStock
+                that.stock = data.data.Content[ 0 ].CargoStock
                 
               }
-  
+              
             }
             for ( var i = 0; i < that.tableDataList.length; i++ ) {
               if ( i === 0 ) {
@@ -316,7 +331,7 @@
         this.tableDataList = [];
         this.defaultColumn = 8;
         this.defaultRows = 5;
-        this.stock=6;
+        this.stock = 6;
       },
       confirmUpload(obj) {
         this.add(obj);
@@ -339,12 +354,10 @@
           } else if ( !this.defaultColumn ) {
             that.$message.error('每层单元格不能为空');
             return;
-          }
-          else if ( !this.productSize1 || !this.productSize2 ) {
+          } else if ( !this.productSize1 || !this.productSize2 ) {
             that.$message.error('请完善产品长宽尺寸');
             return;
-          }
-          else if ( !this.stock ) {
+          } else if ( !this.stock ) {
             that.$message.error('请填写库存上限');
             return;
           }
@@ -358,23 +371,31 @@
         that.$axios.post('/Home/CargoTypeSave', this.formData)
           .then(data => {
             let res = data.data;
-            if ( res.state == 1 ) {
-              if ( this.editOrAdd === 'up_date' ) {
-                that.$axios.post('/Home/CargoTypeSave', {
-                  DogType: 'CargoBind',
-                  CargoId: that.formData.ID,
-                  CargoStock:that.stock,
-                  CargoTypeListString: JSON.stringify(json)
-                })
-                  .then(data => {
-                    console.log(data);
-                    if ( data.data.state == 1 ) {
-                      that.$message.success(Msg);
-                      that.handleClose(obj)
-                    } else {
-                      that.$message.error(data.data.msg);
-                    }
+            if ( res.state === 1 ) {
+              if ( this.editOrAdd === 'a_dd' ) {
+                that.handleClose(obj)
+              } else {
+                if ( !this.tableDataList.length ) {
+                  that.$message.error('您尚未成功创建或者编辑货道');
+                  that.handleClose(obj)
+                } else {
+                  that.$axios.post('/Home/CargoTypeSave', {
+                    DogType: 'CargoBind',
+                    CargoId: that.formData.ID,
+                    CargoStock: that.stock,
+                    CargoTypeListString: JSON.stringify(json)
                   })
+                    .then(data => {
+                      console.log(data);
+                      if ( data.data.state === 1 ) {
+                        that.$message.success(Msg);
+                        that.handleClose(obj)
+                      } else {
+                        that.$message.error(data.data.msg);
+                      }
+                    })
+                }
+                
               }
             } else {
               that.$message.error(res.msg);
@@ -392,10 +413,10 @@
         this.formData.CityCode = code[ 1 ]
         
       },
-  /*
-      onChange(val) {
-        this.formData.CargoCode = val;
-      }*/
+      /*
+		  onChange(val) {
+			this.formData.CargoCode = val;
+		  }*/
     },
     mounted() {
     }

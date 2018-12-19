@@ -252,10 +252,13 @@
             Validity: that.Validity,
           })
             .then(data => {
-              that.list = data.data.Content.DataList;
-              if ( update && update === 'update' || !update ) {
-                storage.setItem('employeeList',JSON.stringify(that.list))
+              if ( data.data.state === 1 ) {
+                that.list = data.data.Content.DataList;
+                if ( update && update === 'update' || !update ) {
+                  storage.setItem('employeeList',JSON.stringify(that.list))
+                }
               }
+              
               that.dataLoading = false;
               that.isListChange = true;
             })

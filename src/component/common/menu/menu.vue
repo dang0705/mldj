@@ -21,6 +21,7 @@
           class="secondNavigation"
           :to="eachSub.subIndex"
           :key="index+1"
+          @click.native="checkSession"
         >
           {{eachSub.navName}}
         </router-link>
@@ -36,7 +37,6 @@
 
 <script>
   const storage = window.localStorage;
-  
   export default {
     name: 'head-Menu',
     data() {
@@ -91,7 +91,17 @@
             
           })
       },
+      checkSession() {
+        this.$axios.post('/Home/checkSession').then(data => {
+          console.log(data);
+          if ( data.data.state === 3 ) {
+            this.$router.push('/')
+          }
+        });
+      }
+      ,
       showSecondNavigation(i, item) {
+        this.checkSession()
         console.log(item);
         this.firstLevelNavigationIndex = i;
         storage.setItem('menuSelected', i);
@@ -108,7 +118,7 @@
         storage.removeItem('device');
         storage.removeItem('activityList');
         storage.removeItem('productList');
-        storage.removeItem('channel')
+        storage.removeItem('channel');
         storage.removeItem('cargoWayList');
         storage.removeItem('employeeList')
       }

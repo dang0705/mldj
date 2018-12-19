@@ -102,10 +102,34 @@
           that.allLabelIdList = [];
           that.$axios.all([ that.getAllDeviceList(), that.getAllLabelList() ])
             .then(that.$axios.spread((allDeviceList, allLabelList) => {
-              // console.log(allDeviceList, allLabelList);
-              that.allDeviceList = allDeviceList.data.Content.Rows;
-              allLabelList = allLabelList.data.Content.Rows;
-              const length = allLabelList.length;
+              let length;
+              if ( allLabelList.data.state === 1 ) {
+                that.allDeviceList = allDeviceList.data.Content.Rows;
+                allLabelList = allLabelList.data.Content.Rows;
+                length = allLabelList.length;
+              } else {
+                allDeviceList = allDeviceList.data.Content.Rows;
+                length = allDeviceList.length;
+                that.allLabelList.push({
+                  id: '0',
+                  pid: 0,
+                  label: '未分组设备',
+                  children: []
+                });
+                for ( var i = 0; i < length; i++ ) {
+                  that.allLabelList[ 0 ].children.push({
+                    id: '0' + '-' + allDeviceList[ i ].ID,
+                    pid: '0',
+                    label: allDeviceList[ i ].DeviceName,
+                    address: allDeviceList[ i ].Address,
+                    disabled: !allDeviceList[ i ].Validity
+                  })
+                }
+                console.log(that.allLabelList);
+                that.loadDateSuccess = true;
+                return;
+              }
+              
               for ( var j = 0; j < length; j++ ) {
                 that.allLabelList.push({
                   id: allLabelList[ j ].ID.toString(),
@@ -186,7 +210,6 @@
         
       },
       handleClose(obj) {
-        console.log(obj);
         if ( this.loadDateSuccess ) {
           this.toData = [];
           this.toData = this.allDeviceList = this.allLabelList = this.allLabelIdList = this.allLabeledDeviceIdList = [];
@@ -194,7 +217,6 @@
             this.$emit('closePlayerAlert', 'n');
           } else {
             this.$emit('closePlayerAlert');
-            
           }
         }
         this.loadDateSuccess = false;
@@ -210,21 +232,30 @@
         console.log(this.$refs.tree);
         let toDataLength = toData.length,
           that = this;
+        console.log(toDataLength);
         that.deviceIdStr = that.deviceNameStr = '';
-        for ( var i = 0; i < toDataLength; i++ ) {
-          if ( !toData[ i ].children.length ) {
-            toData.splice(i, 1);
-            obj.halfNodes.splice(i, 1);
-            i = i - 1;
-            toDataLength = toDataLength - 1;
-          }
-        }
+        /*        for ( var i = 0; i < toDataLength; i++ ) {
+				  if ( !toData[ i ].children.length ) {
+					toData.splice(i, 1);
+					obj.halfNodes.splice(i, 1);
+					i = i - 1;
+					toDataLength = toDataLength - 1;
+				  }
+				}*/
         console.log("toData:", toData);
         for ( var l = 0; l < toData.length; l++ ) {
-          for ( var k = 0; k < toData[ l ].children.length; k++ ) {
-            that.deviceIdStr += toData[ l ].children[ k ].id.split('-')[ 1 ] + ',';
-            that.deviceNameStr += toData[ l ].children[ k ].label + ','
+          if ( toData[l].children ) {
+            for ( var k = 0; k < toData[ l ].children.length; k++ ) {
+              that.deviceIdStr += toData[ l ].children[ k ].id.split('-')[ 1 ] + ',';
+              that.deviceNameStr += toData[ l ].children[ k ].label + ','
+            }
           }
+          /*else {
+            that.deviceIdStr += toData.children[ k ].id.split('-')[ 1 ] + ',';
+            that.deviceNameStr += toData.children[ k ].label + ','
+  
+          }*/
+          
         }
         
         that.deviceNameStr = that.deviceNameStr.substring(0, that.deviceNameStr.length - 1);
@@ -321,7 +352,6 @@
       }
       ,
       renderFunc(h, option) {
-        console.log(option);
         if ( option.node.level == 1 ) {
           if ( option.data.children.length ) {
             if ( option.data.id > 0 ) {
@@ -359,7 +389,7 @@
                     type: 'info',
                     title: '可进入标签管理绑定设备'
                   }
-                }, option.data.label+' - 无设备的标签')
+                }, option.data.label + ' - 无设备的标签')
               ]
             )
           }
@@ -469,11 +499,11 @@
         textOverFlow()
     
     .deviceName
-      width: 30%
+      width: 35%
       margin-right: 5%
     
     .deviceAddress
-      width: 65%
+      width: 60%
       color #409eff
     
     .deviceDisabled

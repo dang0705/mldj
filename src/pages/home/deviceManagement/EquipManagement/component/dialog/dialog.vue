@@ -34,7 +34,7 @@
               clearable
               placeholder=""
               minlength="1"
-              maxlength="10"></el-input>
+              maxlength="15"></el-input>
           </el-form-item>
           
           <el-form-item prop="EmployeeName" label="设备所有人：">
@@ -53,7 +53,29 @@
               </el-option>
             </el-select>
           </el-form-item>
+          <el-form-item prop="CRMStore" label="CRM门店">
+            <el-select
+              v-model="formData.CRMCode"
+              filterable
+              clearable
+            >
+              <el-option-group
+                v-for="(group,index) in CRMSoreList"
+                :key="group.label"
+                :label="group.label"
+              >
+                <el-option
+                  v-for="(item,index) in group.options"
+                  :value="item.value"
+                  :label="item.label"
+                  :key="item.value"
+                >
+                </el-option>
+              </el-option-group>
+            
+            </el-select>
           
+          </el-form-item>
           <el-form-item prop="DeviceType" label="设备类型：">
             <el-select
               v-model="formData.DeviceType"
@@ -78,7 +100,7 @@
               clearable
               @change="apkChange"
               :disabled="formData.DeviceMac==='未绑定'"
-
+            
             >
               <el-option
                 v-for="(item,i) of apkList"
@@ -131,19 +153,26 @@
               @change="cargoWayChange"
               :disabled="formData.DeviceMac==='未绑定'"
             >
+              <li class="el-select-dropdown__item isSelect">
+                <el-checkbox v-model="isSelectCargoWay">货道是否可选</el-checkbox>
+              </li>
               <el-option
                 v-for="(item,i) in cargoWayList"
                 :label="item.label"
                 :value="item.value"
                 :key="item.i"
+                :disabled="!isSelectCargoWay"
               ></el-option>
             </el-select>
-          </el-form-item>
-          <el-form-item>
             <div class="cargoWayImgWrapper">
               <img width="100%" :src="cargoWayImg" alt="">
             </div>
           </el-form-item>
+          <!--<el-form-item>-->
+          <!--<div class="cargoWayImgWrapper">-->
+          <!--<img width="100%" :src="cargoWayImg" alt="">-->
+          <!--</div>-->
+          <!--</el-form-item>-->
         </el-form>
       
       </div>
@@ -184,10 +213,21 @@
     data() {
       return {
         uploadType: 'image/jpeg,image/png',
+        isSelectCargoWay: false,
         upLoadTitle: '',
         cargoWayImg: '',
         list: [],
         deviceTypeList: [],
+        CRMSoreList: [
+          {
+            label: '阿里',
+            options: []
+          },
+          {
+            label: '微信',
+            options: []
+            
+          } ],
         apkList: [],
         paymentList: [],
         cargoWayList: [],
@@ -195,6 +235,7 @@
         alertTitle: '',
         formData: {
           AddEmployeeCode: '',
+          CRMCode: '',
           CargoCode: '',
           ImgBase: '',
           DeviceType: '',
@@ -221,8 +262,8 @@
             },
             {
               min: 1,
-              max: 10,
-              message: '长度请在1~10个字符',
+              max: 15,
+              message: '长度请在1~15个字符',
               trigger: 'blur'
             }
           ]
@@ -234,8 +275,8 @@
               trigger: 'blur'
             }
           
-          ]
-
+          ],
+          
           
         }
         
@@ -255,11 +296,12 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.isSelectCargoWay = false;
           this.getCargoWayList();
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
             console.log(this.formData);
-            this.formData.EmployeeCode=storage.getItem('userName')
+            this.formData.EmployeeCode = storage.getItem('userName')
             // this.formData.EmployeeCode = storage.getItem('userName');
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑设备';
@@ -297,7 +339,7 @@
           this.$emit('closeAlert')
         }
         
-        this.cargoWayList=[]
+        this.cargoWayList = []
         this.formData.ImgBase = this.cargoWayImg = '';
       },
       closed() {
@@ -310,28 +352,32 @@
         if ( that.formData.DeviceName === '' ) {
           that.$message.error('设备名称不能为空');
           return
-        }
-        else if ( that.formData.AddEmployeeCode === '' ) {
+        } else if ( !that.formData.AddEmployeeCode === '' ) {
+          that.$message.error('设备所属人不能为空');
+          return
+        } else if ( !that.formData.AddEmployeeCode ) {
           that.$message.error('设备所属人不能为空');
           return
         }
-     /*   else if ( !that.formData.DeviceType  ) {
-          that.$message.error('设备类型不能为空');
-          return
+        /*   else if ( !that.formData.DeviceType  ) {
+			 that.$message.error('设备类型不能为空');
+			 return
+		   }
+		   else if ( !that.formData.APKCode  ) {
+			 that.$message.error('系统版本不能为空');
+			 return
+		   }
+		   else if ( !that.formData.PayCode  ) {
+			 that.$message.error('支付方式不能为空');
+			 return
+		   }
+		   else if ( !that.formData.CargoCode  ) {
+			 that.$message.error('货道名称不能为空');
+			 return
+		   }*/
+        if ( !this.isSelectCargoWay ) {
+          this.formData.CargoCode = '';
         }
-        else if ( !that.formData.APKCode  ) {
-          that.$message.error('系统版本不能为空');
-          return
-        }
-        else if ( !that.formData.PayCode  ) {
-          that.$message.error('支付方式不能为空');
-          return
-        }
-        else if ( !that.formData.CargoCode  ) {
-          that.$message.error('货道名称不能为空');
-          return
-        }*/
-  
         that.$axios.post('/Home/EmployeeDeviceSave', this.formData)
           .then(data => {
             let res = data.data;
@@ -469,15 +515,15 @@
             const list = JSON.parse(storage.getItem('cargoWayList'));
             console.log(list);
             list.forEach((item, index, arr) => {
-              if ( that.formData.CargoCode=== item.ID) {
-                that.cargoWayImg=item.ImgBase;
+              if ( that.formData.CargoCode === item.ID ) {
+                that.cargoWayImg = item.ImgBase;
                 console.log(that.cargoWayImg);
               }
               that.cargoWayList.push({
                 label: item.CargoName,
                 value: item.ID,
                 ImgBase: item.ImgBase
-        
+                
               })
             })
           } else {
@@ -486,21 +532,46 @@
                 if ( data.data.state === 1 ) {
                   const list = data.data.Content;
                   list.forEach((item, index, arr) => {
-                    if ( that.formData.CargoCode=== item.ID ) {
-                      that.cargoWayImg=item.ImgBase
+                    if ( that.formData.CargoCode === item.ID ) {
+                      that.cargoWayImg = item.ImgBase
                     }
                     that.cargoWayList.push({
                       label: item.CargoName,
                       value: item.ID,
                       ImgBase: item.ImgBase
-              
+                      
                     })
                   })
                 }
               })
           }
         }
-
+        
+      }
+      ,
+      getCRMSoreList() {
+        const that = this;
+        that.$axios.post('/Home/CRMonload')
+          .then(data => {
+            if ( data.data.state === 1 ) {
+              const res = data.data.Content, length = data.data.Content.length;
+              for ( var i = 0; i < length; i++ ) {
+                if ( res[ i ].type === 'ali' ) {
+                  that.CRMSoreList[ 0 ].options.push({
+                    label: res[ i ].StoreName,
+                    value: res[ i ].ID
+                  })
+                } else {
+                  that.CRMSoreList[ 1 ].options.push({
+                    label: res[ i ].StoreName,
+                    value: res[ i ].ID
+                  })
+                  
+                }
+              }
+              console.log(that.CRMSoreList);
+            }
+          })
       }
     },
     mounted() {
@@ -508,6 +579,7 @@
       this.getDeviceType();
       this.getApkList();
       this.getPaymentList();
+      this.getCRMSoreList()
       // this.getCargoWayList()
     }
   }
@@ -527,4 +599,7 @@
   
   .el-select
     width: 100% !important
+  
+  .isSelect
+    background #ccc
 </style>
