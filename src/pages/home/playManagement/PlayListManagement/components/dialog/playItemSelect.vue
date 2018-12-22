@@ -17,7 +17,8 @@
           label: 'ItemName'
         }"
         filterable
-        filter-placeholder="请输入设备名称"
+        filter-placeholder="请输入播放项名称"
+        target-order="push"
         :render-content="renderFunc"
         :titles="['所有播放项名称', '已添加播放项名称']"
         :button-texts="['去除播放项', '添加播放项']"
@@ -90,7 +91,6 @@
           {label: '全部', value: ''},
           {label: '图片', value: 0},
           {label: '视频', value: 1},
-          {label: '游戏', value: 2}
         ],
         playItems: {},
         keyWord: '',
@@ -125,7 +125,7 @@
     },
     methods: {
       renderFunc(h, option) {
-        console.log(option);
+        // console.log(option);
         let fileType;
         if ( option.FileType === 0 ) {
           fileType = '图片'
@@ -197,6 +197,7 @@
         
       },
       handleChange(value, direction, movedKeys) {
+        // console.log(value, direction, movedKeys);
         this.playItems = {
           "AllPm": [],
           "TopPm": [],
@@ -208,19 +209,28 @@
           "TotalTime": 0,
           "ItemCount": 0
         };
-        for ( var i = 0; i < this.selectList.length; i++ ) {
+        value.forEach((vitem, vindex, varr) => {
+          this.selectList.forEach((item,index,arr)=>{
+            if ( vitem === item.ID ) {
+              this.playItems.AllPm.push(item)
+            }
+          })
+        });
+        
+  /*      for ( var i = 0; i < this.selectList.length; i++ ) {
           for ( var j = 0; j < value.length; j++ ) {
             if ( value[ j ] == this.selectList[ i ].ID ) {
               this.playItems.AllPm.push(this.selectList[ i ])
             }
           }
-        }
+        }*/
+        console.log(value);
+        console.log(this.playItems.AllPm);
+        
         for ( var k = 0; k < this.playItems.AllPm.length; k++ ) {
           this.playItems.TotalTime += parseInt(this.playItems.AllPm[ k ].TimeLong);
           this.playItems.ItemCount = this.playItems.AllPm.length
         }
-        console.log(this.playItems);
-        console.log(value);
         // console.log(this.selectList);
       },
       getSelectedList() {
@@ -251,6 +261,9 @@
       },
       confirmUpload(obj) {
         const that = this;
+        console.log('that.playItems', that.playItems);
+        console.log('JSON.stringify(that.playItems)', JSON.stringify(that.playItems));
+        
         that.$axios.post('/PlayManage/ExecElookPlayListItemAdd', {
           PlayListItemListString: JSON.stringify(that.playItems)
         })

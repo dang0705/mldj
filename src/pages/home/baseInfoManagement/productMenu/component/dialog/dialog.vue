@@ -46,7 +46,7 @@
           </el-form-item>
           <el-form-item
             prop="productCode"
-            label="产品编号："
+            label="微信编号："
           >
             <el-input v-model="formData.productCode"
                       clearable

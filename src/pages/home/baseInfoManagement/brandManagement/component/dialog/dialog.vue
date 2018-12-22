@@ -232,15 +232,13 @@
 </script>
 
 <style scoped lang="stylus">
-  .dialogWrapper >>> .el-dialog
-    height 450px
-  
+
   .dialogWrapper
     #imgWrapper, #info
       display inline-block
     
     #imgWrapper
-      vertical-align text-bottom
+      vertical-align top
     
     #info
       width: 60%

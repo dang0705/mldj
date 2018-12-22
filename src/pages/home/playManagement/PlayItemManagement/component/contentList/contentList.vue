@@ -140,8 +140,7 @@
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
-          {value: 1, label: '视频'},
-          {value: 2, label: '游戏'}
+          {value: 1, label: '视频'}
         ],
         statusList: [
           {value: '', label: '全部'},
@@ -226,6 +225,8 @@
             console.log(data);
             if ( data.data.state == 1 ) {
               that.list = data.data.Content.Rows;
+            }else {
+              that.list=[]
             }
             that.dataLoading = false;
             that.isListChange = true;

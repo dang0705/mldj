@@ -50,7 +50,7 @@
         width="80"
       >
         <template slot-scope="props">
-          <el-form label-position="left"  >
+          <el-form label-position="left">
             <el-form-item label="活动编号：">
               <span>{{props.row.ActivityCode}}</span>
             </el-form-item>
@@ -60,23 +60,27 @@
           </el-form>
         </template>
       </el-table-column>
-     <!-- <el-table-column
-        label="操作"
+      <el-table-column
+        label="查看"
         width="100"
         align="center"
       >
         <template slot-scope="scope">
-        &lt;!&ndash;  <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>&ndash;&gt;
-          <el-button size="small"
-                     v-if="!scope.row.ApprovalStataus"
-                     icon="el-icon-edit" circle
-                     @click="getData(scope.$index,scope.row)"
+          <!--   <el-button type="danger" icon="el-icon-delete" circle size="small"
+						@click="deleteItem(scope.$index,scope.row)">
+			 </el-button>-->
+          
+          <el-button
+            size="small"
+            type="success"
+            icon="el-icon-view"
+            circle
+            @click="examine(scope.$index,scope.row)"
           ></el-button>
-        
+
         </template>
-      </el-table-column>-->
+      </el-table-column>
+
       
       <el-table-column
         label="活动名称"
@@ -103,7 +107,7 @@
         align="center"
       >
       </el-table-column>
-    
+      
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
@@ -111,7 +115,7 @@
         align="center"
       >
       </el-table-column>
-      
+    
     </el-table>
     <pagination
       :tableList="list"
@@ -121,12 +125,19 @@
       @defaultPaginationData="defaultPaginationData"
       @listChanged="listChanged"
     ></pagination>
-  
+    <examine-dialog
+      :editData="sendDialogData"
+      :isAlertShow.sync="isExamineShow"
+      @closeExamine="closeExamine"
+    >
+    </examine-dialog>
   </div>
 </template>
 
 <script>
   import alertDialog from '../dialog/dialog'
+  import examineDialog from '../dialog/examineDialog'
+
   import pagination from '@/component/common/pagination/pagination'
   import datePicker from '@/component/common/dateSelect/dateSelect'
   
@@ -135,6 +146,7 @@
     name: "contentList",
     components: {
       alertDialog,
+      examineDialog,
       pagination,
       datePicker
     },
@@ -142,6 +154,7 @@
       return {
         list: [],
         listLoading: true,
+        isExamineShow:false,
         isListChange: false,
         dialogType: 'up_date',
         headerStyle: {
@@ -195,7 +208,7 @@
         } else if ( val === 3 ) {
           return type = ''
         }
-    
+        
       },
       tagText(val) {
         let text;
@@ -207,7 +220,7 @@
           return text = '已通过'
         } else if ( val === 3 ) {
           return text = '已完成'
-      
+          
         }
       },
       getDate(val) {
@@ -236,8 +249,8 @@
         this.pageSize = pageSize
       }
       ,
-      addBtn({row, column, rowIndex, columnIndex},noAdd) {
-        return this.$myFunctions.tableHeadReset({row, column, rowIndex, columnIndex},noAdd);
+      addBtn({row, column, rowIndex, columnIndex}, noAdd) {
+        return this.$myFunctions.tableHeadReset({row, column, rowIndex, columnIndex}, noAdd);
       },
       
       getList(update) {
@@ -249,7 +262,7 @@
           OpenStartDate: this.searchData.startDate,
           OpenEndDate: this.searchData.endDate,
           ApprovalStataus: this.searchData.ApprovalStataus,
-          ActivityEmployeeCode:''
+          ActivityEmployeeCode: ''
         })
           .then(data => {
             if ( data.data.state == 1 ) {
@@ -259,7 +272,7 @@
               that.isListChange = true;
             }
           })
-       
+        
       }
       
       ,
@@ -270,7 +283,33 @@
           this.getList('update')
         }
       }
-      , getData(index, row) {
+      ,
+      closeExamine() {
+        this.isExamineShow = false
+      },
+      examine(index, row) {
+        this.isExamineShow = true;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
+        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
+        this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
+        this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
+        this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
+        this.sendDialogData.ActivityStoreCode = this.list[ realIndex ].ActivityStoreCode;
+        this.sendDialogData.realStoreCode = this.list[ realIndex ].StoreCode;
+        this.sendDialogData.StoreValidity = this.list[ realIndex ].StoreValidity;
+        this.sendDialogData.ActivityEmployeeCode = this.list[ realIndex ].ActivityEmployeeCode;
+        this.sendDialogData.DeviceList = this.list[ realIndex ].DeviceList;
+        this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
+        this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
+        this.sendDialogData.DogType = 'up_date';
+        this.sendDialogData.ID = row.ID;
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
+      }
+/*      , getData(index, row) {
         
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
@@ -278,7 +317,7 @@
         this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
-        // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
         this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
         this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
@@ -294,7 +333,7 @@
         this.sendDialogData.ID = row.ID;
         console.log(row);
         console.log(this.sendDialogData);
-      }
+      }*/
       , deleteItem(index, row) {
         let that = this;
         this.$confirm('此操作将永久删除该活动, 是否继续?', '提示', {
@@ -321,7 +360,8 @@
         return row.OpenStartDate + '--' + row.OpenEndDate
       }
       
-    },
+    }
+    ,
   }
 </script>
 

@@ -16,9 +16,17 @@
         >
         </i>
       </el-input>
-      <el-select v-model="fileType" placeholder="请选择" @change="change">
+      <el-select v-model="fileType" placeholder="文件类型选择" @change="change">
         <el-option
           v-for="item in typeList"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+      <el-select v-model="finish" placeholder="完成状态选择" @change="getList">
+        <el-option
+          v-for="item in finishList"
           :key="item.value"
           :label="item.label"
           :value="item.value">
@@ -46,7 +54,7 @@
         label="素材名称"
         prop="FileName"
         align="left"
-        width="360"
+        width="620"
         :show-overflow-tooltip="true"
       
       >
@@ -82,13 +90,13 @@
         align="center"
         width="100">
       </el-table-column>
-      <el-table-column
-        label="素材来源"
-        prop="CompanyAbb"
-        align="center"
-        width="260"
-        :show-overflow-tooltip="true">
-      </el-table-column>
+      <!--      <el-table-column
+			  label="素材来源"
+			  prop="CompanyAbb"
+			  align="center"
+			  width="260"
+			  :show-overflow-tooltip="true">
+			</el-table-column>-->
       <el-table-column
         label="上传状态"
         :formatter="formatter"
@@ -171,16 +179,21 @@
         list: [],
         fileSrc: '',
         progressValue: 0,
+        finish: '',
+        finishList: [
+          {label: '全部', value: ''},
+          {label: '已完成', value: 1},
+          {label: '未完成', value: 0}
+        ],
         isDialogShow: false,
-        uploadType: 'image/jpg,image/jpeg,image/png,video/mp4,.apk',
+        uploadType: 'image/jpg,image/jpeg,image/png,video/mp4',
         imgWidth: '',
         dataLoading: true,
         isListChange: false,
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
-          {value: 1, label: '视频'},
-          {value: 2, label: '游戏'}
+          {value: 1, label: '视频'}
         ],
         dialogType: 'up_date',
         isListEmpty: true,
@@ -230,6 +243,8 @@
       listChanged() {
         this.isListChange = false
       },
+      isFinishedChange() {
+      },
       defaultPaginationData(val) {
         if ( val && val.length ) {
           this.currentPage = val[ 0 ];
@@ -253,27 +268,26 @@
       
       getList(update, search) {
         const that = this,
-          url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName + '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName');
-        if ( storage.getItem('source') && !update ) {
-          that.list = JSON.parse(storage.getItem('source'))
-          that.dataLoading = false;
-          that.isListChange = true;
-        } else {
-          that.dataLoading = true;
-          that.$axios.post('/PlayManage/EmployeeFileAllList', url)
-            .then(data => {
-              console.log(data);
-              if ( data.data.state == 1 ) {
-                that.list = data.data.Content.Rows;
-                if ( !search ) {
-                  storage.setItem('source', JSON.stringify(that.list))
-                }
-                that.dataLoading = false;
-                that.isListChange = true;
+          url = '&PageSize=1000&PageIndex=1&FileName=' + that.fileName +
+            '&FileType=' + that.fileType + '&EmployeeCode=' + storage.getItem('userName') +
+            '&Finished='+that.finish+
+            '&RoleId=' + storage.getItem('RoleID');
+        that.dataLoading = true;
+        that.$axios.post('/PlayManage/EmployeeFileAllList', url)
+          .then(data => {
+            console.log(data);
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content.Rows;
+              if ( !search ) {
+                storage.setItem('source', JSON.stringify(that.list))
               }
-              
-            })
-        }
+            
+            }else {
+              that.list=[]
+            }
+            that.dataLoading = false;
+            that.isListChange = true;
+          })
       },
       addBtn({row, column, rowIndex, columnIndex}) {
         return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
@@ -334,7 +348,7 @@
         
         this.$nextTick(() => {
           this.$refs[ videoIndex ].src = val.OpenFileUrl;
-          if( this.$refs[ videoIndex ].paused){
+          if ( this.$refs[ videoIndex ].paused ) {
             this.$refs[ videoIndex ].play();
           }
           // this.$refs[ imgIndex ].src = val.OpenFileUrl;
@@ -344,7 +358,7 @@
       ,
       hidePopover(index) {
         const videoIndex = 'video_' + index;
-        this.$nextTick(()=>{
+        this.$nextTick(() => {
           if ( this.$refs[ videoIndex ].play ) {
             this.$refs[ videoIndex ].pause()
           }

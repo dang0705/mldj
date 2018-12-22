@@ -219,8 +219,8 @@
       ,
       handleProductSelect(val) {
         console.log(val);
-        this.productSelectList = val
-        this.$emit('productSelected', this.productSelectList)
+        this.productSelectList = val;
+        // this.$emit('productSelected', this.productSelectList)
         // console.log('this.productSelectList', this.productSelectList);
       }
       ,
@@ -259,7 +259,7 @@
         if ( this.isProductAlertShow ) {
           this.gitList()
           console.log(this.selectedProductList);
-  
+          
           // console.log(this.selectedProductList);
         }
       }

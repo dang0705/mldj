@@ -247,6 +247,8 @@
           .then(data => {
             if ( data.data.state == 1 ) {
               that.list = data.data.Content.Rows
+            }else {
+              that.list=[]
             }
             that.tableLoading = false;
             that.isListChange = true;

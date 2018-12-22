@@ -48,8 +48,8 @@
           <el-option
             v-for="(item,i) in pushProgressSelectList"
             :key="i"
-            :label="item.label"
-            :value="item.value"
+            :label="item.TempNumber"
+            :value="item.TempNumber"
           >
           </el-option>
         </el-select>
@@ -65,7 +65,11 @@
           <el-table-column label="推送状态" align="center" prop="MediaUpdateStatus"
           >
             <template slot-scope="scope">
-              <el-tag :type="getPushStatus(scope.$index,scope.row)">{{pushStatus}}</el-tag>
+              <el-tag
+                :type="getPushStatus(scope.$index,scope.row)"
+                v-text="tagText(scope.$index,scope.row)"
+              >
+              </el-tag>
             </template>
           </el-table-column>
         </el-table>
@@ -130,9 +134,6 @@
     }
     ,
     methods: {
-      changePushData() {
-      }
-      ,
       handleClose() {
         this.$emit('closeSSAlert');
         this.pusHistoryListLoading = this.pusProgressListLoading = this.pushProgressSelectLoading = this.pushHistorySelectLoading = true;
@@ -163,20 +164,27 @@
       ,
       
       getPushStatus(index, row) {
-        console.log(index, row);
         let pushStatus;
         // return pushStatus= row.MediaUpdateStatus==='1'?'success':'info';
         if ( row.MediaUpdateStatus === '1' ) {
-          this.pushStatus = '已推送';
-          return pushStatus = 'success';
+          return pushStatus = 'info';
           
         } else {
-          this.pushStatus = '未推送';
-          return pushStatus = 'info';
+          return pushStatus = 'success';
           
         }
       },
-      
+      tagText(index,row){
+        let pushStatus;
+        // return pushStatus= row.MediaUpdateStatus==='1'?'success':'info';
+        if ( row.MediaUpdateStatus === '1' ) {
+          return pushStatus = '未推送';
+    
+        } else {
+          return pushStatus = '已推送';
+    
+        }
+      },
       /*获取推送历史下拉数据*/
       getHistorySelectOption() {
         const that = this;
@@ -200,7 +208,6 @@
           this.pushHistorySelectLoading = false;
           that.pusHistoryListLoading = false;
         })
-        // }
       }
       ,
       /*切换推送历史table*/
@@ -224,7 +231,6 @@
       /*获取推送进度下拉数据*/
       getProgressSelectOption(val) {
         const that = this;
-        that.pushProgressSelectList = [];
         that.$axios.post('/PlayManage/ExecElookPlayMediaItemList', {
           PageIndex: 1,
           PageSize: 1000,
@@ -234,11 +240,8 @@
           if ( data.data.state == 1 ) {
             const res = data.data.Content.Rows, length = res.length;
             for ( var i = 0; i < length; i++ ) {
-              that.pushProgressSelectList.push({label: res[ i ].TempNumber, value: res[ i ].TempNumber})
+              that.pushProgressSelectList=res;
             }
-          } else {
-            that.pushProgressSelectList = [];
-            that.pushProgressList = [];
           }
           that.pushProgressSelectModel = that.pushProgressSelectList.length ? that.pushProgressSelectList[ 0 ].value : '';
           that.changePushProgressList(that.pushProgressSelectModel);

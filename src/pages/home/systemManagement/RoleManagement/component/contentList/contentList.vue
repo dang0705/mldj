@@ -16,7 +16,7 @@
         >
         </i>
       </el-input>
-      <el-select v-model="Validity" placeholder="全部状态"
+      <!--<el-select v-model="Validity" placeholder="全部状态"
                  @change="getList"
       >
         <el-option
@@ -25,7 +25,7 @@
           :label="item.label"
           :value="item.value">
         </el-option>
-      </el-select>
+      </el-select>-->
     </div>
     
     <el-table width="100%"

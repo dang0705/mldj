@@ -145,6 +145,7 @@
           <el-form-item
             label="货道名称："
             prop="cargoWay"
+            v-if="editOrAdd==='up_date'"
           >
             <el-select
               v-model="formData.CargoCode"
@@ -301,7 +302,7 @@
           if ( this.editOrAdd === 'up_date' ) {
             this.formData = this.editData;
             console.log(this.formData);
-            this.formData.EmployeeCode = storage.getItem('userName')
+            // this.formData.EmployeeCode = storage.getItem('userName')
             // this.formData.EmployeeCode = storage.getItem('userName');
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑设备';

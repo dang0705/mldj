@@ -19,7 +19,7 @@
           align="left"
         >
           <p v-show="formData.FileId" class="fileName">{{formData.FileName}}</p>
-          <el-button type="primary" size="large" @click="selectSource" class="selectSource">上传素材
+          <el-button type="primary" size="large" @click="selectSource" class="selectSource">选择素材
           </el-button>
         </el-form-item>
         <el-form-item

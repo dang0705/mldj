@@ -131,8 +131,7 @@
         typeList: [
           {value: '', label: '全部'},
           {value: 0, label: '图片'},
-          {value: 1, label: '视频'},
-          {value: 2, label: '游戏'}
+          {value: 1, label: '视频'}
         ],
         headerStyle: {
           height: '100%',

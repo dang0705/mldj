@@ -66,7 +66,7 @@
         prop="EmployeeName"
         label="设备所属人"
         align="center"
-        width="180"
+        width="150"
         :show-overflow-tooltip="true">
       </el-table-column>
       
@@ -93,10 +93,17 @@
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
+        prop="ShopName"
+        label="CRM门店"
+        align="center"
+        width="180"
+        :show-overflow-tooltip="true">
+      </el-table-column>
+      <el-table-column
         prop="Address"
         label="地址"
         align="center"
-        width="380"
+        width="230"
         :show-overflow-tooltip="true">
       </el-table-column>
       
@@ -273,7 +280,6 @@
           this.sendDialogData.ID = row.ID;
           this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
         }
-        
       }
       ,
       switchChange(index, row) {
@@ -305,7 +311,7 @@
       ,
       isDeviceActivity(val) {
         let activityStatus;
-        return activityStatus = val.DeviceMac ? '已激活' : '未激活'
+        return activityStatus = val.DeviceMac==='未绑定' ? '未激活' : '已激活'
       }
       
     }

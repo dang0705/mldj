@@ -51,31 +51,39 @@
         width="80"
       >
         <template slot-scope="props">
-          <el-form label-position="left"  >
+          <el-form label-position="left">
             <el-form-item label="活动编号：">
               <span>{{props.row.ActivityCode}}</span>
             </el-form-item>
-            <el-form-item label="CRM门店">
+            <!--<el-form-item label="CRM门店">
               <span>{{props.row.CRMStoreCode}}</span>
-            </el-form-item>
+            </el-form-item>-->
           </el-form>
         </template>
       </el-table-column>
       <el-table-column
         label="操作"
         width="100"
-        align="center"
+        align="left"
       >
         <template slot-scope="scope">
-       <!--   <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>-->
+          <!--   <el-button type="danger" icon="el-icon-delete" circle size="small"
+						@click="deleteItem(scope.$index,scope.row)">
+			 </el-button>-->
+          
+          <el-button
+            size="small"
+            type="success"
+            v-if="scope.row.ApprovalStataus==2||scope.row.ApprovalStataus==1"
+            icon="el-icon-view"
+            circle
+            @click="examine(scope.$index,scope.row)"
+          ></el-button>
           <el-button size="small"
                      v-if="!scope.row.ApprovalStataus"
                      icon="el-icon-edit" circle
                      @click="getData(scope.$index,scope.row)"
           ></el-button>
-        
         </template>
       </el-table-column>
       
@@ -104,7 +112,7 @@
         align="center"
       >
       </el-table-column>
-    
+      
       <el-table-column
         label="活动时间"
         :formatter="activityTime"
@@ -127,14 +135,28 @@
       @listChanged="listChanged"
     
     ></pagination>
-    <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
-                  :editData="sendDialogData"></alert-dialog>
+    <alert-dialog :isAlertShow.sync="isAlertShow"
+                  @closeAlert="closeAlert"
+                  :editOrAdd="dialogType"
+                  :id="id"
+                  :deviceList="deviceList"
+                  :editData="sendDialogData">
+    
+    </alert-dialog>
+    
+    <examine-dialog
+      :editData="sendDialogData"
+      :isAlertShow.sync="isExamineShow"
+      @closeExamine="closeExamine"
+    >
+    </examine-dialog>
   
   </div>
 </template>
 
 <script>
   import alertDialog from '../dialog/dialog'
+  import examineDialog from '../dialog/examineDialog'
   import pagination from '@/component/common/pagination/pagination'
   import datePicker from '@/component/common/dateSelect/dateSelect'
   
@@ -143,6 +165,7 @@
     name: "contentList",
     components: {
       alertDialog,
+      examineDialog,
       pagination,
       datePicker
     },
@@ -151,6 +174,7 @@
         list: [],
         listLoading: true,
         isListChange: false,
+        isExamineShow: false,
         dialogType: 'up_date',
         headerStyle: {
           height: '100%',
@@ -178,6 +202,7 @@
         pageSize: 5,    //    每页的数据
         isAlertShow: false,
         id: '',
+        deviceList: [],
         sendDialogData: {
           ActivityCode: '',
           CRMStoreCode: '',
@@ -189,9 +214,11 @@
       }
     },
     mounted() {
-      this.getList()
+      this.getList();
+      this.getDevice()
     },
     methods: {
+      
       tagType(val) {
         let type;
         if ( !val ) {
@@ -203,7 +230,7 @@
         } else if ( val === 3 ) {
           return type = ''
         }
-    
+        
       },
       tagText(val) {
         let text;
@@ -215,7 +242,7 @@
           return text = '已通过'
         } else if ( val === 3 ) {
           return text = '已完成'
-      
+          
         }
       },
       getDate(val) {
@@ -251,7 +278,7 @@
         if ( column.label === '活动申请' ) {
           this.isAlertShow = true;
           this.dialogType = 'a_dd';
-          console.log(this.dialogType);
+          console.log(this.sendDialogData);
         }
       },
       getList(update) {
@@ -263,7 +290,7 @@
           OpenStartDate: this.searchData.startDate,
           OpenEndDate: this.searchData.endDate,
           ApprovalStataus: this.searchData.ApprovalStataus,
-          ActivityEmployeeCode:storage.getItem('userName')
+          ActivityEmployeeCode: storage.getItem('userName')
         })
           .then(data => {
             if ( data.data.state == 1 ) {
@@ -273,7 +300,7 @@
               that.isListChange = true;
             }
           })
-       
+        
       }
       
       ,
@@ -282,17 +309,21 @@
         this.isAlertShow = false;
         if ( !n ) {
           this.getList('update')
+          this.getDevice()
         }
       }
-      , getData(index, row) {
-        
+      ,
+      closeExamine() {
+        this.isExamineShow = false
+      },
+      examine(index,row){
+        this.isExamineShow=true;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
-        this.isAlertShow = true;
         this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
         this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
-        // this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
         this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
         this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
         this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
@@ -304,10 +335,29 @@
         this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
         this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
         this.sendDialogData.DogType = 'up_date';
-        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
         this.sendDialogData.ID = row.ID;
-        console.log(row);
-        console.log(this.sendDialogData);
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
+      },
+      getData(index, row) {
+        this.isAlertShow = true;
+        var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
+        this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
+        this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
+        this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
+        this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
+        this.sendDialogData.OpenStartDate = this.list[ realIndex ].OpenStartDate;
+        this.sendDialogData.OpenEndDate = this.list[ realIndex ].OpenEndDate;
+        this.sendDialogData.ActivityAdd = this.list[ realIndex ].ActivityAdd;
+        this.sendDialogData.ActivityStoreCode = this.list[ realIndex ].ActivityStoreCode;
+        this.sendDialogData.realStoreCode = this.list[ realIndex ].StoreCode;
+        this.sendDialogData.StoreValidity = this.list[ realIndex ].StoreValidity;
+        this.sendDialogData.ActivityEmployeeCode = this.list[ realIndex ].ActivityEmployeeCode;
+        this.sendDialogData.DeviceList = this.list[ realIndex ].DeviceList;
+        this.sendDialogData.ProductList = this.list[ realIndex ].ProductList;
+        this.sendDialogData.ActivityDec = this.list[ realIndex ].ActivityDec;
+        this.sendDialogData.DogType = 'up_date';
+        this.sendDialogData.ID = row.ID;
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
       }
       , deleteItem(index, row) {
         let that = this;
@@ -334,7 +384,19 @@
       activityTime(row, index) {
         return row.OpenStartDate + '--' + row.OpenEndDate
       }
-      
+      ,
+      getDevice() {
+        let that = this;
+        that.$axios.post('/Home/OnloadEmployeeDeviceList', {
+          DeviceStatus: 'Activity'
+        })
+          .then(data => {
+            console.log(data);
+            if ( data.data.state == 1 ) {
+              that.deviceList = data.data.Content;
+            }
+          })
+      }
     },
   }
 </script>

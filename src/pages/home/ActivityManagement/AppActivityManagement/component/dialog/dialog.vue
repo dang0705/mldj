@@ -78,20 +78,21 @@
         <el-form-item>
           <template
             v-for="(item,i) in selectedProductList"
+            v-if="number[i]>=0"
           >
             <el-form-item class="shoppingCart"
-                          v-if="item.number>0"
             >
+              <el-button class="el-icon-delete" circle type="danger"  size="small" @click="deleteProduct(i)"></el-button>
               <el-tag size="small" type="success">{{item.ProductName}}</el-tag>
               <span v-if="item.Validity===0">----上一次所选择的该产品已被删除</span>
-              
               <el-input-number
                 size="small"
-                v-model="item.number"
-                v-if="item.Validity>0||(item.Validity===undefined&&item.number>0)"
-                @change="ifNumberIsZero"
+                :min="0"
+                v-model="number[i]"
                 @input.native="ifNumberIsZero"
-              ></el-input-number>
+              >
+              
+              </el-input-number>
             </el-form-item>
           </template>
         </el-form-item>
@@ -100,7 +101,7 @@
           <el-select v-model="selectedDeviceArr"
                      :multiple="true">
             <el-option
-              v-for="(item,i) in deviceList"
+              v-for="(item,i) in myDeviceList"
               :key="i"
               :label="item.Validity?item.DeviceName:item.DeviceName+'-----设备已停用'"
               :disabled="!item.Validity"
@@ -162,6 +163,9 @@
       storeSelectAlert
     },
     props: {
+      deviceList: {
+        type: Array
+      },
       isAlertShow: {
         type: Boolean
       },
@@ -175,17 +179,19 @@
     data() {
       return {
         alertTitle: '',
+        number: [],
+        addProductCount: 0,
         dataLoading: true,
         isProductAlertShow: false,
         isStoreAlertShow: false,
         isProductSelected: false,
         isStoreSelected: false,
         productList: [],
-        defaultProductNum: 1,
+        defaultProductNum: 0,
         selectedProductCode: [],
         selectedProductList: [],
         selectedStoreObj: {},
-        deviceList: [],
+        myDeviceList: [],
         storeSelectedModel: '',
         selectedDeviceArr: [],
         disabledDeviceArr: [],
@@ -199,7 +205,7 @@
           ActivityAdd: '',
           ActivityStoreCode: '',
           ActivityEmployeeCode: '',
-          DeviceList: '',
+          DeviceList: [],
           ProductList: '',
           ActivityDec: '',
           DogType: ''
@@ -257,11 +263,15 @@
     watch: {
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
+          this.number = [];
+          this.addProductCount = 0;
+          this.formData = this.editData;
+          console.log(this.formData);
+          this.myDeviceList = this.deviceList;
           this.$nextTick(() => {
             this.$refs.autoFocus.focus()
           });
           if ( this.editOrAdd === 'up_date' ) {
-            this.formData = this.editData;
             this.selectedStoreObj.StoreName = this.formData.StoreName;
             this.selectedStoreObj.AddInfo = this.formData.ActivityAdd;
             this.selectedStoreObj.StoreCode = this.formData.realStoreCode;
@@ -272,18 +282,25 @@
             this.selectedStoreObj.StoreValidity ? this.storeSelectedModel = this.formData.ActivityStoreCode : 0;
             this.selectedProductList = this.formData.ProductList;
             
-            console.log(this.storeSelectedModel);
+            this.formData.ProductList.forEach((item, index, arr) => {
+              this.number.push(item.number)
+            })
+            console.log(this.formData);
             const deviceArr = this.formData.DeviceList
               , length = deviceArr.length;
             console.log(deviceArr);
-            for ( var i = 0; i < length; i++ ) {
-              if ( deviceArr[ i ].Validity ) {
-                this.selectedDeviceArr.push(parseInt(deviceArr[ i ].DeviceCode))
-              } else {
-                this.disabledDeviceArr.push(deviceArr[ i ].DeviceName)
+            if ( !this.formData.ApprovalStataus ) {
+              this.selectedDeviceArr = [];
+            } else {
+              for ( var i = 0; i < length; i++ ) {
+                if ( deviceArr[ i ].Validity ) {
+                  this.selectedDeviceArr.push(parseInt(deviceArr[ i ].DeviceCode))
+                } else {
+                  this.disabledDeviceArr.push(deviceArr[ i ].DeviceName)
+                }
               }
             }
-            console.log(this.formData);
+            
             console.log(this.disabledDeviceArr);
             this.alertTitle = '编辑活动';
             Msg = '编辑成功';
@@ -327,6 +344,18 @@
         }
         
       },
+      /* getDevice(){
+		 let that = this;
+		 that.$axios.post('/Home/OnloadEmployeeDeviceList', {
+		   DeviceStatus: 'Activity'
+		 })
+		   .then(data => {
+			 console.log(data);
+			 if ( data.data.state == 1 ) {
+			   that.deviceList = data.data.Content;
+			 }
+		   })
+	   },*/
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           this.$emit('closeAlert', 'n');
@@ -341,20 +370,11 @@
         this.selectedStoreObj = {};
         this.storeSelectedModel = '';
       },
-      
-      ifNumberIsZero(val, index) {
-        console.log(val, index);
-        if ( !val || (val.target && val.target.value <= 0) ) {
-          this.$nextTick(() => {
-            for ( var i = 0; i < this.selectedProductList.length; i++ ) {
-              if ( !this.selectedProductList[ i ].number ) {
-                this.selectedProductList.splice(i, 1)
-              }
-            }
-          })
-        }
-        console.log(this.selectedProductList);
+      deleteProduct(index){
+        this.selectedProductList.splice(index, 1)
+        this.number.splice(index, 1)
       },
+      
       closeProductSelect() {
         this.isProductAlertShow = false
       }
@@ -362,50 +382,52 @@
       closeStoreSelect() {
         this.isStoreAlertShow = false
       },
-      /*      productSelect(val, label) {
-			  console.log(val, label);
-			  this.selectedProductList = [];
-			  const length = val.length;
-			  for ( var i = 0; i < length; i++ ) {
-				this.selectedProductList.push({
-				  ProductCode: val[ i ].split('^')[ 0 ],
-				  ProductName: val[ i ].split('^')[ 1 ],
-				  number: this.defaultProductNum
-				})
-			  }
-			  console.log(this.selectedProductList);
-			},*/
       productSelected(val) {
         console.log(val);
         
         this.selectedProductList = [];
         const length = val.length;
         for ( var i = 0; i < length; i++ ) {
+          if ( this.addOrEdit === 'a_dd' ) {
+            this.number[ i ] = 0;
+          } else {
+            this.number.push(0)
+          }
           this.selectedProductList.push({
             ProductCode: val[ i ].id,
             ProductName: val[ i ].ProductName,
-            number: this.defaultProductNum
+            // number: this.defaultProductNum
           })
         }
         console.log(this.formData.ProductList);
-      },
+      }
+      ,
       storeSelected(val) {
         console.log(val);
         this.selectedStoreObj = val;
-        this.storeSelectedModel = val.ID.toString()
+        this.storeSelectedModel = val.ID.toString();
         console.log(this.storeSelectedModel);
         
         this.formData.ActivityAdd = this.selectedStoreObj.AddInfo;
         this.formData.ActivityStoreCode = this.selectedStoreObj.ID
-      },
+      }
+      ,
       sendRadioSelectedModel(val) {
         console.log(this.storeSelectedModel);
-      },
+      }
+      ,
       confirmUpload(obj) {
         let that = this;
         this.formData.ProductList = JSON.stringify(this.selectedProductList);
         this.formData.DeviceList = JSON.stringify(this.selectedDeviceArr);
         this.formData.ActivityEmployeeCode = storage.getItem('userName');
+        
+        this.selectedProductList.forEach((item, index, arr) => {
+          item.number = this.number[ index ]
+        });
+        let isProduct = this.selectedProductList.every((item, index, arr) => {
+          return item.number > 0
+        });
         console.log(this.selectedProductList);
         
         if ( !that.formData.ActivityName ) {
@@ -418,8 +440,11 @@
           that.$message.error('门店必须选择');
           return
           
-        } else if ( this.selectedProductList === [] || (this.selectedProductList[ 0 ].Validity !== undefined && this.selectedProductList[ 0 ].Validity === 0) ) {
+        } else if ( !this.selectedProductList.length || (this.selectedProductList.length && this.selectedProductList[ 0 ].Validity !== undefined && this.selectedProductList[ 0 ].Validity === 0) ) {
           that.$message.error('至少要选择一个产品');
+          return
+        } else if ( !isProduct ) {
+          that.$message.error('某个产品的库存为0');
           return
         } else if ( this.formData.DeviceList === '[]' ) {
           that.$message.error('至少要选择一个设备');
@@ -430,7 +455,7 @@
         that.$axios.post('/Home/ActivitySave', this.formData)
           .then(data => {
             let res = data.data;
-            if ( res.state == 1 ) {
+            if ( res.state === 1 ) {
               that.$message.success(Msg);
               that.handleClose(obj);
             } else {
@@ -444,29 +469,22 @@
     }
     ,
     mounted() {
+      this.formData = this.editData;
+      console.log(this.formData);
       let that = this;
+      // that.getDevice()
       if ( storage.getItem('productList') ) {
         that.productList = JSON.parse(storage.getItem('productList'))
       } else {
         that.$axios.post('/Home/OnloadProductList')
           .then(data => {
             console.log(data);
-            if ( data.data.state == 1 ) {
+            if ( data.data.state === 1 ) {
               that.productList = data.data.Content;
             }
           })
       }
-      if ( storage.getItem('device') ) {
-        that.deviceList = JSON.parse(storage.getItem('device'));
-      } else {
-        that.$axios.post('/Home/OnloadEmployeeDeviceList')
-          .then(data => {
-            console.log(data);
-            if ( data.data.state == 1 ) {
-              that.deviceList = data.data.Content;
-            }
-          })
-      }
+      
       
     }
   }
@@ -487,4 +505,5 @@
     
     div.el-input-number
       width: 130px !important
+      float right
 </style>

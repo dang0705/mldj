@@ -238,31 +238,27 @@
       getList(update) {
         let that = this;
         that.dataLoading = true;
-        if ( storage.getItem('employeeList')&&!update ) {
-          that.list = JSON.parse(storage.getItem('employeeList'))
-          that.dataLoading = false;
-          that.isListChange = true;
-        }else {
-          that.$axios.post('/Account/GetEmployeeList', {
-            PageIndex: 1,
-            PageSize: 1000,
-            EmployeeName: that.keyWord,
-            Email: that.email,
-            Phone: that.mobileNumber,
-            Validity: that.Validity,
-          })
-            .then(data => {
-              if ( data.data.state === 1 ) {
-                that.list = data.data.Content.DataList;
-                if ( update && update === 'update' || !update ) {
-                  storage.setItem('employeeList',JSON.stringify(that.list))
-                }
+        that.$axios.post('/Account/GetEmployeeList', {
+          PageIndex: 1,
+          PageSize: 1000,
+          EmployeeName: that.keyWord,
+          Email: that.email,
+          Phone: that.mobileNumber,
+          Validity: that.Validity,
+        })
+          .then(data => {
+            if ( data.data.state === 1 ) {
+              that.list = data.data.Content.DataList;
+              if ( update && update === 'update' || !update ) {
+                storage.setItem('employeeList',JSON.stringify(that.list))
               }
-              
-              that.dataLoading = false;
-              that.isListChange = true;
-            })
-        }
+            }else {
+              that.list=[]
+            }
+      
+            that.dataLoading = false;
+            that.isListChange = true;
+          })
        
       }
       ,

@@ -16,8 +16,8 @@
         >
         </i>
       </el-input>
-      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"
-                  :forSearch="true"></citySelect>
+<!--      <citySelect class="citySelect" :isInAlert="!isAlertShow" @provincesAndCities="cityFilter"
+                  :forSearch="true"></citySelect>-->
     </div>
     
     <el-table width="100%"
@@ -84,7 +84,7 @@
 </template>
 
 <script>
-  import citySelect from '@/component/common/citySelect/citySelect'
+  // import citySelect from '@/component/common/citySelect/citySelect'
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
   
@@ -92,7 +92,7 @@
     name: "contentList",
     components: {
       alertDialog,
-      citySelect,
+      // citySelect,
       pagination
     },
     data() {

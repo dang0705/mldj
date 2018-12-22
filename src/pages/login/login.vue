@@ -21,7 +21,7 @@
         </el-form-item>
         <el-form-item>
           <el-checkbox v-model="loginData.holdLogin">保持登录</el-checkbox>
-          <el-button type="text">忘记密码</el-button>
+          <!--<el-button type="text">忘记密码</el-button>-->
         </el-form-item>
         <el-form-item>
           <el-button type="danger" size="medium" @click="handleLogin">登&nbsp;&nbsp;&nbsp;&nbsp;陆</el-button>
