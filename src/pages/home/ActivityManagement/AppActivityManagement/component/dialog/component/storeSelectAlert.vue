@@ -68,14 +68,16 @@
           label="门店名称"
           prop="StoreName"
           align="center"
-          width="100"
+          width="170"
+          :show-overflow-tooltip="true"
         >
         
         </el-table-column>
         <el-table-column
           label="所在省市"
           align="center"
-          width="200"
+          width="130"
+          :show-overflow-tooltip="true"
           :formatter="getCity"
         ></el-table-column>
         <el-table-column
@@ -191,27 +193,21 @@
       gitList(keyWord, name) {
         let that = this;
         console.log(keyWord);
-        if ( (storage.getItem('store') && (!name || !keyWord)) ||(keyWord && !keyWord instanceof Array) ) {
-          that.storeList = JSON.parse(storage.getItem('store'));
-          that.dataLoading = false;
-          that.isListChange = true;
-        } else {
-          that.dataLoading = true;
-          that.$axios.post('/Home/OnloadStorelList', {
-            StoreName: name === 'keyWord' ? keyWord : '',
-            CityCode: keyWord instanceof Array && keyWord.length ? keyWord[ 1 ] : '',
-            ChannelCode: this.formData.channelID
+        that.dataLoading = true;
+        that.$axios.post('/Home/OnloadStorelList', {
+          StoreName: name === 'keyWord' ? keyWord : '',
+          CityCode: keyWord instanceof Array && keyWord.length ? keyWord[ 1 ] : '',
+          ChannelCode: this.formData.channelID
+        })
+          .then(data => {
+            console.log(data);
+            if ( data.data.state == 1 ) {
+              that.storeList = data.data.Content;
+        
+            }
+            that.dataLoading = false;
+            that.isListChange = true;
           })
-            .then(data => {
-              console.log(data);
-              if ( data.data.state == 1 ) {
-                that.storeList = data.data.Content;
-                
-              }
-              that.dataLoading = false;
-              that.isListChange = true;
-            })
-        }
         console.log(that.storeList);
         
       }

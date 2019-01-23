@@ -249,9 +249,6 @@
           .then(data => {
             if ( data.data.state === 1 ) {
               that.list = data.data.Content.DataList;
-              if ( update && update === 'update' || !update ) {
-                storage.setItem('employeeList',JSON.stringify(that.list))
-              }
             }else {
               that.list=[]
             }
@@ -270,6 +267,7 @@
       }
       ,
       getData(index, row) {
+        this.dialogType='up_date';
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.isAlertShow = true;
         this.sendDialogData.Phone = this.list[ realIndex ].Phone;

@@ -202,7 +202,6 @@
       }
       ,
       closeAlert(n) {
-        this.dialogType = 'up_date';
         this.isAlertShow = false;
         if ( !n ) {
           this.getList('update');
@@ -213,7 +212,7 @@
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         console.log(row);
         this.isAlertShow = true;
-        
+        this.dialogType = 'up_date';
         this.sendDialogData.ImgBase = this.list[ realIndex ].ImgBase;
         this.sendDialogData.CargoDec = this.list[ realIndex ].CargoDec;
         this.sendDialogData.CargoName = this.list[ realIndex ].CargoName;

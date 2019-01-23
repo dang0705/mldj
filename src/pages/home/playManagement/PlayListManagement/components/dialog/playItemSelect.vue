@@ -372,7 +372,16 @@
     width: 600px
     /*vertical-align top*/
     height: 450px
-  
+    .el-transfer-panel__filter
+      width auto
+      display inline-block
+    .el-transfer-panel__footer
+      border-top: 0
+      width auto
+      right:0
+      left inherit
+      top: 40px
+      height: 55px
   .dialogWrapper >>> .el-checkbox__label
     text-align center
     

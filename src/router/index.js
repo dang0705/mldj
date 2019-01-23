@@ -12,6 +12,7 @@ Vue.use(Router);
 
 export default new Router({
   base: '/HomeWeb',
+  // mode:'history',
   routes: [
     {
       path: '*/',
@@ -25,7 +26,7 @@ export default new Router({
 
         {
           path: '/homePage',
-          name: '/homePage',
+          name: 'homePage',
           component: resolve => require([ '@/pages/home/homePage/homePage' ], resolve)
         },
         {

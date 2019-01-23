@@ -32,7 +32,7 @@
 					  <el-tag type="info">选择的门店已被删除,请重新选择门店</el-tag>
 					  <el-form
 						label-width="100px"
-						v-if="selectedStoreObj.AddInfo"
+						v-if="selectedStoreObj.ActivityAdd"
 					  >
 						<el-form-item label="门店名称：">
 						  <el-tag size="small" type="danger">{{selectedStoreObj.StoreName}}</el-tag>
@@ -76,20 +76,34 @@
           <el-button @click="toSelectProduct" type="success">选择产品</el-button>
         </el-form-item>
         <el-form-item>
+          <template>
+            <el-form-item class="shoppingCart operate_all" v-show="selectedProductList.length>1" >
+              <div id="all" >
+                <el-button class="el-icon-delete" type="danger" size="small" @click="deleteAll" style="vertical-align: text-bottom">全部删除</el-button>
+                <el-input-number
+                  size="small"
+                  label="批量设置库存"
+                  :min="0"
+                  v-model="all_Number"
+                  @change="change_all_number"
+                ></el-input-number>
+              </div>
+            </el-form-item>
+          </template>
           <template
             v-for="(item,i) in selectedProductList"
             v-if="number[i]>=0"
           >
             <el-form-item class="shoppingCart"
             >
-              <el-button class="el-icon-delete" circle type="danger"  size="small" @click="deleteProduct(i)"></el-button>
+              
+              <el-button class="el-icon-delete" circle type="danger" size="small" @click="deleteProduct(i)"></el-button>
               <el-tag size="small" type="success">{{item.ProductName}}</el-tag>
               <span v-if="item.Validity===0">----上一次所选择的该产品已被删除</span>
               <el-input-number
                 size="small"
                 :min="0"
                 v-model="number[i]"
-                @input.native="ifNumberIsZero"
               >
               
               </el-input-number>
@@ -179,6 +193,7 @@
     data() {
       return {
         alertTitle: '',
+        all_Number: 0,
         number: [],
         addProductCount: 0,
         dataLoading: true,
@@ -264,7 +279,6 @@
       'isAlertShow': function () {
         if ( this.isAlertShow === true ) {
           this.number = [];
-          this.addProductCount = 0;
           this.formData = this.editData;
           console.log(this.formData);
           this.myDeviceList = this.deviceList;
@@ -272,14 +286,15 @@
             this.$refs.autoFocus.focus()
           });
           if ( this.editOrAdd === 'up_date' ) {
-            this.selectedStoreObj.StoreName = this.formData.StoreName;
-            this.selectedStoreObj.AddInfo = this.formData.ActivityAdd;
-            this.selectedStoreObj.StoreCode = this.formData.realStoreCode;
-            this.selectedStoreObj.ChannelName = this.formData.ChannelName;
-            this.selectedStoreObj.StoreValidity = this.formData.StoreValidity;
+            console.log(this.formData);
+            const {StoreName, ActivityAdd, realStoreCode, ChannelName, StoreValidity} = this.formData;
+            this.selectedStoreObj = {StoreName, ActivityAdd, realStoreCode, ChannelName, StoreValidity};
+            console.log(this.selectedStoreObj);
+            
+            this.storeSelectedModel = this.selectedStoreObj.StoreValidity ? this.formData.ActivityStoreCode : '';
+            
             this.selectedDate = [ this.formData.OpenStartDate, this.formData.OpenEndDate ];
             this.isStoreSelected = true;
-            this.selectedStoreObj.StoreValidity ? this.storeSelectedModel = this.formData.ActivityStoreCode : 0;
             this.selectedProductList = this.formData.ProductList;
             
             this.formData.ProductList.forEach((item, index, arr) => {
@@ -344,18 +359,14 @@
         }
         
       },
-      /* getDevice(){
-		 let that = this;
-		 that.$axios.post('/Home/OnloadEmployeeDeviceList', {
-		   DeviceStatus: 'Activity'
-		 })
-		   .then(data => {
-			 console.log(data);
-			 if ( data.data.state == 1 ) {
-			   that.deviceList = data.data.Content;
-			 }
-		   })
-	   },*/
+      change_all_number(val) {
+        console.log(val);
+        console.log(this.number);
+        for ( var i = 0; i < this.number.length; i++ ) {
+          this.number[ i ] = val
+        }
+        
+      },
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           this.$emit('closeAlert', 'n');
@@ -370,11 +381,25 @@
         this.selectedStoreObj = {};
         this.storeSelectedModel = '';
       },
-      deleteProduct(index){
-        this.selectedProductList.splice(index, 1)
+      deleteProduct(index) {
+        this.selectedProductList.splice(index, 1);
         this.number.splice(index, 1)
       },
-      
+      deleteAll() {
+        this.$confirm('是否删除全部选中的产品?','提示',{
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(()=>{
+          this.selectedProductList = [];
+          this.number = [];
+          this.all_Number = 0;
+        }).catch(()=>{
+        
+        })
+       
+  
+      },
       closeProductSelect() {
         this.isProductAlertShow = false
       }
@@ -399,6 +424,7 @@
             // number: this.defaultProductNum
           })
         }
+        console.log(this.selectedProductList);
         console.log(this.formData.ProductList);
       }
       ,
@@ -407,7 +433,7 @@
         this.selectedStoreObj = val;
         this.storeSelectedModel = val.ID.toString();
         console.log(this.storeSelectedModel);
-        
+        console.log(this.selectedStoreObj);
         this.formData.ActivityAdd = this.selectedStoreObj.AddInfo;
         this.formData.ActivityStoreCode = this.selectedStoreObj.ID
       }
@@ -418,9 +444,7 @@
       ,
       confirmUpload(obj) {
         let that = this;
-        this.formData.ProductList = JSON.stringify(this.selectedProductList);
-        this.formData.DeviceList = JSON.stringify(this.selectedDeviceArr);
-        this.formData.ActivityEmployeeCode = storage.getItem('userName');
+        
         
         this.selectedProductList.forEach((item, index, arr) => {
           item.number = this.number[ index ]
@@ -428,8 +452,11 @@
         let isProduct = this.selectedProductList.every((item, index, arr) => {
           return item.number > 0
         });
+        this.formData.ProductList = JSON.stringify(this.selectedProductList);
+        this.formData.DeviceList = JSON.stringify(this.selectedDeviceArr);
+        this.formData.ActivityEmployeeCode = storage.getItem('userName');
         console.log(this.selectedProductList);
-        
+        console.log(this.formData);
         if ( !that.formData.ActivityName ) {
           that.$message.error('活动名称不能为空');
           return
@@ -478,7 +505,6 @@
       } else {
         that.$axios.post('/Home/OnloadProductList')
           .then(data => {
-            console.log(data);
             if ( data.data.state === 1 ) {
               that.productList = data.data.Content;
             }
@@ -493,12 +519,17 @@
 <style scoped lang="stylus">
   .dialogWrapper >>> .el-dialog
     width: 600px !important
-  
+  .dialogWrapper>>>.operate_all
+    margin-bottom 20px
+    border-bottom: 1px solid #ccc
+    #all
+      padding-left 10rem
   .dialogWrapper >>> .shoppingCart
     text-align left
     
     > div
       margin-left: 0 !important
+     
     
     .el-tag--small
       vertical-align middle

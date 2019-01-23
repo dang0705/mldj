@@ -247,6 +247,7 @@
         this.isAlertShow = true;
         this.sendDialogData.FileName = this.list[ realIndex ].FileName;
         this.sendDialogData.FileType = this.list[ realIndex ].FileType;
+        this.sendDialogData.PlayItemUrl = this.list[ realIndex ].PlayItemUrl;
         this.sendDialogData.PlayItemName = this.list[ realIndex ].PlayItemName;
         this.sendDialogData.Duration = this.list[ realIndex ].Duration;
         this.sendDialogData.TimeLong = this.list[ realIndex ].TimeLong;

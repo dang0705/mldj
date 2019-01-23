@@ -13,7 +13,7 @@
         align="left"
       >
         <el-form-item prop="ApkName" label="版本名称">
-          <el-input v-model="formData.ApkName" clearable minlength="1" maxlength="10"></el-input>
+          <el-input  v-model="formData.ApkName" clearable minlength="1" maxlength="10"></el-input>
         </el-form-item>
         <el-form-item prop="ApkCode" label="版本编号">
           <el-input
@@ -57,6 +57,20 @@
   export default {
     // inject:['reload'],
     name: "apkManagement_dialog",
+/*    directives:{
+      'focus':{
+        bind(el,binding){
+          console.log(el, binding);
+          vm.$nextTick(
+            el.focus()
+          )
+        },
+        update(el,binding){
+          console.log(el, binding);
+          el.focus()
+        }
+      }
+    },*/
     components: {
       upload
     },

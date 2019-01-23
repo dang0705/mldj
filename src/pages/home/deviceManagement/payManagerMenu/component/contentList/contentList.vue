@@ -168,25 +168,17 @@
       },
       getList(update) {
         let that = this;
-        if ( storage.getItem('payment') && !update ) {
-          this.list = JSON.parse(storage.getItem('payment'));
-          that.dataLoading = false;
-          that.isListChange = true;
-        } else {
-          that.$axios.post('/Home/payList', {
-            payname: this.keyWord,
+        that.$axios.post('/Home/payList', {
+          payname: this.keyWord,
+        })
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
+        
+            }
+            that.dataLoading = false;
+            that.isListChange = true;
           })
-            .then(data => {
-              if ( data.data.state == 1 ) {
-                that.list = data.data.Content;
-                if ( (update && update === 'update') || !update ) {
-                  storage.setItem('payment', JSON.stringify(that.list))
-                }
-              }
-              that.dataLoading = false;
-              that.isListChange = true;
-            })
-        }
         
       }
       

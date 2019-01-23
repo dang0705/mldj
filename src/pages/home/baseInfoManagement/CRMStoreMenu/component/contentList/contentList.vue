@@ -16,19 +16,19 @@
         >
         </i>
       </el-input>
-     <el-select
-       v-model="type"
-       @clear="getList"
-       @change="getList"
-       clearable
-     >
-       <el-option
-         v-for="(item,index) in typeList"
-         :label="item.label"
-         :value="item.value"
-         :key="index"
-       ></el-option>
-     </el-select>
+      <el-select
+        v-model="type"
+        @clear="getList"
+        @change="getList"
+        clearable
+      >
+        <el-option
+          v-for="(item,index) in sendDialogData.typeList"
+          :label="item.label"
+          :value="item.value"
+          :key="index"
+        ></el-option>
+      </el-select>
     </div>
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
@@ -82,11 +82,12 @@
     
     ></pagination>
     
-    <alert-dialog :isAlertShow.sync="isAlertShow"
-                  @closeAlert="closeAlert"
-                  :editOrAdd="dialogType"
-                  :id="id"
-                  :editData="sendDialogData"
+    <alert-dialog
+      @closeAlert="closeAlert"
+      :isAlertShow.sync="isAlertShow"
+      :editOrAdd="dialogType"
+      :id="id"
+      :editData="sendDialogData"
     ></alert-dialog>
   
   </div>
@@ -95,8 +96,6 @@
 <script>
   import pagination from '@/component/common/pagination/pagination'
   import alertDialog from '../dialog/dialog'
-  
-  const storage = window.localStorage;
   export default {
     name: "contentList",
     components: {
@@ -106,14 +105,11 @@
     data() {
       return {
         list: [],
-        type:'',
+        type: '',
         listLoading: true,
         isListChange: false,
         dialogType: 'up_date',
-        typeList:[
-          {label:'阿里',value:'ali'},
-          {label:'微信',value:'weixin'},
-        ],
+        // typeList: [],
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -129,6 +125,7 @@
         isAlertShow: false,
         id: '',
         sendDialogData: {
+          typeList:[],
           StoreCode: '',
           StoreName: '',
           ChannelCode: '',
@@ -145,6 +142,7 @@
     
     mounted() {
       this.getList();
+      this.getCrmTypeList()
     },
     methods: {
       listChanged() {
@@ -174,36 +172,44 @@
           console.log(this.dialogType);
         }
       },
-      getList(update) {
-        if ( storage.getItem('CRMStore') && !update ) {
-          this.list = JSON.parse(storage.getItem('CRMStore'));
-          this.listLoading = false;
-          this.isListChange = true;
-        } else {
-          let that = this;
-          that.listLoading = true;
-          that.$axios.post('/Home/CRMonload', {
-            StoreName: that.keyWord,
-            type: this.type
+      getCrmTypeList() {
+        let that = this;
+        that.$axios.post('/Home/OnloadMetaDataByType', {
+          InputType: 'CRMDATA'
+        })
+          .then(data => {
+            if ( data.data.state === 1 ) {
+              const list = data.data.Content;
+              list.forEach((item, index, arr) => {
+                that.sendDialogData.typeList.push({
+                  label: item.Name,
+                  value: item.Value,
+                })
+              });
+            }
           })
-            .then(data => {
-              if ( data.data.state == 1 ) {
-                that.list = data.data.Content;
-                if ( (update && update === 'update') || !update ) {
-                  storage.setItem('CRMStore', JSON.stringify(that.list))
-                }
-              }
-              that.listLoading = false;
-              that.isListChange = true;
-              this.defaultPaginationData()
-            })
-        }
+      },
+      getList(update) {
+        let that = this;
+        that.listLoading = true;
+        that.$axios.post('/Home/CRMonload', {
+          StoreName: that.keyWord,
+          type: this.type
+        })
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
+            }
+            that.listLoading = false;
+            that.isListChange = true;
+            this.defaultPaginationData()
+          })
         
       }
       ,
-      storeType(row){
+      storeType(row) {
         let type;
-        return type=row.type==='ali'?'阿里':'微信'
+        return type = row.type === '1' ? '阿里' : '微信'
       },
       closeAlert(n) {
         this.dialogType = 'up_date';
@@ -221,9 +227,9 @@
         this.sendDialogData.StoreName = this.list[ realIndex ].StoreName;
         this.sendDialogData.type = this.list[ realIndex ].type;
         // this.sendDialogData.ChannelName = this.list[ realIndex ].ChannelName;
-       
+        
         this.sendDialogData.ID = row.ID;
-        this.sendDialogData=JSON.parse(JSON.stringify(this.sendDialogData))
+        this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData))
       }
       , deleteItem(index, row) {
         let that = this;

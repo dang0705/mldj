@@ -5,14 +5,6 @@
       :visible.sync="isProductAlertShow"
       :before-close="handleClose"
     >
-      <!-- <template v-for="(item ,i) in productSelectList">
-		 <el-tag size="small">{{item.ProductName}}</el-tag>
-	   </template>-->
-      <!--      <div id="productTags"
-				 v-for="(item,i) in productSelectList"
-			>
-			  <el-tag size="small"></el-tag>
-			</div>-->
       <el-form
         ref="sourceSelect"
       >
@@ -50,12 +42,14 @@
                 :data="productList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
                 :header-row-style="headerStyle"
                 :row-style="rowStyle"
+                :row-key="getRowKeys"
                 v-loading="dataLoading"
                 @select="handleProductSelect"
                 @select-all="handleProductSelect"
       >
         <el-table-column
           type="selection"
+          :reserve-selection="true"
           align="center"
           width="55">
         </el-table-column>
@@ -65,10 +59,6 @@
           width="100"
         >
           <template slot-scope="scope">
-            <!--<div class="imgWrapper" style="width: 40px;height: 40px;margin: 0 auto">
-              <img :src="scope.row.ImgBase||noLogo" slot="reference" alt="" width="100%" height="100%"
-                   style="vertical-align: middle;cursor: pointer">
-            </div>-->
             <el-popover
               placement="right"
               trigger="click"
@@ -111,9 +101,6 @@
 
 <script>
   import pagination from '@/component/common/pagination/pagination'
-  
-  const storage = window.localStorage;
-  
   export default {
     name: "productSelectAlert",
     components: {
@@ -135,6 +122,8 @@
         catalogList: [],
         productSelectList: [],
         productList: [],
+        /*记录所有push的产品*/
+        noteAllSelectedPrd: [],
         formData: {
           ProductName: '',
           ProductClassId: [],
@@ -159,14 +148,20 @@
       }
     },
     methods: {
+      getRowKeys(row) {
+        console.log(row);
+        return row.id.toString()
+      },
+      
       handleSizeChange: function (size) {
         this.pageSize = size;
         console.log(this.pageSize)  //每页下拉显示数据
       },
       handleCurrentChange: function (currentPage) {
-        this.currentPage = currentPage;
-        this.getSelectedStatus()
-        // console.log(this.currentPage)  //点击第几页
+        const that = this;
+        that.currentPage = currentPage;
+        // that.getSelectedStatus();
+       
       }
       ,
       handleClose(obj) {
@@ -175,7 +170,7 @@
             this.productSelectList = [];
           }
         }
-        console.log(this.productSelectList);
+        // console.log(this.productSelectList);
         this.formData.ProductName = '';
         this.formData.ProductClassId = []
         this.$emit('closeProductSelect');
@@ -189,37 +184,82 @@
         } else {
           update = ''
         }
-        
-        if ( storage.getItem('productList') && !name ) {
-          that.productList = JSON.parse(storage.getItem('productList'));
-          that.dataLoading = false;
-          that.isListChange = true;
-          that.getSelectedStatus()
-        } else {
-          that.dataLoading = true;
-          that.$axios.post('/Home/OnloadProductList', {
-            ProductClassID: name === 'classID' ? update : '',
-            ProductName: name === 'keyWord' ? update : ''
-          })
-            .then(data => {
-              console.log(data);
-              if ( data.data.state == 1 ) {
-                that.productList = data.data.Content;
-                // storage.setItem('productList', JSON.stringify(that.productList))
-                
-              }
-              that.dataLoading = false;
-              that.isListChange = true;
-              that.getSelectedStatus()
-            })
-        }
+        that.dataLoading = true;
+        that.$axios.post('/Home/OnloadProductList', {
+          ProductClassID: name === 'classID' ? update : '',
+          ProductName: name === 'keyWord' ? update : ''
+        })
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.productList = data.data.Content;
+            }
+            that.isListChange = true;
+            that.getSelectedStatus()
+          });
         console.log(that.productList);
         
       }
       ,
-      handleProductSelect(val) {
-        console.log(val);
-        this.productSelectList = val;
+      handleProductSelect(val, row) {
+        console.log('选中值', val);
+        // console.log(row);
+/*        function unique(arr) {
+          const res = new Map();
+          return arr.filter((a) => !res.has(a.id) && res.set(a.id, 1))
+        }*/
+        
+        if ( this.selectedProductList.length ) {
+          if ( row ) {
+            let isHasRow = val.includes(row);
+            console.log(isHasRow);
+            if ( !isHasRow ) {
+              console.log('删除一项');
+              for ( var i = this.productSelectList.length - 1; i >= 0; i-- ) {
+                if ( this.productSelectList[ i ].id === row.id ) {
+                  console.log(`删除第${i}项`);
+                  this.productSelectList.splice(i, 1);
+                  break;
+                }
+              }
+            } else {
+              this.productSelectList = val;
+            }
+          }else {
+            this.productSelectList = val;
+          }
+        } else {
+          this.productSelectList = val;
+        }
+        console.log(this.productSelectList);
+  
+        /*        let isHasRow= this.productSelectList.includes(row);
+				console.log(isHasRow);
+				if ( !isHasRow ) {
+				  this.productSelectList.push(row);
+				}else {
+				  // this.productSelectList.push(val)
+				}
+		/!*        if ( !this.productSelectList.length ) {
+				  this.productSelectList.push(row);
+				}else {
+				  let isHasRow=val.includes(row);
+				  console.log(isHasRow);
+				  if ( !isHasRow ) {
+					this.productSelectList.push(row);
+				  }
+		  /!*        val.forEach((item,index,arr)=>{
+					if ( row !== item ) {
+					  this.productSelectList.push(val);
+					}else {
+					
+					}
+				  });*!/
+				}*!/
+			 
+				// if ( this.productSelectList.length ) {
+				//   this.productSelectList.splice(this.currentPage, 1)
+				// }
+				this.productSelectList=this.productSelectList.flat();*/
         // this.$emit('productSelected', this.productSelectList)
         // console.log('this.productSelectList', this.productSelectList);
       }
@@ -229,35 +269,47 @@
         that.$nextTick(() => {
           that.selectedProductList.forEach((item, i) => {
             that.productList.forEach((_item, _i) => {
-              if ( parseInt(item.ProductCode) === _item.id ) {
-                that.$refs.products.toggleRowSelection(_item)
+              if ( item.ProductCode === _item.id ) {
+                // console.log(_item);
+                this.productSelectList.push(_item);
+                that.$refs.products.toggleRowSelection(_item, true)
+  
               }
             })
           })
+          that.dataLoading = false;
         })
       },
       getProductClass() {
         let that = this;
-        if ( storage.getItem('catalog') ) {
-          that.catalogList = JSON.parse(storage.getItem('productList'));
-        } else {
-          that.$axios.post('/Home/OnloadProductClassList')
-            .then(data => {
-              if ( data.data.state == 1 ) {
-                that.catalogList = data.data.Content;
-              }
-            })
-        }
+        that.$axios.post('/Home/OnloadProductClassList')
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.catalogList = data.data.Content;
+            }
+          })
       },
       confirmUpload(obj) {
-        this.handleClose(obj)
+        this.handleClose(obj);
+        console.log(this.productSelectList);
         this.$emit('productSelected', this.productSelectList)
       }
     },
     watch: {
       'isProductAlertShow': function () {
+        
         if ( this.isProductAlertShow ) {
-          this.gitList()
+          if (!this.selectedProductList.length ) {
+            this.dataLoading = false;
+  
+          }
+          this.$nextTick(()=>{
+            this.$refs.products.clearSelection();
+            this.productSelectList=[];
+  
+          });
+          this.currentPage = 1;
+          this.gitList();
           console.log(this.selectedProductList);
           
           // console.log(this.selectedProductList);

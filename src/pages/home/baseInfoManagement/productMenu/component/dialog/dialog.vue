@@ -382,7 +382,7 @@
           = this.formData.ProductBrandId
           = this.formData.Introduce
           = this.formData.ImgBase = '';
-        this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 100;
+        this.formData.Sale = this.formData.cost = this.formData.spSale = this.formData.Size = 50;
         this.formData.ProductClassId = '';
         this.formData.ProductBrandId = '';
         // this.editFormData.ImgBase = ''

@@ -29,6 +29,7 @@
     </div>
     
     <el-table width="100%"
+              empty-text
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :header-row-style="headerStyle"
               :header-cell-class-name="addBtn"
@@ -188,29 +189,23 @@
       getList(update) {
         let that = this;
         that.tableLoading = true;
-        if ( storage.getItem('roleList') && !update ) {
-          that.list = JSON.parse(storage.getItem('roleList'));
-          that.tableLoading = false;
-          that.isListChange = true;
-        }else {
-          that.$axios.post('/OrganizationalRole/GetRoleList', {
-            PageIndex: 1,
-            PageSize: 1000,
-            Validity: that.Validity,
-            RoleName: that.keyWord
-          })
-            .then(data => {
-              console.log(data);
-              if ( data.data.state == 1 ) {
-                that.list = data.data.Content.DataList;
-                if ( update && update === 'update' || !update ) {
-                  storage.setItem('roleList', JSON.stringify(that.list))
-                }
+        that.$axios.post('/OrganizationalRole/GetRoleList', {
+          PageIndex: 1,
+          PageSize: 1000,
+          Validity: that.Validity,
+          RoleName: that.keyWord
+        })
+          .then(data => {
+            console.log(data);
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content.DataList;
+              if ( update && update === 'update' || !update ) {
+                // storage.setItem('roleList', JSON.stringify(that.list))
               }
-              that.tableLoading = false;
-              that.isListChange = true;
-            })
-        }
+            }
+            that.tableLoading = false;
+            that.isListChange = true;
+          })
       }
       ,
       closeAlert(n) {

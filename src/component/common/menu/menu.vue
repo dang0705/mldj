@@ -27,20 +27,31 @@
         </router-link>
       </ul>
       <div id="info">
+        <p id="editPsw" @click="editPassword">修改密码</p>
         <a @click="logOut">欢迎您：{{userName}}</a>
       </div>
     </div>
-  
+    <psw-dialog
+      :isAlertShow="isAlertShow"
+      @closeAlert="closeAlert"
+    ></psw-dialog>
   </div>
-
+ 
 </template>
 
 <script>
+  import pswDialog from './dialog/dialog'
+  import md5 from 'md5'
+
   const storage = window.localStorage;
   export default {
     name: 'head-Menu',
+    components:{
+      pswDialog
+    },
     data() {
       return {
+        isAlertShow:false,
         userName: storage.getItem('name'),
         isActive: 0,
         isSubActive: 0,
@@ -123,6 +134,14 @@
         storage.removeItem('employeeList')
       }
       ,
+      editPassword(){
+        this.isAlertShow=true
+      },
+      closeAlert(){
+        this.isAlertShow=false
+    
+      },
+      
       logOut() {
         this.$confirm('确定退出此账号?', '退出', {
           confirmButtonText: '确定',
@@ -143,7 +162,10 @@
   @import '~@/assets/styles/varibles.styl'
   .active
     color $color
-  
+  #editPsw
+    height: 30px
+    line-height: 30px
+    cursor pointer
   #menuWrapper
     width: 1280px
     margin 0 auto

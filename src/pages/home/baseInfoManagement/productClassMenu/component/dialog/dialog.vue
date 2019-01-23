@@ -26,7 +26,7 @@
         icon-class="el-icon-arrow-right"
         :expand-on-click-node="false"
         :indent=25
-
+      
       >
       <span class="custom-tree-node" slot-scope="{ node, data }">
         <el-form
@@ -155,13 +155,13 @@
         const that = this;
         that.reName(node, data, 'append')
       },
-      remove(node, data) {
-        console.log(node, data);
-        const parent = node.parent;
-        const children = parent.data.children || parent.data;
-        const index = children.findIndex(d => d.id === data.id);
-        children.splice(index, 1);
-      },
+      /*      remove(node, data) {
+			  console.log(node, data);
+			  const parent = node.parent;
+			  const children = parent.data.children || parent.data;
+			  const index = children.findIndex(d => d.id === data.id);
+			  children.splice(index, 1);
+			},*/
       handleClose(obj) {
         if ( obj.target && obj.target.innerText === '取 消' || !obj.target ) {
           // this.treeData
@@ -173,12 +173,7 @@
         }
       },
       onInput(obj) {
-        if ( obj === '' ) {
-          this.$message.error('品类名称不能为空')
-          this.isEmpty = true;
-        } else {
-          this.isEmpty = false;
-        }
+        this.isEmpty = obj === '';
         
       }
       ,
@@ -187,16 +182,20 @@
         this.isRenameShow = true;
         if ( append ) {
           this.tempText = this.oldText = data.children[ data.children.length - 1 ].label;
-          this.treeData = data.children[ 0 ];
+          this.treeData = data.children[ data.children.length - 1 ];
         } else {
           this.tempText = this.oldText = data.label;
           this.treeData = data;
         }
         
         const that = this;
-        setTimeout(function () {
-          that.$refs.reName.focus()
-        }, 300)
+        that.$nextTick(()=>{
+          // that.$refs.reName.select()
+          that.$refs.reName.select()
+        })
+      /*  setTimeout(function () {
+        
+        }, 300)*/
       }
       ,
       onBlur(obj) {

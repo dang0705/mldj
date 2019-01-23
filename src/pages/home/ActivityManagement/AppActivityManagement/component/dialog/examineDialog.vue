@@ -59,18 +59,20 @@
       </div>
       <div class="step">
         <el-steps direction="vertical" class="stepContent" >
-          <el-step :title="'步骤'+(index+1)"
-                   v-for="(item,index) in stepList"
-                   v-if="item.SetpList.length"
+          <template
+            v-for="(item,index) in stepList"
+          >
+          <el-step
+                   v-for="(eitem,eindex) in stepList[index].SetpList"
                    :key="index"
           >
-            <el-input></el-input>
+            <!--<el-input></el-input>-->
           </el-step>
-        
+          </template>
         </el-steps>
         <el-form
           class="stepContent"
-          label-width="120px"
+          label-width="160px"
           align="left"
         >
           <template
@@ -182,5 +184,5 @@
     border-right: 1px solid green
   
   .step
-    float right
+    float left
 </style>

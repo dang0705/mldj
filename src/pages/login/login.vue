@@ -21,7 +21,7 @@
         </el-form-item>
         <el-form-item>
           <el-checkbox v-model="loginData.holdLogin">保持登录</el-checkbox>
-          <!--<el-button type="text">忘记密码</el-button>-->
+          <!--<el-button type="text" @click="forgetPassword">忘记密码</el-button>-->
         </el-form-item>
         <el-form-item>
           <el-button type="danger" size="medium" @click="handleLogin">登&nbsp;&nbsp;&nbsp;&nbsp;陆</el-button>
@@ -29,6 +29,7 @@
       </el-form>
     
     </div>
+   
   </div>
 </template>
 
@@ -38,8 +39,10 @@
   let storage = window.localStorage;
   export default {
     name: "login",
+   
     data() {
       return {
+        // isAlertShow:false,
         checkCode: '',
         yanzhengCode: '',
         loginData: {
@@ -87,6 +90,7 @@
           return
         } else if ( this.yanzhengCode !== this.checkCode ) {
           this.$message.error('验证码错误');
+          
           this.createCode();
           return
         }
@@ -107,6 +111,7 @@
             storage.setItem('RoleID', res.RoleID);
             storage.setItem('name', res.UserName);
             storage.setItem('CompanyID', res.CompanyID);
+            storage.setItem('ID', res.ID);
             storage.removeItem('menu');
             storage.removeItem('store');
             storage.removeItem('source');
@@ -119,7 +124,7 @@
             storage.removeItem('CRMStore');
           } else {
             that.$message.error('用户名或密码错误');
-            that.createCode();
+            // that.createCode();
           }
         });
         // this.$router.push('/activityManagement')
@@ -128,6 +133,7 @@
         //先清空验证码的输入
         this.code = "";
         this.checkCode = "";
+        this.yanzhengCode='';
         //验证码的长度
         var codeLength = 4;
         //随机数
@@ -140,6 +146,11 @@
         }
         //把code值赋给验证码
         this.checkCode = this.code.toLowerCase();
+      },
+     
+      closeAlert(){
+        this.isAlertShow=false
+  
       }
     },
     created() {

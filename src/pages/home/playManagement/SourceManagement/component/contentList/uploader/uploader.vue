@@ -1,13 +1,13 @@
 <template>
   <div class="uploaderWrapper">
     <el-upload
-               :accept="uploadType"
-               ref="upload"
-               :action="params.action"
-               :auto-upload="false"
-               :show-file-list="false"
-               :data="params.data"
-               :on-change="uploadOnChange"
+      :accept="uploadType"
+      ref="upload"
+      :action="params.action"
+      :auto-upload="false"
+      :show-file-list="false"
+      :data="params.data"
+      :on-change="uploadOnChange"
     >
       <el-button size="large" class="add">增加+</el-button>
     </el-upload>
@@ -44,7 +44,7 @@
     data() {
       return {
         progressValue: 0,
-        maxSize: 1024 * 1024 * 512,
+        maxSize: 1024 * 1024 * 4,
         chunkSize: 1024 * 1024 * 4,
         hash: '',
         requestCount: 0,
@@ -84,8 +84,8 @@
           apk = 'application/vnd.android.package-archive';
         that.file = val;
         if ( val && (val.type === mp4 || val.type === jpg || val.type === png || val.type === apk || /\.apk$/.test(val.name.toLocaleLowerCase())) ) {
-          if ( val.size > that.maxSize ) {
-            that.$message.success("素材大小超过最大上传限制（512MB），请更换素材！");
+          if ( val.size > that.maxSize && val.type === jpg || val.type === png ) {
+            that.$message.success("素材大小超过最大上传限制（4MB），请更换素材！");
             return;
           }
           that.fileSize = val.size;

@@ -59,22 +59,22 @@
       }
     },
     methods: {
-      
       handleClose() {
         this.$emit('closeAlert');
-        
         this.$refs.tree.setCheckedKeys([]);
       },
       handleNodeClick(val) {
-        if ( this.postNavList.indexOf(this.$refs.tree.getHalfCheckedKeys()) < 0 ) {
-          this.postNavList = [ {MenuCode: this.$refs.tree.getHalfCheckedKeys()[ 0 ]} ];
+        const tree = this.$refs.tree;
+        
+        if ( this.postNavList.indexOf(tree.getHalfCheckedKeys()) < 0 ) {
+          this.postNavList = [ {MenuCode: tree.getHalfCheckedKeys()[ 0 ]} ];
         }
-        for ( var i = 0; i < this.$refs.tree.getCheckedKeys().length; i++ ) {
-          this.postNavList.push({MenuCode: this.$refs.tree.getCheckedKeys()[ i ]})
+        for ( var i = 0; i < tree.getCheckedKeys().length; i++ ) {
+          this.postNavList.push({MenuCode: tree.getCheckedKeys()[ i ]})
         }
         console.log('this.postNavList=', this.postNavList);
-        console.log(this.$refs.tree.getCheckedKeys());
-        console.log(this.$refs.tree.getHalfCheckedKeys());
+        console.log(tree.getCheckedKeys());
+        console.log(tree.getHalfCheckedKeys());
       }
       ,
       getSelected() {
@@ -106,10 +106,10 @@
                   }
                 }
               }
-              
+              const tree = this.$refs.tree;
               console.log(that.postNavList);
-              that.$refs.tree.setCheckedKeys(that.echoSelectedList);
-              that.$refs.tree.defaultExpandAll = true;
+              tree.setCheckedKeys(that.echoSelectedList);
+              tree.defaultExpandAll = true;
               that.treeLoading = false;
               
               console.log(that.echoSelectedList);
@@ -118,7 +118,7 @@
       },
       
       confirm() {
-        console.log(this.$refs.tree);
+        // console.log(this.$refs.tree);
         const that = this;
         console.log(that.postNavList.length);
         const sendArr = that.postNavList.filter((item, index, arr) => {
@@ -145,10 +145,32 @@
       }
     },
     mounted() {
-      const storage = window.localStorage;
-      if ( storage.getItem('menu') ) {
-        this.menuList = JSON.parse(storage.getItem('menu'))
-      }
+      const that = this;
+      that.$axios.post('/Menu/GetMenListByTree')
+        .then(data => {
+          console.log(data);
+          if ( data.data.state === 1 ) {
+            data.data.Content.forEach((item, index, arr) => {
+              var Menu_item = [];
+              item.MenuList.forEach((_item, _index) => {
+                Menu_item.push({
+                  navName: _item.MenuName,
+                  subIndex: _item.MenuCode
+                })
+              });
+              this.menuList.push({
+                navName: item.MenuName,
+                subIndex: item.MenuCode,
+                subNav: Menu_item
+              })
+            })
+            // this.menuList=data.data.Content
+          }
+        })
+      // const storage = window.localStorage;
+      // if ( storage.getItem('menu') ) {
+      //   this.menuList = JSON.parse(storage.getItem('menu'))
+      // }
     }
   }
 </script>

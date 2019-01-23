@@ -38,7 +38,7 @@
             v-model="formData.type"
           >
             <el-option
-              v-for="(item,i) in typeList"
+              v-for="(item,i) in formData.typeList"
               :key="i"
               :label="item.label"
               :value="item.value"
@@ -75,10 +75,7 @@
     },
     data() {
       return {
-        typeList: [
-          {label: '阿里', value: 'ali'},
-          {label: '微信', value: 'weixin'},
-        ],
+        // typeList: [],
         alertTitle: '',
         formData: {
           CRMStoreCode: '',
@@ -140,6 +137,7 @@
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
+            this.formData.typeList = this.editData.typeList;
             this.alertTitle = '新增CRM门店';
             Msg = '增加成功';
           }
@@ -162,12 +160,12 @@
         if ( !that.formData.StoreName ) {
           that.$message.error('CRM门店名称不能为空');
           return
-        }  else if ( !that.formData.CRMStoreCode ) {
+        } else if ( !that.formData.CRMStoreCode ) {
           that.$message.error('CRM门店编号不能为空');
           return
-        }else if ( !that.formData.type ) {
+        } else if ( !that.formData.type ) {
           that.$message.error('CRM门店类型不能为空');
-  
+          
         }
         that.$axios.post('/Home/CRMsave', this.formData)
           .then(data => {
@@ -185,7 +183,9 @@
       },
       
     },
-    
+    mounted() {
+      // this.getCrmTypeList()
+    }
     
   }
 </script>

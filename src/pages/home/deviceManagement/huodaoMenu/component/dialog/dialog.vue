@@ -76,7 +76,7 @@
                              class="defaultRows"
             ></el-input-number>
           </el-form-item>
-          <el-form-item prop="size" label="产品尺寸（mm×mm）：">
+          <el-form-item prop="size" label="货道尺寸（mm×mm）：">
             <el-input-number v-model="productSize1"
                              :min="5"
                              class="defaultRows"
@@ -236,7 +236,7 @@
             this.tableOnload();
             Msg = '编辑成功'
           } else {
-            this.dataLoading = false
+            this.dataLoading = false;
             this.alertTitle = '新增货道';
             Msg = '增加成功'
           }
@@ -251,7 +251,6 @@
     methods: {
       creatCargoWay() {
         let getMax;
-        
         if ( this.DataRowCount.length ) {
           getMax = Math.max.apply(null, this.DataRowCount);
         } else {

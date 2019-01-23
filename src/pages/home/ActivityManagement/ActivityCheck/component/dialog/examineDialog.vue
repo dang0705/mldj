@@ -58,28 +58,36 @@
         </el-form>
       </div>
       <div class="step">
-        <el-steps direction="vertical" class="stepContent">
-          <el-step :title="'步骤'+(index+1)"
-                   v-for="(item,index) in stepList.length"
-                   :key="index"
+        <el-steps direction="vertical" class="stepContent" >
+          <template
+            v-for="(item,index) in stepList"
           >
-            <el-input></el-input>
-          </el-step>
-        
+            <el-step
+                     v-for="(eitem,eindex) in stepList[index].SetpList"
+                     :key="index"
+            >
+              <!--<el-input></el-input>-->
+            </el-step>
+          </template>
+    
         </el-steps>
         <el-form
           class="stepContent"
-          label-width="120px"
+          label-width="160px"
           align="left"
         >
-          <el-form-item
+          <template
             v-for="(item,index) in stepList"
-            :label="item.ActivityStepName+'：'"
-            :key="index"
           >
-            <span>{{item.EmployeeName}}</span>
-           
-          </el-form-item>
+            <el-form-item
+              v-for="(Eitem,Eindex) in stepList[index].SetpList"
+              :label="Eitem.ActivityStepName+'：'"
+              :key="Eindex"
+            >
+              <span>{{Eitem.EmployeeName}}</span>
+        
+            </el-form-item>
+          </template>
         </el-form>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -176,5 +184,5 @@
     border-right: 1px solid green
   
   .step
-    float right
+    float left
 </style>

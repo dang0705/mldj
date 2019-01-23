@@ -190,6 +190,7 @@
     
     methods: {
       selectedSource(val) {
+        // console.log(val);
         this.formData.FileName = val.FileName;
         this.formData.FileId = val.FileId;
         this.formData.FileType = val.FileType;

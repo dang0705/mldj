@@ -146,7 +146,7 @@
     },
     methods: {
       select(val) {
-        console.log(val);
+        console.log(val.FileUrl);
         this.sourceInfo.FileName = val.FileName;
         this.sourceInfo.TimeLong = val.TimeLong;
         this.sourceInfo.FileType = val.FileType;

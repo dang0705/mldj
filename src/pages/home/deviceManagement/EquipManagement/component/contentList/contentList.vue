@@ -22,7 +22,6 @@
                   @provincesAndCities="cityFilter">
       </citySelect>
     </div>
-    
     <el-table width="100%"
               :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
               :row-style="rowStyle"
@@ -30,8 +29,43 @@
               :header-cell-class-name="addBtn"
               @header-click="add"
               v-loading="dataLoading"
-    
     >
+      <el-table-column
+        type="expand"
+        width="60"
+        label="详情"
+      >
+        <template
+          slot-scope="props"
+        >
+          <el-form label-position="left" class="tableExpand">
+            <el-form-item label="版本名称：">
+              <span>{{props.row.ApkName}}</span>
+            </el-form-item>
+            <el-form-item label="CRM门店：">
+              <span>{{props.row.ShopName}}</span>
+            </el-form-item>
+            <el-form-item label="当前版本号：">
+              <span>{{props.row.ApkVersion}}</span>
+            </el-form-item>
+            <el-form-item label="版本名称：">
+              <span>{{props.row.OldApkVersion}}</span>
+            </el-form-item>
+            <el-form-item label="更新进度：">
+              <span>{{props.row.ApkVersionUpdate}}</span>
+            </el-form-item>
+            <el-form-item label="设备类型：">
+              <span>{{props.row.DeviceType}}</span>
+            </el-form-item>
+         <!--   <el-form-item label="静默时间：">
+              <span>{{props.row.showTime}}秒</span>
+            </el-form-item>-->
+            <el-form-item label="设备地址：">
+              <span>{{props.row.Address}}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
       <el-table-column
         width="100"
         label="操作"
@@ -58,7 +92,7 @@
         prop="DeviceName"
         label="设备名称"
         align="center"
-        width="200"
+        width="160"
         :show-overflow-tooltip="true"
       >
       </el-table-column>
@@ -69,7 +103,13 @@
         width="150"
         :show-overflow-tooltip="true">
       </el-table-column>
-      
+      <el-table-column
+        prop="DeviceMac"
+        label="设备mac"
+        align="center"
+        width="150"
+        :show-overflow-tooltip="true">
+      </el-table-column>
       <el-table-column
         prop="ProvinceName"
         label="省份"
@@ -84,6 +124,7 @@
         width="80"
         :show-overflow-tooltip="true">
       </el-table-column>
+      
       <el-table-column
         prop="DeviceMac"
         label="激活状态"
@@ -93,24 +134,26 @@
         :show-overflow-tooltip="true">
       </el-table-column>
       <el-table-column
-        prop="ShopName"
-        label="CRM门店"
+        prop="DeviceOpenStatus"
+        label="设备状态"
         align="center"
-        width="180"
+        width="100"
         :show-overflow-tooltip="true">
+        <template slot-scope="scope">
+          <el-tag :type="isOpen(scope.row)" v-text="is_device_open(scope.row)"></el-tag>
+        </template>
       </el-table-column>
       <el-table-column
-        prop="Address"
-        label="地址"
+        header-align="center"
         align="center"
-        width="230"
-        :show-overflow-tooltip="true">
+        prop="showTime"
+        width="120"
+        label="静默时间(秒)"
+      >
       </el-table-column>
-      
       <el-table-column
         label="增加+"
       >
-      
       </el-table-column>
     
     </el-table>
@@ -210,40 +253,22 @@
       },
       getList(update) {
         let that = this;
-        if ( storage.getItem('device') && !update ) {
-          that.list = JSON.parse(storage.getItem('device'));
-          that.dataLoading = false;
-          that.isListChange = true;
-        } else {
-          that.listLoading = true;
-          that.$axios.post('/Home/OnloadEmployeeDeviceList', {
-            CityCode: update && update !== 'update' ? update[ 1 ] : '',
-            DeviceName: that.keyWord
-          })
-            .then(data => {
-              if ( data.data.state == 1 ) {
-                that.list = data.data.Content;
-                if ( update && update === 'update' || !update ) {
-                  storage.setItem('device', JSON.stringify(that.list));
-                }
+        that.listLoading = true;
+        that.$axios.post('/Home/OnloadEmployeeDeviceList', {
+          CityCode: update && update !== 'update' ? update[ 1 ] : '',
+          DeviceName: that.keyWord
+        })
+          .then(data => {
+            if ( data.data.state == 1 ) {
+              that.list = data.data.Content;
+              if ( update && update === 'update' || !update ) {
+                storage.setItem('device', JSON.stringify(that.list));
               }
-              that.dataLoading = false;
-              that.isListChange = true;
-            })
-        }
+            }
+            that.dataLoading = false;
+            that.isListChange = true;
+          });
         console.log(that.list);
-        /*       that.$axios.post('/Home/OnloadEmployeeDeviceList', {
-				 CityCode: city ? city[ 1 ] : '',
-				 DeviceName: that.keyWord
-			   })
-				 .then(data => {
-				   if ( data.data.state == 1 ) {
-					 that.list = data.data.Content;
-				   }
-				   that.dataLoading = false;
-				   that.isListChange = true;
-				 })*/
-      
       }
       
       ,
@@ -262,6 +287,11 @@
         this.dialogType = 'up_date';
         if ( this.list.length ) {
           this.sendDialogData.EmployeeCode = this.list[ realIndex ].EmployeeCode;
+          this.sendDialogData.PayUser = parseInt(this.list[ realIndex ].PayUser);
+          
+          this.sendDialogData.PayCode = this.list[ realIndex ].PayCode;
+          
+          this.sendDialogData.showTime = this.list[ realIndex ].showTime;
           this.sendDialogData.CRMCode = parseInt(this.list[ realIndex ].CRMCode);
           this.sendDialogData.DeviceMac = this.list[ realIndex ].DeviceMac;
           this.sendDialogData.EmployeeName = this.list[ realIndex ].EmployeeName;
@@ -269,7 +299,6 @@
           this.sendDialogData.CargoCode = parseInt(this.list[ realIndex ].CargoCode);
           this.sendDialogData.APKCode = this.list[ realIndex ].APKCode;
           this.sendDialogData.DeviceType = this.list[ realIndex ].DeviceType;
-          this.sendDialogData.PayCode = this.list[ realIndex ].PayCode;
           this.sendDialogData.AddEmployeeCode = this.list[ realIndex ].AddEmployeeCode;
           this.sendDialogData.DeviceName = this.list[ realIndex ].DeviceName;
           this.sendDialogData.Address = this.list[ realIndex ].Address;
@@ -311,13 +340,22 @@
       ,
       isDeviceActivity(val) {
         let activityStatus;
-        return activityStatus = val.DeviceMac==='未绑定' ? '未激活' : '已激活'
+        return activityStatus = val.DeviceMac === '未绑定' ? '未激活' : '已激活'
+      },
+      isOpen(val) {
+        let openStatus;
+        return openStatus = val.DeviceOpenStatus === '1' ? 'success' : 'info'
+        
+      },
+      is_device_open(val) {
+        let openStatus;
+        return openStatus = val.DeviceOpenStatus === '1' ? '已开机' : '未开机'
       }
-      
     }
   }
 </script>
 
 <style scoped lang="stylus">
-
+  .el-form-item
+    margin-bottom: 0
 </style>

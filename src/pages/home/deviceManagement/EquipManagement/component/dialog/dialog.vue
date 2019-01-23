@@ -24,9 +24,10 @@
           ref="upload"
           :model="formData"
           :rules="uploadRules"
-          label-width="120px"
+          label-width="130px"
           class='upImgForm'
-        
+          v-loading="dialogLoading"
+
         >
           <el-form-item prop="DeviceName" label="设备名称：">
             <el-input
@@ -36,7 +37,14 @@
               minlength="1"
               maxlength="15"></el-input>
           </el-form-item>
-          
+          <el-form-item prop="time" label="KV时长(秒)：">
+            <el-input
+              v-model="formData.showTime"
+              clearable
+              placeholder=""
+              minlength="1"
+              maxlength="15"></el-input>
+          </el-form-item>
           <el-form-item prop="EmployeeName" label="设备所有人：">
             <el-select
               v-model="formData.EmployeeCode"
@@ -92,13 +100,11 @@
               ></el-option>
             </el-select>
           </el-form-item>
-          
           <el-form-item prop="APK" label="系统版本：">
             <el-select
               v-model="formData.APKCode"
               filterable
               clearable
-              @change="apkChange"
               :disabled="formData.DeviceMac==='未绑定'"
             
             >
@@ -106,17 +112,23 @@
                 v-for="(item,i) of apkList"
                 :key="i"
                 :label="item.label"
-                :value="item.value"
+                :value="parseInt(item.value)"
               ></el-option>
             </el-select>
           </el-form-item>
           
-          <el-form-item prop="payment" label="支付方式：">
+          
+          
+          
+          
+          
+          
+          <el-form-item prop="payment" label="版本类型：">
             <el-select
               v-model="formData.PayCode"
               filterable
               clearable
-              @change="apkChange"
+              @change="creatSelect"
               :disabled="formData.DeviceMac==='未绑定'"
             >
               <el-option
@@ -124,6 +136,22 @@
                 :key="i"
                 :label="item.label"
                 :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item
+            label="支付账户："
+            v-show="isAccountShow"
+          >
+            <el-select
+              v-model="formData.PayUser"
+            >
+              <el-option
+                v-for="(item,i) of accountList"
+                :key="i"
+                :label="item.payname"
+                :value="item.ID"
               ></el-option>
             </el-select>
           </el-form-item>
@@ -169,11 +197,7 @@
               <img width="100%" :src="cargoWayImg" alt="">
             </div>
           </el-form-item>
-          <!--<el-form-item>-->
-          <!--<div class="cargoWayImgWrapper">-->
-          <!--<img width="100%" :src="cargoWayImg" alt="">-->
-          <!--</div>-->
-          <!--</el-form-item>-->
+
         </el-form>
       
       </div>
@@ -215,8 +239,11 @@
       return {
         uploadType: 'image/jpeg,image/png',
         isSelectCargoWay: false,
+        isAccountShow:false,
+        dialogLoading:true,
         upLoadTitle: '',
         cargoWayImg: '',
+        accountList:[],
         list: [],
         deviceTypeList: [],
         CRMSoreList: [
@@ -236,6 +263,8 @@
         alertTitle: '',
         formData: {
           AddEmployeeCode: '',
+          PayUser:'',
+          showTime: 0,
           CRMCode: '',
           CargoCode: '',
           ImgBase: '',
@@ -269,6 +298,13 @@
             }
           ]
           ,
+          time: [
+            {
+              required: true,
+              message: 'KV时长为必填项',
+              trigger: 'blur'
+            },
+          ],
           EmployeeName: [
             {
               required: true,
@@ -300,10 +336,27 @@
           this.isSelectCargoWay = false;
           this.getCargoWayList();
           if ( this.editOrAdd === 'up_date' ) {
+            
             this.formData = this.editData;
             console.log(this.formData);
-            // this.formData.EmployeeCode = storage.getItem('userName')
-            // this.formData.EmployeeCode = storage.getItem('userName');
+  
+            if ( this.formData.PayCode ==0 ) {
+                const that = this;
+                that.$axios.post('/Home/payList')
+                  .then(data => {
+                    console.log(data);
+                    if ( data.data.state === 1 ) {
+                      that.isAccountShow = true;
+                      that.accountList = data.data.Content;
+                      console.log(that.accountList);
+                    }
+                    that.dialogLoading = false
+                  })
+            }else {
+              this.dialogLoading = false
+            }
+
+            console.log(this.formData);
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑设备';
             this.provinceTotalArr = this.formData.ProvinceName + ' / ' + this.formData.CityName;
@@ -317,6 +370,8 @@
             }
             Msg = '编辑成功'
           } else {
+            this.dialogLoading=false;
+            this.isAccountShow=false;
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
@@ -340,12 +395,11 @@
           this.$emit('closeAlert')
         }
         
-        this.cargoWayList = []
+        this.cargoWayList = [];
         this.formData.ImgBase = this.cargoWayImg = '';
       },
       closed() {
         this.isClose = true;
-        
       },
       confirmUpload(obj) {
         console.log(this.formData);
@@ -353,29 +407,11 @@
         if ( that.formData.DeviceName === '' ) {
           that.$message.error('设备名称不能为空');
           return
-        } else if ( !that.formData.AddEmployeeCode === '' ) {
-          that.$message.error('设备所属人不能为空');
-          return
-        } else if ( !that.formData.AddEmployeeCode ) {
+        }  else if ( !that.formData.EmployeeCode ) {
           that.$message.error('设备所属人不能为空');
           return
         }
-        /*   else if ( !that.formData.DeviceType  ) {
-			 that.$message.error('设备类型不能为空');
-			 return
-		   }
-		   else if ( !that.formData.APKCode  ) {
-			 that.$message.error('系统版本不能为空');
-			 return
-		   }
-		   else if ( !that.formData.PayCode  ) {
-			 that.$message.error('支付方式不能为空');
-			 return
-		   }
-		   else if ( !that.formData.CargoCode  ) {
-			 that.$message.error('货道名称不能为空');
-			 return
-		   }*/
+
         if ( !this.isSelectCargoWay ) {
           this.formData.CargoCode = '';
         }
@@ -427,8 +463,7 @@
         this.formData.DeviceType = val;
       }
       ,
-      apkChange() {
-      },
+     
       cargoWayChange(val) {
         if ( val ) {
           this.cargoWayList.forEach((item, index, arr) => {
@@ -485,28 +520,20 @@
       ,
       getPaymentList() {
         let that = this;
-        if ( storage.getItem('payment') ) {
-          const list = JSON.parse(storage.getItem('payment'));
-          list.forEach((item, index, arr) => {
-            that.paymentList.push({
-              label: item.payname,
-              value: item.ID
-            })
-          });
-        } else {
-          that.$axios.post('/Home/OnloadApkList')
-            .then(data => {
-              if ( data.data.state === 1 ) {
-                const list = data.data.Content;
-                list.forEach((item, index, arr) => {
-                  that.paymentList.push({
-                    label: item.payname,
-                    value: item.ID,
-                  })
-                });
-              }
-            })
-        }
+        that.$axios.post('/Home/OnloadMetaDataByType',{
+          InputType:'CRMDATA'
+        })
+          .then(data => {
+            if ( data.data.state === 1 ) {
+              const list = data.data.Content;
+              list.forEach((item, index, arr) => {
+                that.paymentList.push({
+                  label: item.Name,
+                  value: item.Value,
+                })
+              });
+            }
+          })
       }
       ,
       getCargoWayList() {
@@ -557,7 +584,7 @@
             if ( data.data.state === 1 ) {
               const res = data.data.Content, length = data.data.Content.length;
               for ( var i = 0; i < length; i++ ) {
-                if ( res[ i ].type === 'ali' ) {
+                if ( res[ i ].type === '1' ) {
                   that.CRMSoreList[ 0 ].options.push({
                     label: res[ i ].StoreName,
                     value: res[ i ].ID
@@ -573,6 +600,25 @@
               console.log(that.CRMSoreList);
             }
           })
+      },
+      creatSelect(val) {
+        console.log(val);
+        if ( val==0 ) {
+          const that=this;
+          that.$axios.post('/Home/payList')
+            .then(data=>{
+              console.log(data);
+              if ( data.data.state === 1 ) {
+                that.isAccountShow=true;
+                that.accountList=data.data.Content;
+                that.formData.PayUser=that.accountList[0].ID;
+                  console.log(that.accountList);
+              }
+            })
+        }else {
+          this.isAccountShow=false;
+          this.formData.PayUser='';
+        }
       }
     },
     mounted() {
