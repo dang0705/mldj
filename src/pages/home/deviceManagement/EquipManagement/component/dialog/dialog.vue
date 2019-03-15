@@ -37,7 +37,7 @@
               minlength="1"
               maxlength="15"></el-input>
           </el-form-item>
-          <el-form-item prop="time" label="KV时长(秒)：">
+          <el-form-item prop="time" label="回KV时长(秒)：">
             <el-input
               v-model="formData.showTime"
               clearable

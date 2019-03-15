@@ -284,12 +284,13 @@
           ID: that.formData.ID
         })
           .then(data => {
-            // console.log(data);
+            console.log(data);
             if ( data.data.state === 1 && !that.hasAjaxData ) {
               that.tableDataList = data.data.Content;
-              if ( data.data.Content.length ) {
-                that.stock = data.data.Content[ 0 ].CargoStock
-                
+              if ( that.tableDataList.length ) {
+                that.stock = that.tableDataList[ 0 ].CargoStock;
+                that.defaultRows=that.tableDataList[ that.tableDataList.length-1 ].CargoX;
+                that.defaultColumn=that.tableDataList[ that.tableDataList.length-1 ].CargoY;
               }
               
             }

@@ -199,9 +199,6 @@
             console.log(data);
             if ( data.data.state == 1 ) {
               that.list = data.data.Content.DataList;
-              if ( update && update === 'update' || !update ) {
-                // storage.setItem('roleList', JSON.stringify(that.list))
-              }
             }
             that.tableLoading = false;
             that.isListChange = true;

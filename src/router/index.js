@@ -30,6 +30,11 @@ export default new Router({
           component: resolve => require([ '@/pages/home/homePage/homePage' ], resolve)
         },
         {
+          path:'/SaleReport',
+          name:'SaleReport',
+          component:resolve=>require(['@/pages/home/TableCreate/SaleReport/SaleReport'],resolve)
+        },
+        {
           path: '/AppActivityManagement',
           name: 'AppActivityManagement',
           component: resolve => require([ '@/pages/home/ActivityManagement/AppActivityManagement/AppActivityManagement' ], resolve)

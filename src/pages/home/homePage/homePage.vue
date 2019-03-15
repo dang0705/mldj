@@ -42,8 +42,11 @@
       }
     },
     methods: {
+      
       goto(index){
-        this.$router.push({path:this.moduleList[index].index})
+        if ( this.activityList.length ) {
+          this.$router.push({path:this.moduleList[index].index})
+        }
       }
     },
     mounted() {

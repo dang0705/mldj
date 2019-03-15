@@ -12,7 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       '/': {
-        target: 'http://v2.1shi.com.cn:8078',
+        // target: 'http://v2.1shi.com.cn:8078',
+        target: 'https://vm.yesic.com/',
         changeOrigin: true,
       /*  pathRewrite: {
           '^/api/': '/HomeWeb'

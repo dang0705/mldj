@@ -49,6 +49,14 @@
     components:{
       pswDialog
     },
+    watch:{
+      '$store.state.treeChanged':function () {
+        if ( this.$store.state.treeChanged ) {
+          // storage.removeItem('menu');
+          this.getMenu()
+        }
+      }
+    },
     data() {
       return {
         isAlertShow:false,
@@ -88,6 +96,7 @@
                 that.firstLevelNavigationArr[ i ].subNav.push({navName: MenuList.MenuName, subIndex: MenuList.MenuCode})
               }
             }
+            that.$store.commit('treeChanged',false);
             that.firstLevelNavigationArr.unshift({navName: '首页'});
             const sendArr = that.firstLevelNavigationArr.filter((ele, idx, arr) => {
               return idx !== 0;

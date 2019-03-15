@@ -7,6 +7,7 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     menuList: [],
+    treeChanged:false,
     organizationList: [],
     getAllLabelList: [],
     menuIndex: '',
@@ -16,6 +17,9 @@ export default new Vuex.Store({
 
   },
   mutations: {
+    treeChanged(state,bol){
+      state.treeChanged=bol;
+    },
     updateMenuList(state, menuList) {
       state.menuList = menuList;
     },

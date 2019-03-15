@@ -64,22 +64,31 @@
       <el-table-column
         label="操作"
         width="100"
-        align="left"
+        align="center"
       >
         <template slot-scope="scope">
           <!--   <el-button type="danger" icon="el-icon-delete" circle size="small"
 						@click="deleteItem(scope.$index,scope.row)">
 			 </el-button>-->
-          
+          <el-button type="danger"
+                     icon="el-icon-error"
+                     circle size="small"
+                     title="停止活动"
+                     v-if="scope.row.ApprovalStataus!==3"
+                     @click="deleteItem(scope.row.ActivityCode)">
+          </el-button>
           <el-button
             size="small"
             type="success"
-            v-if="scope.row.ApprovalStataus==2||scope.row.ApprovalStataus==1"
+            title="活动详情"
+            v-if="scope.row.ApprovalStataus===2||scope.row.ApprovalStataus===1"
             icon="el-icon-view"
             circle
             @click="examine(scope.$index,scope.row)"
           ></el-button>
+          
           <el-button size="small"
+                     title="编辑活动"
                      v-if="!scope.row.ApprovalStataus"
                      icon="el-icon-edit" circle
                      @click="getData(scope.$index,scope.row)"
@@ -222,28 +231,28 @@
       tagType(val) {
         let type;
         if ( !val ) {
-          return type = 'info'
+          type = 'info'
         } else if ( val === 1 ) {
-          return type = 'warning'
+          type = 'warning'
         } else if ( val === 2 ) {
-          return type = 'success'
+          type = 'success'
         } else if ( val === 3 ) {
-          return type = ''
+          type = ''
         }
-        
+        return type
       },
       tagText(val) {
         let text;
         if ( !val ) {
-          return text = '未通过'
+          text = '未通过'
         } else if ( val === 1 ) {
-          return text = '待审核'
+          text = '待审核'
         } else if ( val === 2 ) {
-          return text = '已通过'
+          text = '已通过'
         } else if ( val === 3 ) {
-          return text = '已完成'
-          
+          text = '已完成'
         }
+        return text
       },
       getDate(val) {
         if ( val ) {
@@ -294,6 +303,7 @@
         })
           .then(data => {
             if ( data.data.state == 1 ) {
+              console.log(data);
               that.list = data.data.Content;
               storage.setItem('activityList', JSON.stringify(that.list));
               that.listLoading = false;
@@ -316,8 +326,8 @@
       closeExamine() {
         this.isExamineShow = false
       },
-      examine(index,row){
-        this.isExamineShow=true;
+      examine(index, row) {
+        this.isExamineShow = true;
         var realIndex = this.currentPage > 1 ? index + ((this.currentPage - 1) * this.pageSize) : index;
         this.sendDialogData.ActivityName = this.list[ realIndex ].ActivityName;
         this.sendDialogData.ActivityCode = this.list[ realIndex ].ActivityCode;
@@ -359,17 +369,17 @@
         this.sendDialogData.ID = row.ID;
         this.sendDialogData = JSON.parse(JSON.stringify(this.sendDialogData));
       }
-      , deleteItem(index, row) {
+      ,
+      deleteItem(row) {
         let that = this;
-        this.$confirm('此操作将永久删除该渠道, 是否继续?', '提示', {
+        this.$confirm('此操作将停止该活动, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         })
           .then(() => {
-            that.$axios.post('/Home/ChannelSave', {
-              DogType: 'd_elete',
-              ID: row.ID
+            that.$axios.post('/Home/stopActivity', {
+              ActivityCode: row,
             })
               .then(() => {
                 that.getList()

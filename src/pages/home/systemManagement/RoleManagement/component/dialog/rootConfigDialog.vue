@@ -40,6 +40,9 @@
     data() {
       return {
         menuList: [],
+        tree: [],
+        treeChecked: [],
+        treeHalfChecked: [],
         isSplice: false,
         echoSelectedList: [],
         treeLoading: true,
@@ -64,17 +67,24 @@
         this.$refs.tree.setCheckedKeys([]);
       },
       handleNodeClick(val) {
-        const tree = this.$refs.tree;
-        
-        if ( this.postNavList.indexOf(tree.getHalfCheckedKeys()) < 0 ) {
-          this.postNavList = [ {MenuCode: tree.getHalfCheckedKeys()[ 0 ]} ];
+        this.tree = this.$refs.tree;
+        this.treeChecked=[];
+        this.treeHalfChecked=[];
+        if ( this.postNavList.indexOf(this.tree.getHalfCheckedKeys()) < 0 ) {
+          this.postNavList = [ {MenuCode: this.tree.getHalfCheckedKeys()[ 0 ]} ];
         }
-        for ( var i = 0; i < tree.getCheckedKeys().length; i++ ) {
-          this.postNavList.push({MenuCode: tree.getCheckedKeys()[ i ]})
+        for ( var i = 0; i < this.tree.getCheckedKeys().length; i++ ) {
+          this.postNavList.push({MenuCode: this.tree.getCheckedKeys()[ i ]})
         }
         console.log('this.postNavList=', this.postNavList);
-        console.log(tree.getCheckedKeys());
-        console.log(tree.getHalfCheckedKeys());
+        this.tree.getCheckedKeys().forEach((item, index) => {
+          this.treeChecked.push({MenuCode: item})
+        });
+        this.tree.getHalfCheckedKeys().forEach((item, index) => {
+          this.treeHalfChecked.push({MenuCode: item})
+        });
+        console.log(this.tree.getCheckedKeys());
+        console.log(this.tree.getHalfCheckedKeys());
       }
       ,
       getSelected() {
@@ -121,11 +131,12 @@
         // console.log(this.$refs.tree);
         const that = this;
         console.log(that.postNavList.length);
-        const sendArr = that.postNavList.filter((item, index, arr) => {
-          return item.MenuCode
-        });
+        // const sendArr = that.postNavList.filter((item, index, arr) => {
+        //   return item.MenuCode
+        // });
+        const sendArr = this.treeChecked.concat(this.treeHalfChecked);
         console.log(sendArr);
-        if ( that.postNavList.length === 1 ) {
+        if ( !sendArr.length  ) {
           that.$message.error('您还未对 ' + that.roleName + ' 配置任何权限')
         } else {
           that.$axios.post('/RoleMenu/BindRoleMenu', {
@@ -136,6 +147,7 @@
               console.log(data);
               if ( data.data.state == 1 ) {
                 that.$message.success('权限配置成功');
+                that.$store.commit('treeChanged',true)
                 that.$emit('closeAlert')
               } else {
                 that.$message.error(data.data.msg);
