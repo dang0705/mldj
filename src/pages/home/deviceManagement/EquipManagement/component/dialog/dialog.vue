@@ -27,7 +27,7 @@
           label-width="130px"
           class='upImgForm'
           v-loading="dialogLoading"
-
+        
         >
           <el-form-item prop="DeviceName" label="设备名称：">
             <el-input
@@ -118,11 +118,6 @@
           </el-form-item>
           
           
-          
-          
-          
-          
-          
           <el-form-item prop="payment" label="版本类型：">
             <el-select
               v-model="formData.PayCode"
@@ -178,7 +173,6 @@
             <el-select
               v-model="formData.CargoCode"
               filterable
-              clearable
               @change="cargoWayChange"
               :disabled="formData.DeviceMac==='未绑定'"
             >
@@ -194,10 +188,18 @@
               ></el-option>
             </el-select>
             <div class="cargoWayImgWrapper">
-              <img width="100%" :src="cargoWayImg" alt="">
+              <img :src="cargoWayImg" width="100%" alt=" ">
+              <!-- <el-popover
+				 placement="right"
+				 trigger="click"
+			   >
+				 <img :src="cargoWayImg" alt="图片出错">
+				 <img class="thumbnail" slot="reference" width="100px" :src="cargoWayImg" alt=" ">
+			   </el-popover>-->
+              <!--<img width="100%" :src="cargoWayImg" alt="">-->
             </div>
           </el-form-item>
-
+        
         </el-form>
       
       </div>
@@ -239,11 +241,11 @@
       return {
         uploadType: 'image/jpeg,image/png',
         isSelectCargoWay: false,
-        isAccountShow:false,
-        dialogLoading:true,
+        isAccountShow: false,
+        dialogLoading: true,
         upLoadTitle: '',
         cargoWayImg: '',
-        accountList:[],
+        accountList: [],
         list: [],
         deviceTypeList: [],
         CRMSoreList: [
@@ -263,7 +265,7 @@
         alertTitle: '',
         formData: {
           AddEmployeeCode: '',
-          PayUser:'',
+          PayUser: '',
           showTime: 0,
           CRMCode: '',
           CargoCode: '',
@@ -339,23 +341,23 @@
             
             this.formData = this.editData;
             console.log(this.formData);
-  
-            if ( this.formData.PayCode ==0 ) {
-                const that = this;
-                that.$axios.post('/Home/payList')
-                  .then(data => {
-                    console.log(data);
-                    if ( data.data.state === 1 ) {
-                      that.isAccountShow = true;
-                      that.accountList = data.data.Content;
-                      console.log(that.accountList);
-                    }
-                    that.dialogLoading = false
-                  })
-            }else {
+            
+            if ( this.formData.PayCode == 0 ) {
+              const that = this;
+              that.$axios.post('/Home/payList')
+                .then(data => {
+                  console.log(data);
+                  if ( data.data.state === 1 ) {
+                    that.isAccountShow = true;
+                    that.accountList = data.data.Content;
+                    console.log(that.accountList);
+                  }
+                  that.dialogLoading = false
+                })
+            } else {
               this.dialogLoading = false
             }
-
+            
             console.log(this.formData);
             this.formData.DogType = this.editString;
             this.alertTitle = '编辑设备';
@@ -370,8 +372,8 @@
             }
             Msg = '编辑成功'
           } else {
-            this.dialogLoading=false;
-            this.isAccountShow=false;
+            this.dialogLoading = false;
+            this.isAccountShow = false;
             for ( var i in  this.formData ) {
               this.formData[ i ] = ''
             }
@@ -407,11 +409,11 @@
         if ( that.formData.DeviceName === '' ) {
           that.$message.error('设备名称不能为空');
           return
-        }  else if ( !that.formData.EmployeeCode ) {
+        } else if ( !that.formData.EmployeeCode ) {
           that.$message.error('设备所属人不能为空');
           return
         }
-
+        
         if ( !this.isSelectCargoWay ) {
           this.formData.CargoCode = '';
         }
@@ -463,8 +465,9 @@
         this.formData.DeviceType = val;
       }
       ,
-     
+      
       cargoWayChange(val) {
+        console.log(val);
         if ( val ) {
           this.cargoWayList.forEach((item, index, arr) => {
             if ( val === item.value ) {
@@ -520,8 +523,8 @@
       ,
       getPaymentList() {
         let that = this;
-        that.$axios.post('/Home/OnloadMetaDataByType',{
-          InputType:'CRMDATA'
+        that.$axios.post('/Home/OnloadMetaDataByType', {
+          InputType: 'CRMDATA'
         })
           .then(data => {
             if ( data.data.state === 1 ) {
@@ -603,21 +606,21 @@
       },
       creatSelect(val) {
         console.log(val);
-        if ( val==0 ) {
-          const that=this;
+        if ( val == 0 ) {
+          const that = this;
           that.$axios.post('/Home/payList')
-            .then(data=>{
+            .then(data => {
               console.log(data);
               if ( data.data.state === 1 ) {
-                that.isAccountShow=true;
-                that.accountList=data.data.Content;
-                that.formData.PayUser=that.accountList[0].ID;
-                  console.log(that.accountList);
+                that.isAccountShow = true;
+                that.accountList = data.data.Content;
+                that.formData.PayUser = that.accountList[ 0 ].ID;
+                console.log(that.accountList);
               }
             })
-        }else {
-          this.isAccountShow=false;
-          this.formData.PayUser='';
+        } else {
+          this.isAccountShow = false;
+          this.formData.PayUser = '';
         }
       }
     },
@@ -640,10 +643,10 @@
     width: 100%
   
   
-  .cargoWayImgWrapper
-    width 178px
-    margin-right 50px
-  
+  .cargoWayImgWrapper img
+    position: absolute
+    left -180%
+    bottom 0
   .el-select
     width: 100% !important
   

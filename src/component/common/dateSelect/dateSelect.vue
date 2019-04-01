@@ -5,13 +5,13 @@
       size="large"
       value-format="yyyy-MM-dd"
       @change="getDate"
-      type="daterange"
+      :type="dataType"
       align="center"
       unlink-panels
       :clearable="isSearch"
       range-separator="到"
-      start-placeholder="开始日期"
-      end-placeholder="结束日期"
+      :start-placeholder="start"
+      :end-placeholder="end"
       :picker-options="pickerOptions">
     </el-date-picker>
   </div>
@@ -26,6 +26,18 @@
         default: () => true
       }
       ,
+      start: {
+        type: String,
+        default: '开始日期'
+      },
+      end: {
+        type: String,
+        default: '结束日期'
+      },
+      dataType:{
+        type:String,
+        default:'daterange'
+      },
       selectedDate: {
         default: () => []
       },
@@ -33,12 +45,15 @@
         type: Boolean,
         default: false
       },
+      beforeToday: {
+        type: Boolean,
+      },
       isClearDate: {
         type: Boolean,
         
       },
-      isSearch:{
-        type:Boolean
+      isSearch: {
+        type: Boolean
       }
     },
     watch: {
@@ -55,7 +70,10 @@
       return {
         pickerOptions: {
           disabledDate: time => {
-            if ( !this.allDate ) {
+            
+            if ( this.beforeToday === true ) {
+              return time.getTime() > Date.now() - 8.64e6
+            } else if ( this.allDate === false ) {
               return time.getTime() < Date.now() - 8.64e7
             }
           }
@@ -72,6 +90,7 @@
     }
     ,
     mounted() {
+      console.log(this.beforeToday);
       this.value = this.selectedDate;
     }
   }

@@ -35,6 +35,16 @@ export default new Router({
           component:resolve=>require(['@/pages/home/TableCreate/SaleReport/SaleReport'],resolve)
         },
         {
+          path:'/OrderReprot',
+          name:'OrderReprot',
+          component:resolve=>require(['@/pages/home/TableCreate/OrderReprot/OrderReprot'],resolve)
+        },
+        {
+          path:'/ProductData',
+          name:'ProductData',
+          component:resolve=>require(['@/pages/home/TableCreate/ProductData/ProductData'],resolve)
+        },
+        {
           path: '/AppActivityManagement',
           name: 'AppActivityManagement',
           component: resolve => require([ '@/pages/home/ActivityManagement/AppActivityManagement/AppActivityManagement' ], resolve)

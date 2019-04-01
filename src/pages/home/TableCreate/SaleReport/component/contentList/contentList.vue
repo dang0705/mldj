@@ -1,100 +1,72 @@
 <template>
   <div id="contentListWrapper">
-    <!--    <div class="filterComponents">
-		  <el-input
-			autofocus
-			class="input activeName"
-			v-model="keyWord"
-			autocomplete="on"
-			placeholder="名称"
-			@keyup.enter.native="getList"
-		  >
-			<i
-			  class="el-icon-search el-input__icon"
-			  slot="suffix"
-			  @click="getList"
-			>
-			</i>
-		  </el-input>
-		</div>-->
-    <el-table width="100%"
-              :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-              :header-row-style="headerStyle"
-              :header-cell-class-name="addBtn"
-              :row-style="rowStyle"
-              @header-click="add"
-              v-loading="listLoading"
+    <div class="filterComponents">
+      <el-input
+        autofocus
+        class="input activeName"
+        v-model="searchData.keyWord"
+        autocomplete="on"
+        placeholder="机器编码"
+        @keyup.enter.native="getList"
+      >
+        <i
+          class="el-icon-search el-input__icon"
+          slot="suffix"
+          @click="getList"
+        >
+        </i>
+      </el-input>
+      <date-picker
+        @getDate="getDate"
+        :beforeToday="true"
+        :isSearch="true"
+      ></date-picker>
     
-    >
-      <el-table-column
-        label="操作"
-        width="100"
-        align="center"
+     
+    </div>
+    <div class="result-wrapper">
+      <dynamic-table :table-data="tableData"
+                     :windowHeight="windowHeight"
+                     :table-header="tableConfig"
+                     :listLoading="listLoading"
+                     :isListChange="isListChange"
       >
-        <template slot-scope="scope">
-          <el-button size="small" icon="el-icon-edit" circle @click="getData(scope.$index,scope.row)"></el-button>
-          <el-button type="danger" icon="el-icon-delete" circle size="small"
-                     @click="deleteItem(scope.$index,scope.row)">
-          </el-button>
-        </template>
-      </el-table-column>
-      
-      <el-table-column
-        label="渠道名称"
-        prop="ChannelName"
-        width="180"
-        align="center"
-      >
-      </el-table-column>
-      <el-table-column
-        label="渠道编号"
-        prop="ChannelCode"
-        width="180"
-        align="center"
-      >
-      </el-table-column>
-      <el-table-column
-        label="渠道描述"
-        prop="ChannelDec"
-        width="660"
-        :show-overflow-tooltip="true"
-        align="center"
-      >
-      </el-table-column>
- <!--     <el-table-column label="增加+">
-      </el-table-column>-->
+      </dynamic-table>
+    </div>
     
-    </el-table>
-    <pagination
-      :tableList="list"
-      :isListChange="isListChange"
-      @currentPage="getCurrentPage"
-      @pageSize="getPageSize"
-      @defaultPaginationData="defaultPaginationData"
-      @listChanged="listChanged"
-    
-    ></pagination>
-   <!-- <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
-                  :editData="sendDialogData"></alert-dialog>-->
+    <!-- <alert-dialog :isAlertShow.sync="isAlertShow" @closeAlert="closeAlert" :editOrAdd="dialogType" :id="id"
+				   :editData="sendDialogData"></alert-dialog>-->
   
   </div>
 </template>
 
 <script>
-  import pagination from '@/component/common/pagination/pagination'
-  
+  import DynamicTable from './DynamicTable'
+  import datePicker from '@/component/common/dateSelect/dateSelect'
+
   export default {
     name: "contentList",
-    components:{
-      pagination
+    components: {
+      DynamicTable,
+      datePicker
     },
     data() {
       return {
         list: [],
+        windowHeight:document.body.clientHeight-258,
+        isListChange:false,
+        searchData: {
+          keyWord: '',
+          startDate: '',
+          endDate: '',
+          ApprovalStataus: ''
+        },
+        // 表数据
+        tableData: [],
+        // 表头数据
+        tableConfig: [],
         listLoading: true,
-        isListChange: false,
-        currentPage: 1, //初始页
-        pageSize: 5,    //    每页的数据
+       //    每页的数据
         headerStyle: {
           height: '100%',
           textAlign: 'center',
@@ -107,34 +79,40 @@
       }
     },
     mounted() {
-      this.getList()
+      this.getList();
+      console.log(this.windowHeight);
     },
     methods: {
       getList() {
         const that = this;
-        that.$axios.post('/Home/Saledata')
+        that.listLoading = true;
+        that.$axios.post('/Home/Saledata',{
+          StartDate:that.searchData.startDate,
+          EndDate:that.searchData.endDate,
+          DeviceName:that.searchData.keyWord
+        })
           .then(data => {
-          
+            if ( data.data.state === 1 ) {
+              console.log(data.data);
+              that.tableData = data.data.Content.tabler;
+              that.tableConfig=data.data.Content.tableh;
+            }
+            that.listLoading = false;
+            that.isListChange = true;
           })
       },
-      listChanged() {
-        this.isListChange = false
-      },
-      defaultPaginationData(val) {
-        if ( val && val.length ) {
-          this.currentPage = val[ 0 ];
-          this.pageSize = val[ 1 ]
+      getDate(val) {
+        if ( val ) {
+          this.searchData.startDate = val[ 0 ];
+          this.searchData.endDate = val[ 1 ];
+        } else {
+          this.searchData.startDate = this.searchData.endDate = ''
         }
+        this.getList()
+    
       },
-      getCurrentPage(currentPage) {
-        this.currentPage = currentPage
-      },
-      getPageSize(pageSize) {
-        this.pageSize = pageSize
-      }
-      ,
-      addBtn({row, column, rowIndex, columnIndex}) {
-        // return this.$myFunctions.tableHeadReset(row, column, rowIndex, columnIndex);
+      addBtn({row, column, rowIndex, columnIndex}, noAdd) {
+        return this.$myFunctions.tableHeadReset({row, column, rowIndex, columnIndex}, noAdd);
       },
       add(column, event) {
         if ( column.label === '增加+' ) {

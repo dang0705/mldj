@@ -18,7 +18,7 @@
       </el-input>
       <date-picker
         @getDate="getDate"
-        :allDate="true"
+        :allDate="allDate"
         :isSearch="true"
       ></date-picker>
       
@@ -60,6 +60,8 @@
           </el-form>
         </template>
       </el-table-column>
+      
+      
       <el-table-column
         label="查看"
         width="100"
@@ -80,8 +82,6 @@
         
         </template>
       </el-table-column>
-      
-      
       <el-table-column
         label="活动名称"
         prop="ActivityName"
@@ -153,6 +153,7 @@
     data() {
       return {
         list: [],
+        allDate:false,
         listLoading: true,
         isExamineShow: false,
         isListChange: false,
@@ -227,6 +228,7 @@
         if ( val ) {
           this.searchData.startDate = val[ 0 ];
           this.searchData.endDate = val[ 1 ];
+          this.listLoading=true;
         } else {
           this.searchData.startDate = this.searchData.endDate = ''
         }

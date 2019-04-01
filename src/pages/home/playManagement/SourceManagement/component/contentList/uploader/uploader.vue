@@ -84,10 +84,14 @@
           apk = 'application/vnd.android.package-archive';
         that.file = val;
         if ( val && (val.type === mp4 || val.type === jpg || val.type === png || val.type === apk || /\.apk$/.test(val.name.toLocaleLowerCase())) ) {
-          if ( val.size > that.maxSize && val.type === jpg || val.type === png ) {
-            that.$message.success("素材大小超过最大上传限制（4MB），请更换素材！");
+          if ( (val.type === jpg || val.type === png) && val.size > that.maxSize ) {
+            that.$message.error("素材大小超过最大上传限制（4MB），请更换素材！");
             return;
           }
+          /*  if ( val.type === png ) {
+			  that.$message.error("图片只支持png，请更换素材！");
+			  return;
+			}*/
           that.fileSize = val.size;
           that.chunksLength = (Math.ceil(that.fileSize / that.chunkSize)).toString();
           if ( val.type === 'video/mp4' ) {

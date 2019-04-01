@@ -385,11 +385,8 @@
     font-size: 0;
     width: 50%;
     margin 0 auto
-    
     .el-form-item
       margin-right: 0;
       margin-bottom: 0;
-      width: 30%;
-
 
 </style>

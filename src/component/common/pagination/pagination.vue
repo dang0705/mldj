@@ -4,7 +4,7 @@
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
       :current-page.sync="currentPage"
-      :page-sizes="[5,10, 15]"
+      :page-sizes="isSortable?[5,10,15,tableLength]:[5,10,15]"
       :page-size.sync="pageSize"
       layout="total, sizes, prev, pager, next, jumper"
       :total="list.length">
@@ -19,6 +19,13 @@
       tableList: {
         type: Array,
         default: []
+      },
+      tableLength:{
+        type:Number
+      },
+      isSortable: {
+        type: Boolean,
+        default: false
       },
       isListChange: {
         type: Boolean,
@@ -53,8 +60,6 @@
       }
     },
     mounted() {
-      
-      // console.log(this.isListChange);
       this.$emit('defaultPaginationData', [ this.currentPage, this.pageSize ]);
     }
   }
